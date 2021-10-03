@@ -1,21 +1,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:silkroute/widget/category_head.dart';
-import 'package:silkroute/widget/category_product_tile.dart';
+import 'package:silkroute/widget/subcategory_head.dart';
+import 'package:silkroute/widget/product_tile.dart';
 import 'package:silkroute/widget/footer.dart';
 import 'package:silkroute/widget/navbar.dart';
 import 'package:silkroute/widget/topbar.dart';
 
-class CategoryPage extends StatefulWidget {
-  const CategoryPage({this.category});
+class ProductListPage extends StatefulWidget {
+  const ProductListPage({this.category});
 
   final String category;
 
   @override
-  _CategoryPageState createState() => _CategoryPageState();
+  _ProductListPageState createState() => _ProductListPageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
+class _ProductListPageState extends State<ProductListPage> {
   List products = [];
   bool loading = true;
 
@@ -93,7 +93,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                   children: List.generate(
                                     products == [] ? 0 : products.length,
                                     (index) {
-                                      return CategoryProductTile(
+                                      return ProductTile(
                                           id: products[index]);
                                     },
                                   ),

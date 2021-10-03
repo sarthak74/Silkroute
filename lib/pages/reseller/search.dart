@@ -1,23 +1,40 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:silkroute/widget/category_head.dart';
+import 'package:silkroute/widget/subcategory_head.dart';
+import 'package:silkroute/widget/product_tile.dart';
 import 'package:silkroute/widget/footer.dart';
 import 'package:silkroute/widget/navbar.dart';
 import 'package:silkroute/widget/topbar.dart';
 
-class ProductPage extends StatefulWidget {
-  const ProductPage({this.id});
+class SearchPage extends StatefulWidget {
+  const SearchPage({this.category});
 
-  final String id;
+  final String category;
 
   @override
-  _ProductPageState createState() => _ProductPageState();
+  _SearchPageState createState() => _SearchPageState();
 }
 
-class _ProductPageState extends State<ProductPage> {
+class _SearchPageState extends State<SearchPage> {
+  List products = [];
+  bool loading = true;
+
+  void loadProducts() {
+    for (int i = 0; i < 20; i++) {
+      products.add(i.toString());
+    }
+    setState(() {
+      loading = false;
+    });
+  }
+
+  void initState() {
+    super.initState();
+    //loadProducts();
+  }
+
   @override
   Widget build(BuildContext context) {
-    double fh = MediaQuery.of(context).size.height;
-    double fw = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
@@ -41,29 +58,9 @@ class _ProductPageState extends State<ProductPage> {
               //////////////////////////////
 
               TopBar(),
-              SizedBox(height: fh * 0.1),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.84),
 
-              Expanded(
-                child: CustomScrollView(slivers: [
-                  SliverList(
-                    delegate: SliverChildListDelegate([
-                      Container(
-                        height: fh * 0.8,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 2),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(35),
-                            topRight: Radius.circular(35),
-                          ),
-                          color: Colors.white,
-                        ),
-                      ),
-                    ]),
-                  ),
-                  SliverFillRemaining(hasScrollBody: false, child: Container()),
-                ]),
-              ),
-
+              
               //////////////////////////////
               ///                        ///
               ///         Footer         ///

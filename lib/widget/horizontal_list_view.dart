@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:localstorage/localstorage.dart';
-import 'package:silkroute/pages/category.dart';
+import 'package:silkroute/pages/reseller/category.dart';
 
 class HorizontalListView extends StatefulWidget {
   HorizontalListView(this.title, this.productList);

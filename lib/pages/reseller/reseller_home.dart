@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/showdailog.dart';
+import 'package:silkroute/widget/carousel_indicator.dart';
 import 'package:silkroute/widget/footer.dart';
 import 'package:silkroute/widget/horizontal_list_view.dart';
 import 'package:silkroute/widget/navbar.dart';
+import 'package:silkroute/widget/topIcon.dart';
+import 'package:silkroute/widget/top_picks.dart';
 import 'package:silkroute/widget/topbar.dart';
 
-class ManufacturerHome extends StatefulWidget {
+class ResellerHome extends StatefulWidget {
   @override
-  _ManufacturerHomeState createState() => _ManufacturerHomeState();
+  _ResellerHomeState createState() => _ResellerHomeState();
 }
 
-class _ManufacturerHomeState extends State<ManufacturerHome> {
+class _ResellerHomeState extends State<ResellerHome> {
   void initState() {
     if (!Methods().isAuthenticated()) {
       WidgetsBinding.instance.addPostFrameCallback(
@@ -27,7 +30,7 @@ class _ManufacturerHomeState extends State<ManufacturerHome> {
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuX7EvcOkWOCYRFGR78Dxa2oNQb2OPCI7uqg&usqp=CAU'
   ];
 
-  List<Map<String, String>> products = [
+  List<Map<String, String>> categories = [
     {
       "title": "Saree",
       "url":
@@ -87,9 +90,25 @@ class _ManufacturerHomeState extends State<ManufacturerHome> {
                       ///                        ///
                       //////////////////////////////
 
-                      HorizontalListView("CATEGORIES", products),
+                      HorizontalListView("CATEGORIES", categories),
 
                       SizedBox(height: 20),
+
+                      //////////////////////////////
+                      ///                        ///
+                      ///    Carousel Section    ///
+                      ///                        ///
+                      //////////////////////////////
+
+                      CarouselWithIndicator(adList),
+
+                      //////////////////////////////
+                      ///                        ///
+                      ///        TopPicks        ///
+                      ///                        ///
+                      //////////////////////////////
+
+                      TopPicks(),
                     ]),
                   ),
                   SliverFillRemaining(hasScrollBody: false, child: Container()),

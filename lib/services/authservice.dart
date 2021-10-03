@@ -12,19 +12,19 @@ class AuthService {
   String uri = "http://192.168.43.220:4000/api";
   auth(contact) async {
     try {
-      Response res = await dio.post(uri + "/auth",
-          data: {
-            "contact": contact,
-          },
-          options: Options(contentType: Headers.formUrlEncodedContentType));
+    //   Response res = await dio.post(uri + "/auth",
+    //       data: {
+    //         "contact": contact,
+    //       },
+    //       options: Options(contentType: Headers.formUrlEncodedContentType));
 
-      var data = jsonDecode(res.toString());
-      // var data = {
-      //   "msg": "Otp Sent Succesfully",
-      //   "token": "test",
-      //   "success": true,
-      //   "index": 2
-      // };
+    //   var data = jsonDecode(res.toString());
+      var data = {
+        "msg": "Otp Sent Succesfully",
+        "token": "test",
+        "success": true,
+        "index": 2
+      };
       print(data);
       Fluttertoast.showToast(
         msg: data["msg"],
@@ -56,22 +56,23 @@ class AuthService {
 
   verifyotp(otp, token) async {
     try {
-      dio.options.headers['Authorization'] = token;
-      Response res = await dio.post(uri + "/otpverify",
-          data: {
-            "otp": otp,
-          },
-          options: Options(contentType: Headers.formUrlEncodedContentType));
+      // dio.options.headers['Authorization'] = token;
+      // Response res = await dio.post(uri + "/otpverify",
+      //     data: {
+      //       "otp": otp,
+      //     },
+      //     options: Options(contentType: Headers.formUrlEncodedContentType));
 
-      var data = jsonDecode(res.toString());
-      print("Otp response -- ${res.toString()}\nUser -- $data");
-      // var data = {
-      //   "success": true,
-      //   "msg": 'You are authorized',
-      //   "isregistered": true,
-      //   "contact": "+917408159898",
-      //   "name": "Shashwat"
-      // };
+      // var data = jsonDecode(res.toString());
+      // print("Otp response -- ${res.toString()}\nUser -- $data");
+      var data = {
+        "success": true,
+        "msg": 'You are authorized',
+        "isregistered": true,
+        "contact": "+917408159898",
+        "name": "Shashwat",
+        "userType": "Reseller"
+      };
 
       String send = "";
       if (data["success"]) {

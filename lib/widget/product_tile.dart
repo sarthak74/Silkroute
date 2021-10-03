@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:silkroute/pages/product.dart';
+import 'package:silkroute/pages/reseller/product.dart';
 
-class CategoryProductTile extends StatefulWidget {
-  const CategoryProductTile({this.id});
+class ProductTile extends StatefulWidget {
+  const ProductTile({this.id});
 
   final String id;
 
   @override
-  _CategoryProductTileState createState() => _CategoryProductTileState();
+  _ProductTileState createState() => _ProductTileState();
 }
 
-class _CategoryProductTileState extends State<CategoryProductTile> {
+class _ProductTileState extends State<ProductTile> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

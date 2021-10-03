@@ -16,61 +16,49 @@ class _FooterState extends State<Footer> {
         children: <Widget>[
           GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed("/reseller_home");
+              Navigator.of(context).pushNamed("/merchant_home");
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Icon(Icons.shop),
-                Text("Market"),
+                Text("My Shop"),
               ],
             ),
           ),
           GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed("/categories");
+              Navigator.of(context).pushNamed("/add_new");
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Icon(Icons.widgets),
-                Text("Categories"),
+                Text("Add New"),
               ],
             ),
           ),
           GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed("/search");
+              Navigator.of(context).pushNamed("/calculate");
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Icon(Icons.search),
-                Text("Search"),
+                Text("Calculate"),
               ],
             ),
           ),
           GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed("/wishlist");
+              Navigator.of(context).pushNamed("/dashboard");
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Icon(Icons.widgets),
-                Text("Wishlist"),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed("/crate");
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(Icons.shopping_cart),
-                Text("Crate"),
+                Text("dashboard"),
               ],
             ),
           ),

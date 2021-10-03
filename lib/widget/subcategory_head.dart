@@ -33,7 +33,7 @@ class _CategoryHeadState extends State<CategoryHead> {
             widget.title,
             style: TextStyle(
               color: Color(0xFF5B0D1B),
-              fontSize: 45,
+              fontSize: 25,
             ),
           ),
         ],
