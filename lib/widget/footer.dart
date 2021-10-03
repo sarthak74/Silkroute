@@ -14,40 +14,65 @@ class _FooterState extends State<Footer> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Icon(Icons.shop),
-              Text("Shop"),
-            ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed("/reseller_home");
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(Icons.shop),
+                Text("Shop"),
+              ],
+            ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Icon(Icons.widgets),
-              Text("Categories"),
-            ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed("/reseller_home");
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(Icons.widgets),
+                Text("Categories"),
+              ],
+            ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Icon(Icons.search, size: 30),
-              Text("Search"),
-            ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed("/reseller_home");
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(Icons.search),
+                Text("Search"),
+              ],
+            ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Icon(Icons.widgets),
-              Text("Wishlist"),
-            ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed("/reseller_home");
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(Icons.widgets),
+                Text("Wishlist"),
+              ],
+            ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Icon(Icons.shopping_cart),
-              Text("Crate"),
-            ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed("/reseller_home");
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(Icons.shopping_cart),
+                Text("Crate"),
+              ],
+            ),
           ),
         ],
       ),

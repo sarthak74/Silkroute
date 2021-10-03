@@ -91,13 +91,14 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                   ),
                 ),
                 onPressed: () async {
-                  String contact, name;
+                  String contact, name, userType;
                   List<String> list;
                   print("In Otp -- Token is $token");
 
                   await AuthService().verifyotp(userOtp, token).then(
                         (res) => {
-                          list = res.split(" "),
+                          list = res.split("-"),
+                          print("\n--->\n $res\n"),
                           res = list[0],
                           contact = res.substring(2, 12),
                           print(
@@ -108,9 +109,15 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                               storage.setItem('contact', contact),
                               if (res[1] == '1')
                                 {
+                                  userType = list[1],
+                                  print("\n--->\n $userType\n"),
                                   name = res.substring(12),
-                                  nextpage = "/reseller_home",
-                                  storage.setItem('name', name)
+                                  userType = userType,
+                                  storage.setItem('name', name),
+                                  storage.setItem('userType', userType),
+                                  nextpage = (userType == "Reseller")
+                                      ? "/reseller_home"
+                                      : "/manufacturer_home",
                                 }
                               else
                                 {nextpage = "/register_detail"},

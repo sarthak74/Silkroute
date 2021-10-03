@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/showdailog.dart';
-import 'package:silkroute/widget/carousel_indicator.dart';
 import 'package:silkroute/widget/footer.dart';
 import 'package:silkroute/widget/horizontal_list_view.dart';
 import 'package:silkroute/widget/navbar.dart';
-import 'package:silkroute/widget/topIcon.dart';
-import 'package:silkroute/widget/top_picks.dart';
 import 'package:silkroute/widget/topbar.dart';
 
-class ResellerHome extends StatefulWidget {
+class ManufacturerHome extends StatefulWidget {
   @override
-  _ResellerHomeState createState() => _ResellerHomeState();
+  _ManufacturerHomeState createState() => _ManufacturerHomeState();
 }
 
-class _ResellerHomeState extends State<ResellerHome> {
+class _ManufacturerHomeState extends State<ManufacturerHome> {
   void initState() {
     if (!Methods().isAuthenticated()) {
       WidgetsBinding.instance.addPostFrameCallback(
@@ -93,22 +90,6 @@ class _ResellerHomeState extends State<ResellerHome> {
                       HorizontalListView("CATEGORIES", products),
 
                       SizedBox(height: 20),
-
-                      //////////////////////////////
-                      ///                        ///
-                      ///    Carousel Section    ///
-                      ///                        ///
-                      //////////////////////////////
-
-                      CarouselWithIndicator(adList),
-
-                      //////////////////////////////
-                      ///                        ///
-                      ///        TopPicks        ///
-                      ///                        ///
-                      //////////////////////////////
-
-                      TopPicks(),
                     ]),
                   ),
                   SliverFillRemaining(hasScrollBody: false, child: Container()),

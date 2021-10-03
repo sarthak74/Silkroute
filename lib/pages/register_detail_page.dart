@@ -19,7 +19,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
   bool agreementCheck = false;
 
   LocalStorage storage = LocalStorage('silkroute');
-  String contact;
+  String contact, userType = "Reseller";
 
   Widget nullContact;
 
@@ -28,6 +28,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     "currAdd": "",
     "anotherNumber": "",
     "contact": "",
+    "userType": ""
   };
 
   List<String> reqFields;
@@ -35,6 +36,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
   ////   SOME METHODS //////////
 
   bool validForm() {
+    print("1");
     if (storage.getItem('contact') == null) {
       Fluttertoast.showToast(
         msg: "You have to register your number first",
@@ -46,8 +48,9 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       );
       return false;
     }
-    reqFields = ["name", "currAdd", "contact"];
+    reqFields = ["name", "currAdd", "contact", "userType"];
     for (String x in reqFields) {
+      print("$x - ${data[x].toString()}");
       if ((data[x].toString()).length == 0) {
         Fluttertoast.showToast(
           msg: "Invalid Form",
@@ -96,6 +99,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
   }
 
   void navigatorFuntion() async {
+    print("\nRD--\n$data\n");
     var res;
     if (contact == null) {
       Fluttertoast.showToast(
@@ -119,8 +123,15 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       } else {
         storage.setItem('contact', data['contact']);
         storage.setItem('isregistered', true);
+        storage.setItem('name', data['name']);
+        storage.setItem('userType', data['userType']);
+
+        String nextpage =
+            (userType == "Reseller") ? "/reseller_home" : "/manufacturer_home";
+
         Navigator.of(context).pop();
-        Navigator.of(context).pushNamed("/reseller_home");
+
+        Navigator.of(context).pushNamed(nextpage);
       }
     }
   }
@@ -199,6 +210,25 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
 
                 new SizedBox(
                   height: 30.0,
+                ),
+
+                Row(
+                  children: <Widget>[
+                    Text("You are "),
+                    SizedBox(width: 10),
+                    Dropdown(
+                      ["Reseller", "Manufacturer"],
+                      (val) {
+                        setState(() {
+                          data["userType"] = val;
+                        });
+                      },
+                      userType,
+                    ),
+                    new SizedBox(
+                      height: 30.0,
+                    ),
+                  ],
                 ),
 
                 // Terms and Conditions

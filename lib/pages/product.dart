@@ -16,6 +16,8 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
+    double fh = MediaQuery.of(context).size.height;
+    double fw = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
@@ -32,23 +34,30 @@ class _ProductPageState extends State<ProductPage> {
           ),
           child: Column(
             children: <Widget>[
+              //////////////////////////////
+              ///                        ///
+              ///         TopBar         ///
+              ///                        ///
+              //////////////////////////////
+
+              TopBar(),
+              SizedBox(height: fh * 0.1),
+
               Expanded(
                 child: CustomScrollView(slivers: [
                   SliverList(
                     delegate: SliverChildListDelegate([
-                      //////////////////////////////
-                      ///                        ///
-                      ///         TopBar         ///
-                      ///                        ///
-                      //////////////////////////////
-
-                      TopBar(),
-
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.09,
+                      Container(
+                        height: fh * 0.8,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(35),
+                            topRight: Radius.circular(35),
+                          ),
+                          color: Colors.white,
+                        ),
                       ),
-
-                      CategoryHead(title: ("Product" + widget.id)),
                     ]),
                   ),
                   SliverFillRemaining(hasScrollBody: false, child: Container()),

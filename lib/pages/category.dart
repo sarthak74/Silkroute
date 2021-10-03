@@ -51,22 +51,19 @@ class _CategoryPageState extends State<CategoryPage> {
           ),
           child: Column(
             children: <Widget>[
+              //////////////////////////////
+              ///                        ///
+              ///         TopBar         ///
+              ///                        ///
+              //////////////////////////////
+
+              TopBar(),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+
               Expanded(
                 child: CustomScrollView(slivers: [
                   SliverList(
                     delegate: SliverChildListDelegate([
-                      //////////////////////////////
-                      ///                        ///
-                      ///         TopBar         ///
-                      ///                        ///
-                      //////////////////////////////
-
-                      TopBar(),
-
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.09,
-                      ),
-
                       //////////////////////////////
                       ///                        ///
                       ///     Category Head      ///

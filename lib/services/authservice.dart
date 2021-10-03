@@ -62,8 +62,9 @@ class AuthService {
             "otp": otp,
           },
           options: Options(contentType: Headers.formUrlEncodedContentType));
-      print("Otp response -- ${res.toString()}");
+
       var data = jsonDecode(res.toString());
+      print("Otp response -- ${res.toString()}\nUser -- $data");
       // var data = {
       //   "success": true,
       //   "msg": 'You are authorized',
@@ -104,6 +105,8 @@ class AuthService {
 
       if (data["isregistered"]) {
         send += data["name"];
+        send += "-";
+        send += data["userType"];
       }
 
       return send;

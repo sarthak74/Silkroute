@@ -38,7 +38,9 @@ class _NavbarState extends State<Navbar> {
   Widget build(BuildContext context) {
     double fw = MediaQuery.of(context).size.width;
     double fh = MediaQuery.of(context).size.height;
+    print("UT - ${storage.getItem('userType')}");
     return Drawer(
+      elevation: 5,
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
@@ -66,11 +68,13 @@ class _NavbarState extends State<Navbar> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Text(
-                              (name == null) ? "name" : name,
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 25,
+                            Flexible(
+                              child: Text(
+                                (name == null) ? "name" : name.split(" ")[0],
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                             SizedBox(height: 5),
