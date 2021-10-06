@@ -7,9 +7,9 @@ import 'package:silkroute/widget/navbar.dart';
 import 'package:silkroute/widget/topbar.dart';
 
 class ProductListPage extends StatefulWidget {
-  const ProductListPage({this.category});
+  const ProductListPage({this.headtext});
 
-  final String category;
+  final String headtext;
 
   @override
   _ProductListPageState createState() => _ProductListPageState();
@@ -18,10 +18,21 @@ class ProductListPage extends StatefulWidget {
 class _ProductListPageState extends State<ProductListPage> {
   List products = [];
   bool loading = true;
+  dynamic product = {
+    "id": 1,
+    "title": "Kanjeevaram Silk Saree",
+    "discount": true,
+    "mrp": 20000.0,
+    "discountValue": 70.0,
+    "min_order": 5.0,
+    "wishlist": false,
+    "rating": 4.2
+  };
 
   void loadProducts() {
     for (int i = 0; i < 20; i++) {
-      products.add(i.toString());
+      dynamic data = product;
+      products.add(data);
     }
     setState(() {
       loading = false;
@@ -35,9 +46,14 @@ class _ProductListPageState extends State<ProductListPage> {
 
   @override
   Widget build(BuildContext context) {
+    double aspectRatio = 1.45 *
+        (MediaQuery.of(context).size.width *
+            0.86 /
+            MediaQuery.of(context).size.height);
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         drawer: Navbar(),
         primary: false,
         body: Container(
@@ -70,7 +86,9 @@ class _ProductListPageState extends State<ProductListPage> {
                       ///                        ///
                       //////////////////////////////
 
-                      CategoryHead(title: widget.category),
+                      CategoryHead(title: widget.headtext),
+                      // TODO: Change design of category
+                      // TODO: Sort & Filter functionality
 
                       //////////////////////////////
                       ///                        ///
@@ -89,12 +107,13 @@ class _ProductListPageState extends State<ProductListPage> {
                           child: loading
                               ? Text("Loading Loading")
                               : GridView.count(
+                                  childAspectRatio: aspectRatio,
                                   crossAxisCount: 2,
                                   children: List.generate(
                                     products == [] ? 0 : products.length,
                                     (index) {
                                       return ProductTile(
-                                          id: products[index]);
+                                          product: products[index]);
                                     },
                                   ),
                                 ),

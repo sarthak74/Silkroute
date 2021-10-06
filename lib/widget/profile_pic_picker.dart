@@ -15,7 +15,7 @@ class ProfilePic extends StatefulWidget {
 }
 
 class ProfilePicState extends State<ProfilePic> {
-  LocalStorage storage = LocalStorage('organic');
+  LocalStorage storage = LocalStorage('silkroute');
 
   @override
   void initState() {
@@ -43,7 +43,7 @@ class ProfilePicState extends State<ProfilePic> {
       children: <Widget>[
         SizedBox(height: 10),
         Container(
-          height: 100,
+          height: 70,
           child: ClipRRect(
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(50),
@@ -57,6 +57,7 @@ class ProfilePicState extends State<ProfilePic> {
                 onTap: () {
                   // pickImage();
                   // print("abcd");
+                  Navigator.of(context).pushNamed("/reseller_profile");
                 },
                 child: Image.network(
                   'https://static.thenounproject.com/png/3237155-200.png',

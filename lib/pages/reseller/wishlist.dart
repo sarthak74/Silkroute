@@ -7,10 +7,6 @@ import 'package:silkroute/widget/navbar.dart';
 import 'package:silkroute/widget/topbar.dart';
 
 class WishlistPage extends StatefulWidget {
-  const WishlistPage({this.category});
-
-  final String category;
-
   @override
   _WishlistPageState createState() => _WishlistPageState();
 }
@@ -18,10 +14,21 @@ class WishlistPage extends StatefulWidget {
 class _WishlistPageState extends State<WishlistPage> {
   List products = [];
   bool loading = true;
+  dynamic product = {
+    "id": 2,
+    "title": "Kanjeevaram Silk Saree",
+    "discount": true,
+    "mrp": 20000.0,
+    "discountValue": 70.0,
+    "min_order": 5.0,
+    "wishlist": true,
+    "rating": 4.2
+  };
 
   void loadProducts() {
-    for (int i = 0; i < 20; i++) {
-      products.add(i.toString());
+    for (int i = 0; i < 3; i++) {
+      dynamic data = product;
+      products.add(data);
     }
     setState(() {
       loading = false;
@@ -30,14 +37,19 @@ class _WishlistPageState extends State<WishlistPage> {
 
   void initState() {
     super.initState();
-    //loadProducts();
+    loadProducts();
   }
 
   @override
   Widget build(BuildContext context) {
+    double aspectRatio = 1.45 *
+        (MediaQuery.of(context).size.width *
+            0.86 /
+            MediaQuery.of(context).size.height);
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         drawer: Navbar(),
         primary: false,
         body: Container(
@@ -58,9 +70,55 @@ class _WishlistPageState extends State<WishlistPage> {
               //////////////////////////////
 
               TopBar(),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.84),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
 
-              
+              Expanded(
+                child: CustomScrollView(slivers: [
+                  SliverList(
+                    delegate: SliverChildListDelegate([
+                      //////////////////////////////
+                      ///                        ///
+                      ///     Category Head      ///
+                      ///                        ///
+                      //////////////////////////////
+
+                      CategoryHead(title: "Wishlist"),
+
+                      //////////////////////////////
+                      ///                        ///
+                      ///         Lists          ///
+                      ///                        ///
+                      //////////////////////////////
+
+                      SizedBox(height: 20),
+
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05,
+                        ),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          child: loading
+                              ? Text("Loading Loading")
+                              : GridView.count(
+                                  childAspectRatio: aspectRatio,
+                                  crossAxisCount: 2,
+                                  children: List.generate(
+                                    products == [] ? 0 : products.length,
+                                    (index) {
+                                      return ProductTile(
+                                          product: products[index]);
+                                    },
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ]),
+                  ),
+                  SliverFillRemaining(hasScrollBody: false, child: Container()),
+                ]),
+              ),
+
               //////////////////////////////
               ///                        ///
               ///         Footer         ///

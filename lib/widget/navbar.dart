@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:silkroute/widget/profile_pic_picker.dart';
 
 class Navbar extends StatefulWidget {
   @override
@@ -54,13 +55,7 @@ class _NavbarState extends State<Navbar> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: Image.network(
-                          'https://static.thenounproject.com/png/3237155-200.png',
-                          height: MediaQuery.of(context).size.height * 0.12,
-                        ),
-                      ),
+                      ProfilePic(storage.getItem("contact")),
                       Container(
                         alignment: Alignment.center,
                         height: MediaQuery.of(context).size.height * 0.12,

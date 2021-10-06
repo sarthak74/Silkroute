@@ -1,5 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:silkroute/pages/reseller/address.dart';
+import 'package:silkroute/pages/reseller/crate_page1.dart';
+import 'package:silkroute/pages/reseller/payment.dart';
+import 'package:silkroute/widget/crate_product_tile.dart';
+import 'package:silkroute/widget/flutter_dash.dart';
 import 'package:silkroute/widget/subcategory_head.dart';
 import 'package:silkroute/widget/product_tile.dart';
 import 'package:silkroute/widget/footer.dart';
@@ -7,39 +13,68 @@ import 'package:silkroute/widget/navbar.dart';
 import 'package:silkroute/widget/topbar.dart';
 
 class CratePage extends StatefulWidget {
-  const CratePage({this.category});
+  CratePage({this.category});
 
   final String category;
+  bool addressStatus = false, paymentStatus = false;
 
   @override
   _CratePageState createState() => _CratePageState();
 }
 
 class _CratePageState extends State<CratePage> {
-  List products = [];
-  bool loading = true;
-
-  void loadProducts() {
-    for (int i = 0; i < 20; i++) {
-      products.add(i.toString());
-    }
-    setState(() {
-      loading = false;
-    });
-  }
-
+  bool addressStatus = CratePage().addressStatus,
+      paymentStatus = CratePage().paymentStatus;
   void initState() {
     super.initState();
-    //loadProducts();
   }
+
+  TextStyle textStyle(num size, Color color) {
+    return GoogleFonts.poppins(
+      textStyle: TextStyle(
+        color: color,
+        fontSize: size,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  PageController pageController = PageController(initialPage: 0);
 
   @override
   Widget build(BuildContext context) {
+    pageController.addListener(() {
+      // print("\nPage -- ${pageController.page.floor()}\n");
+      int val = pageController.page.floor();
+
+      setState(() {
+        if (val == 0) {
+          print("\nPage -- 0\n");
+          addressStatus = false;
+          paymentStatus = false;
+          CratePage().addressStatus = false;
+          CratePage().paymentStatus = false;
+        } else if (val == 1) {
+          print("\nPage -- 1\n");
+          addressStatus = true;
+          paymentStatus = false;
+          CratePage().addressStatus = true;
+          CratePage().paymentStatus = false;
+        } else {
+          print("\nPage -- 2\n");
+          addressStatus = true;
+          paymentStatus = true;
+          CratePage().addressStatus = true;
+          CratePage().paymentStatus = true;
+        }
+      });
+    });
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
         drawer: Navbar(),
         primary: false,
+        resizeToAvoidBottomInset: false,
         body: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -58,9 +93,138 @@ class _CratePageState extends State<CratePage> {
               //////////////////////////////
 
               TopBar(),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.84),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.15),
 
-              
+              Expanded(
+                child: CustomScrollView(slivers: [
+                  SliverList(
+                    delegate: SliverChildListDelegate([
+                      ////////////////////////
+                      ///  Top BreadCrumb  ///
+                      ////////////////////////
+
+                      Container(
+                        padding: EdgeInsets.fromLTRB(
+                          MediaQuery.of(context).size.width * 0.15,
+                          0,
+                          MediaQuery.of(context).size.width * 0.15,
+                          0,
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            Stack(
+                              children: <Widget>[
+                                /////  Left Connector
+                                Positioned(
+                                  bottom: 11,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.36,
+                                  child: Container(
+                                    margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        width: 1,
+                                        color: addressStatus
+                                            ? Color(0xFF5B0D1B)
+                                            : Colors.grey[400],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                /////  Right Connector
+                                Positioned(
+                                  bottom: 11,
+                                  left:
+                                      MediaQuery.of(context).size.width * 0.34,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.36,
+                                  child: Container(
+                                    margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        width: 1,
+                                        color: paymentStatus
+                                            ? Color(0xFF5B0D1B)
+                                            : Colors.grey[400],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    /// Crate Status
+                                    Icon(
+                                      Icons.circle,
+                                      color: Color(0xFF5B0D1B),
+                                    ),
+
+                                    /// Address Status
+                                    Icon(
+                                      Icons.circle,
+                                      color: addressStatus
+                                          ? Color(0xFF5B0D1B)
+                                          : Colors.grey[400],
+                                    ),
+
+                                    /// Payment Status
+                                    Icon(
+                                      Icons.circle,
+                                      color: paymentStatus
+                                          ? Color(0xFF5B0D1B)
+                                          : Colors.grey[400],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text("Crate",
+                                    style: textStyle(12.0, Color(0xFF5B0D1B))),
+                                Text("Address",
+                                    style: textStyle(
+                                        12.0,
+                                        addressStatus
+                                            ? Color(0xFF5B0D1B)
+                                            : Colors.grey[400])),
+                                Text("Payment",
+                                    style: textStyle(
+                                        12.0,
+                                        paymentStatus
+                                            ? Color(0xFF5B0D1B)
+                                            : Colors.grey[400])),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.05),
+
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.55,
+                        child: PageView(
+                          controller: pageController,
+                          children: [
+                            CratePage1(pageController: pageController),
+                            AddressPage(pageController: pageController),
+                            PaymentPage(),
+                          ],
+                        ),
+                      ),
+                    ]),
+                  ),
+                  SliverFillRemaining(hasScrollBody: false, child: Container()),
+                ]),
+              ),
+
               //////////////////////////////
               ///                        ///
               ///         Footer         ///

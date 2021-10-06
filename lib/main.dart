@@ -11,7 +11,9 @@ import 'package:silkroute/pages/localization_app_page.dart';
 import 'package:silkroute/pages/merchant/merchant_home.dart';
 import 'package:silkroute/pages/otp-verification.dart';
 import 'package:silkroute/pages/register_detail_page.dart';
+import 'package:silkroute/pages/reseller/orders.dart';
 import 'package:silkroute/pages/reseller/reseller_home.dart';
+import 'package:silkroute/pages/reseller/reseller_profile.dart';
 import 'package:silkroute/pages/reseller/search.dart';
 import 'package:silkroute/pages/reseller/wishlist.dart';
 import 'package:silkroute/provider/locale_provider.dart';
@@ -70,14 +72,14 @@ class MyApp extends StatelessWidget {
               "/register_detail": (BuildContext context) =>
                   RegisterDetailPage(),
               "/reseller_home": (BuildContext context) => ResellerHome(),
-              "/merchant_home": (BuildContext context) =>
-                  MerchantHome(),
-              "/categories": (BuildContext context) => 
+              "/reseller_profile": (BuildContext context) => ResellerProfile(),
+              "/merchant_home": (BuildContext context) => MerchantHome(),
+              "/categories": (BuildContext context) =>
                   CategoryPage(category: "saree"),
               "/search": (BuildContext context) => SearchPage(),
               "/wishlist": (BuildContext context) => WishlistPage(),
               "/crate": (BuildContext context) => CratePage(),
-
+              "/orders": (BuildContext context) => Orders(),
             },
           );
         },

@@ -19,8 +19,7 @@ class _CategoryTileState extends State<CategoryTile> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductListPage(category: widget.id)
-          ),
+              builder: (context) => ProductListPage(headtext: widget.id)),
         );
       },
       child: Container(

@@ -58,6 +58,7 @@ class _ResellerHomeState extends State<ResellerHome> {
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         drawer: Navbar(),
         primary: false,
         body: Container(

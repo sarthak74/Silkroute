@@ -21,6 +21,7 @@ class _ProductPageState extends State<ProductPage> {
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         drawer: Navbar(),
         primary: false,
         body: Container(

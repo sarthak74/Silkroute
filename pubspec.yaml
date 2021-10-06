@@ -30,7 +30,10 @@ dependencies:
   carousel_slider: ^3.0.0
   localstorage:
   dio:
+  im_stepper: ^0.1.3
+  getwidget: ^2.0.4
   fluttertoast:
+  google_fonts:
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -24,9 +24,10 @@ class CustomTextFieldState extends State<CustomTextField> {
             borderSide: new BorderSide(
               color: Colors.black,
             ),
+            borderRadius: BorderRadius.all(Radius.circular(30)),
           ),
           contentPadding: new EdgeInsets.symmetric(
-            horizontal: 10.0,
+            horizontal: 20.0,
           ),
           labelText: widget.labelText,
           prefixStyle: new TextStyle(
