@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:silkroute/services/authservice.dart';
+import 'package:silkroute/model/services/authservice.dart';
 import 'package:silkroute/widget/next_page_button.dart';
 import 'package:silkroute/widget/text_field.dart';
 import 'package:localstorage/localstorage.dart';

@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:silkroute/widget/top_banner.dart';
-import 'package:silkroute/services/authservice.dart';
+import 'package:silkroute/model/services/authservice.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

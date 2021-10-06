@@ -4,7 +4,7 @@ import 'package:silkroute/methods/registerredirect.dart';
 import 'package:silkroute/widget/profile_pic_picker.dart';
 import 'package:localstorage/localstorage.dart';
 
-import 'package:silkroute/services/authservice.dart';
+import 'package:silkroute/model/services/authservice.dart';
 import 'package:silkroute/widget/dropdown.dart';
 import 'package:silkroute/widget/liscenseAndAgreements.dart';
 
