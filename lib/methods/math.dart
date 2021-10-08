@@ -10,4 +10,9 @@ class Math {
     if (a <= b) return a;
     return b;
   }
+
+  dynamic max(dynamic a, dynamic b) {
+    if (a >= b) return a;
+    return b;
+  }
 }
