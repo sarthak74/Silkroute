@@ -1,12 +1,13 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/view/pages/reseller/product.dart';
 
 class ProductTile extends StatefulWidget {
   const ProductTile({this.product});
 
-  final dynamic product;
+  final ProductList product;
 
   @override
   _ProductTileState createState() => _ProductTileState();
@@ -15,11 +16,11 @@ class ProductTile extends StatefulWidget {
 class _ProductTileState extends State<ProductTile> {
   @override
   Widget build(BuildContext context) {
-    bool wishlist = widget.product['wishlist'];
-    num mrp = widget.product['mrp'];
-    num discountValue = widget.product['discountValue'];
+    bool wishlist = false;
+    num mrp = widget.product.mrp;
+    num discountValue = widget.product.discountValue;
     String sp;
-    if (widget.product['discount']) {
+    if (widget.product.discount) {
       sp = Math.getSp(mrp, discountValue);
     }
 
@@ -29,7 +30,7 @@ class _ProductTileState extends State<ProductTile> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                ProductPage(id: (widget.product["id"]).toString()),
+                ProductPage(id: (widget.product.id).toString()),
           ),
         );
       },
@@ -78,7 +79,7 @@ class _ProductTileState extends State<ProductTile> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            (widget.product['rating']).toString(),
+                            ("4.2").toString(),
                             style: GoogleFonts.poppins(
                               textStyle: TextStyle(
                                 color: Colors.black,
@@ -155,7 +156,7 @@ class _ProductTileState extends State<ProductTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    widget.product['title'],
+                    widget.product.title,
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(
                         color: Colors.black,
@@ -164,7 +165,7 @@ class _ProductTileState extends State<ProductTile> {
                       ),
                     ),
                   ),
-                  widget.product['discount']
+                  widget.product.discount
                       ? Row(
                           children: <Widget>[
                             Text(

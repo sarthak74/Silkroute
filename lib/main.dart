@@ -11,6 +11,7 @@ import 'package:silkroute/view/pages/localization_app_page.dart';
 import 'package:silkroute/view/pages/merchant/merchant_home.dart';
 import 'package:silkroute/view/pages/otp-verification.dart';
 import 'package:silkroute/view/pages/register_detail_page.dart';
+import 'package:silkroute/view/pages/reseller/faqs.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/pages/reseller/reseller_home.dart';
 import 'package:silkroute/view/pages/reseller/reseller_profile.dart';
@@ -80,6 +81,7 @@ class MyApp extends StatelessWidget {
               "/wishlist": (BuildContext context) => WishlistPage(),
               "/crate": (BuildContext context) => CratePage(),
               "/orders": (BuildContext context) => Orders(),
+              "/faqs": (BuildContext context) => Faqs(),
             },
           );
         },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/model/glitch/NoInternetGlitch.dart';
 import 'package:silkroute/provider/ProductListProvider.dart';
@@ -21,36 +22,31 @@ class ProductListPage extends StatefulWidget {
 class _ProductListPageState extends State<ProductListPage> {
   List products = [];
   bool loading = true;
-  dynamic product = {
-    "id": 1,
-    "title": "Kanjeevaram Silk Saree",
-    "discount": true,
-    "mrp": 20000.0,
-    "discountValue": 70.0,
-    "min_order": 5.0,
-    "wishlist": false,
-    "rating": 4.2
-  };
 
+  dynamic provider = new ProductListProvider();
   void loadproduct() {
-    dynamic provider = ProductListProvider();
+    print("here");
+    print("here + $provider");
+
+    provider.getTwentyProduct();
     provider.productListStream.listen((snapshot) {
-      snapshot.fold((l) {
-        if (l is NoInternetGlitch) {
-          print("No Internet");
-          //Implement UI to handle NoInternet
-        }
-      }, (r) => {products.add(r)});
+      //print("snapshot -- $snapshot");
+      for (var x in snapshot) {
+        setState(() {
+          products.add(x);
+        });
+      }
+      //print("products -- $products");
+      setState(() {
+        loading = false;
+      });
     });
   }
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      //loadproduct();
-      setState(() {
-        loading = false;
-      });
+      loadproduct();
     });
     super.initState();
   }
@@ -118,7 +114,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                   MediaQuery.of(context).size.width * 0.05,
                             ),
                             child: SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.6,
+                              height: MediaQuery.of(context).size.height * 0.5,
                               child: loading
                                   ? Text("Loading Loading")
                                   : GridView.count(
@@ -135,21 +131,42 @@ class _ProductListPageState extends State<ProductListPage> {
                             ),
                           ),
 
-                          GestureDetector(
-                            onTap: provider.loadMore,
-                            child: Container(
-                              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              GestureDetector(
+                                onTap: loadproduct,
+                                child: Container(
+                                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(
+                                        "Load More",
+                                        style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        size: 15,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              child: Text(
-                                "Load More",
-                                style: textStyle(12, Colors.black),
-                              ),
-                            ),
+                            ],
                           ),
+                          SizedBox(height: 30),
                         ]),
                       ),
                       SliverFillRemaining(

@@ -1,14 +1,38 @@
 import 'dart:convert';
 
+/*
+id: String,
+title: String,
+category: String,
+userContact: String,
+dateAdded: String,
+description: String,
+mrp: Number,
+discount: Boolean,
+discountValue: Number,
+totalSet: Number,
+min: Number,
+increment: Number,
+stockAvailability: Number,
+resellerCrateAvailability: Number,
+colors: Object
+*/
 class ProductList {
   final String id;
   final String title;
   final bool discount;
-  final double mrp;
-  final double discountValue;
-  final int minOrder;
-  final bool wishlist;
-  final bool rating;
+  final num mrp;
+  final num discountValue;
+  final String category;
+  final String userContact;
+  final String dateAdded;
+  final String description;
+  final num totalSet;
+  final num min;
+  final num increment;
+  final num stockAvailability;
+  final num resellerCrateAvailability;
+  final dynamic colors;
 
   ProductList({
     this.id,
@@ -16,9 +40,16 @@ class ProductList {
     this.discount,
     this.mrp,
     this.discountValue,
-    this.minOrder,
-    this.wishlist,
-    this.rating,
+    this.category,
+    this.userContact,
+    this.dateAdded,
+    this.description,
+    this.totalSet,
+    this.min,
+    this.increment,
+    this.stockAvailability,
+    this.resellerCrateAvailability,
+    this.colors,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,9 +59,16 @@ class ProductList {
       'discount': discount,
       'mrp': mrp,
       'discountValue': discountValue,
-      'minOrder': minOrder,
-      'wishlist': wishlist,
-      'rating': rating,
+      'category': category,
+      'userContact': userContact,
+      'dateAdded': dateAdded,
+      'description': description,
+      'totalSet': totalSet,
+      'min': min,
+      'increment': increment,
+      'stockAvailability': stockAvailability,
+      'resellerCrateAvailability': resellerCrateAvailability,
+      'colors': colors,
     };
   }
 
@@ -41,9 +79,16 @@ class ProductList {
       discount: map['discount'],
       mrp: map['mrp'],
       discountValue: map['discountValue'],
-      minOrder: map['minOrder'],
-      wishlist: map['wishlist'],
-      rating: map['rating'],
+      category: map['category'],
+      userContact: map['userContact'],
+      dateAdded: map['dateAdded'],
+      description: map['description'],
+      totalSet: map['totalSet'],
+      min: map['min'],
+      increment: map['increment'],
+      stockAvailability: map['stockAvailability'],
+      resellerCrateAvailability: map['resellerCrateAvailability'],
+      colors: map['colors'],
     );
   }
 

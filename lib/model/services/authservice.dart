@@ -12,19 +12,19 @@ class AuthService {
   String uri = "http://192.168.43.220:4000/api";
   auth(contact) async {
     try {
-    //   Response res = await dio.post(uri + "/auth",
-    //       data: {
-    //         "contact": contact,
-    //       },
-    //       options: Options(contentType: Headers.formUrlEncodedContentType));
+      Response res = await dio.post(uri + "/auth",
+          data: {
+            "contact": contact,
+          },
+          options: Options(contentType: Headers.formUrlEncodedContentType));
 
-    //   var data = jsonDecode(res.toString());
-      var data = {
-        "msg": "Otp Sent Succesfully",
-        "token": "test",
-        "success": true,
-        "index": 2
-      };
+      var data = jsonDecode(res.toString());
+      // var data = {
+      //   "msg": "Otp Sent Succesfully",
+      //   "token": "test",
+      //   "success": true,
+      //   "index": 2
+      // };
       print(data);
       Fluttertoast.showToast(
         msg: data["msg"],

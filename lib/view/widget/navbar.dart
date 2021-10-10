@@ -17,7 +17,7 @@ class _NavbarState extends State<Navbar> {
   LocalStorage storage = LocalStorage('silkroute');
 
   var navBarList = [
-    {"name": "Profile", "url": "/dashboard"},
+    {"name": "Profile", "url": "/reseller_profile"},
     {"name": "Orders", "url": "/orders"},
     {"name": "FAQs", "url": "/faqs"},
     {"name": "Contact Us", "url": "/contact_us"},
