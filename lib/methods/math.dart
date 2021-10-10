@@ -15,4 +15,15 @@ class Math {
     if (a >= b) return a;
     return b;
   }
+
+  String ip() {
+    return "http://192.168.43.220:4000";
+  }
 }
+
+/*
+Helper: WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadProductDetails();
+    });
+
+*/

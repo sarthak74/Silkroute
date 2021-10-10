@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
                   RegisterDetailPage(),
               "/reseller_home": (BuildContext context) => ResellerHome(),
               "/reseller_profile": (BuildContext context) => ResellerProfile(),
-              "/merchant_home": (BuildContext context) => MerchantHome(),
+              "/merchant_home": (BuildContext context) => ResellerHome(),
               "/categories": (BuildContext context) =>
                   CategoryPage(category: "saree"),
               "/search": (BuildContext context) => SearchPage(),

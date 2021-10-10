@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:silkroute/model/services/authservice.dart';
 import 'package:silkroute/view/widget/next_page_button.dart';
@@ -93,31 +95,19 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                 onPressed: () async {
                   String contact, name, userType;
                   List<String> list;
+                  dynamic user;
                   print("In Otp -- Token is $token");
 
                   await AuthService().verifyotp(userOtp, token).then(
                         (res) => {
-                          list = res.split("-"),
-                          print("\n--->\n $res\n"),
-                          res = list[0],
-                          contact = res.substring(2, 12),
-                          print(
-                              "Otp result --- $res $contact ${res.substring(12)}"),
+                          print("\nOtp result --- $res\n"),
                           if (res[0] == '1')
                             {
-                              storage.clear(),
-                              storage.setItem('contact', contact),
                               if (res[1] == '1')
                                 {
-                                  userType = list[1],
-                                  print("\n--->\n $userType\n"),
-                                  name = res.substring(12),
-                                  userType = userType,
-                                  storage.setItem('name', name),
-                                  storage.setItem('userType', userType),
                                   nextpage = (userType == "Reseller")
                                       ? "/reseller_home"
-                                      : "/manufacturer_home",
+                                      : "/merchant_home",
                                 }
                               else
                                 {nextpage = "/register_detail"},

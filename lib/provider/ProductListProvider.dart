@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/model/core/ProductList.dart';
-import 'package:silkroute/model/glitch/Glitch.dart';
 import 'package:silkroute/model/services/ProductListApi.dart';
 
 class ProductListProvider extends ChangeNotifier {
@@ -33,15 +31,13 @@ class ProductListProvider extends ChangeNotifier {
       return;
     }
     dynamic toadd = _productApiResult.sublist(i, Math().min(len, i + 20));
-    print("toadd: $toadd");
-    for (dynamic x in toadd) {
-      products.add(x);
-    }
+
     i = Math().min(len, i + 20);
-    _streamController.add(toadd);
+    _streamController.sink.add(toadd);
   }
 
   void loadMore() {
+    print("Hey LoadMore");
     getTwentyProduct();
   }
 

@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/model/core/ProductList.dart';
+import 'package:silkroute/model/services/WishlistApi.dart';
 import 'package:silkroute/view/pages/reseller/product.dart';
 
 class ProductTile extends StatefulWidget {
@@ -14,9 +18,56 @@ class ProductTile extends StatefulWidget {
 }
 
 class _ProductTileState extends State<ProductTile> {
+  LocalStorage storage = LocalStorage('silkroute');
+  dynamic user;
+  List<String> wishlists = [];
+
+  void wishlistFunction() async {
+    print("product: ${widget.product} ${widget.product.id}");
+    String pid = widget.product.id;
+    if (!wishlists.contains(pid)) {
+      print("add");
+      setState(() {
+        wishlists.add(pid);
+        user['wishlist'] = wishlists;
+        storage.setItem('user', user);
+        print("new wishlist:  $wishlists\n");
+      });
+    } else {
+      print("remove");
+      setState(() {
+        wishlists.remove(pid);
+        user['wishlist'] = wishlists;
+        storage.setItem('user', user);
+        print("new wishlist:  $wishlists\n");
+      });
+    }
+
+    await WishlistApi().setWishlist();
+  }
+
+  void loadVars() {
+    setState(() {
+      user = storage.getItem('user');
+    });
+    List<dynamic> xy = user['wishlist'];
+    for (dynamic x in xy) {
+      setState(() {
+        wishlists.add(x.toString());
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadVars();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool wishlist = false;
     num mrp = widget.product.mrp;
     num discountValue = widget.product.discountValue;
     String sp;
@@ -92,11 +143,7 @@ class _ProductTileState extends State<ProductTile> {
                         ],
                       ),
                       GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            wishlist = !wishlist;
-                          });
-                        },
+                        onTap: wishlistFunction,
                         child: Container(
                           width: 35,
                           height: 35,
@@ -111,14 +158,14 @@ class _ProductTileState extends State<ProductTile> {
                                 blurRadius: 4.0,
                               ),
                             ],
-                            color: !wishlist
+                            color: !wishlists.contains(widget.product.id)
                                 ? Color(0xFFFFFFFF)
                                 : Color(0xFFE1AC5D),
                           ),
                           child: Icon(
                             Icons.widgets,
                             size: 20,
-                            color: wishlist
+                            color: wishlists.contains(widget.product.id)
                                 ? Color(0xFFFFFFFF)
                                 : Color(0xFFE1AC5D),
                           ),

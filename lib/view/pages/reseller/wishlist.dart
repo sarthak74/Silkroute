@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/model/core/ProductList.dart';
+import 'package:silkroute/model/services/WishlistApi.dart';
 import 'package:silkroute/view/widget/subcategory_head.dart';
 import 'package:silkroute/view/widget/product_tile.dart';
 import 'package:silkroute/view/widget/footer.dart';
@@ -12,32 +15,18 @@ class WishlistPage extends StatefulWidget {
 }
 
 class _WishlistPageState extends State<WishlistPage> {
-  List products = [];
+  LocalStorage storage = LocalStorage('silkroute');
+  List<ProductList> products = [];
   bool loading = true;
-  dynamic product = {
-    "id": 2,
-    "title": "Kanjeevaram Silk Saree",
-    "discount": true,
-    "mrp": 20000.0,
-    "discountValue": 70.0,
-    "min_order": 5.0,
-    "wishlist": true,
-    "rating": 4.2
-  };
-
-  void loadProducts() {
-    for (int i = 0; i < 3; i++) {
-      dynamic data = product;
-      products.add(data);
-    }
-    setState(() {
-      loading = false;
-    });
-  }
 
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      products = await WishlistApi().getProd();
+      setState(() {
+        loading = false;
+      });
+    });
     super.initState();
-    loadProducts();
   }
 
   @override
@@ -99,12 +88,14 @@ class _WishlistPageState extends State<WishlistPage> {
                         child: SizedBox(
                           height: MediaQuery.of(context).size.height * 0.6,
                           child: loading
-                              ? Text("Loading Loading")
+                              ? Text("Loading")
                               : GridView.count(
                                   childAspectRatio: aspectRatio,
                                   crossAxisCount: 2,
                                   children: List.generate(
-                                    products == [] ? 0 : products.length,
+                                    (products == [] || products == null)
+                                        ? 0
+                                        : products.length,
                                     (index) {
                                       return ProductTile(
                                           product: products[index]);

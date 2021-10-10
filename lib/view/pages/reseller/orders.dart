@@ -86,7 +86,8 @@ class OrderList extends StatefulWidget {
 class _OrderListState extends State<OrderList> {
   LocalStorage storage = LocalStorage('silkroute');
 
-  dynamic orders = [], loading = true;
+  List orders = [];
+  bool loading = true;
 
   void loadOrders() {
     setState(() {

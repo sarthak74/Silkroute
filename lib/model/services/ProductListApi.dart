@@ -1,13 +1,9 @@
 import 'dart:convert';
-
-import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 
 class ProductListApi {
-  Dio dio = new Dio();
   LocalStorage storage = LocalStorage('silkroute');
   String endpoint = "192.168.43.220:4000";
   Future<List<ProductList>> getProductList() async {

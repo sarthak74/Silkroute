@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/glitch/NoInternetGlitch.dart';
 import 'package:silkroute/provider/ProductListProvider.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -24,30 +25,31 @@ class _ProductListPageState extends State<ProductListPage> {
   bool loading = true;
 
   dynamic provider = new ProductListProvider();
-  void loadproduct() {
-    print("here");
-    print("here + $provider");
+  // void loadproduct() {
+  //   print("here");
+  //   print("here + $provider");
 
-    provider.getTwentyProduct();
-    provider.productListStream.listen((snapshot) {
-      //print("snapshot -- $snapshot");
-      for (var x in snapshot) {
-        setState(() {
-          products.add(x);
-        });
-      }
-      //print("products -- $products");
-      setState(() {
-        loading = false;
-      });
-    });
-  }
+  //   provider.getTwentyProduct();
+  //   provider.productListStream.listen((snapshot) {
+  //     //print("snapshot -- $snapshot");
+  //     for (var x in snapshot) {
+  //       setState(() {
+  //         products.add(x);
+  //       });
+  //     }
+  //     //print("products -- $products");
+  //     setState(() {
+  //       loading = false;
+  //     });
+  //   });
+  // }
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadproduct();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   loadproduct();
+    // });
+    provider.loadMore();
     super.initState();
   }
 
@@ -55,7 +57,6 @@ class _ProductListPageState extends State<ProductListPage> {
   Widget build(BuildContext context) => ChangeNotifierProvider(
       create: (context) => ProductListProvider(),
       builder: (context, child) {
-        final provider = Provider.of<ProductListProvider>(context);
         double aspectRatio = 1.45 *
             (MediaQuery.of(context).size.width *
                 0.86 /
@@ -113,21 +114,55 @@ class _ProductListPageState extends State<ProductListPage> {
                               horizontal:
                                   MediaQuery.of(context).size.width * 0.05,
                             ),
+                            // child: SizedBox(
+                            //   height: MediaQuery.of(context).size.height * 0.5,
+                            //   child: loading
+                            //       ? Text("Loading Loading")
+                            //       : GridView.count(
+                            //           childAspectRatio: aspectRatio,
+                            //           crossAxisCount: 2,
+                            //           children: List.generate(
+                            //             products == [] ? 0 : products.length,
+                            //             (index) {
+                            //               return ProductTile(
+                            //                   product: products[index]);
+                            //             },
+                            //           ),
+                            //         ),
+                            // ),
                             child: SizedBox(
                               height: MediaQuery.of(context).size.height * 0.5,
-                              child: loading
-                                  ? Text("Loading Loading")
-                                  : GridView.count(
-                                      childAspectRatio: aspectRatio,
-                                      crossAxisCount: 2,
-                                      children: List.generate(
-                                        products == [] ? 0 : products.length,
-                                        (index) {
-                                          return ProductTile(
-                                              product: products[index]);
-                                        },
-                                      ),
-                                    ),
+                              child: StreamBuilder<List<ProductList>>(
+                                stream: provider.productListStream,
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Text("Loading");
+                                  } else if (snapshot.connectionState ==
+                                      ConnectionState.done) {
+                                    return Text("Fetched");
+                                  } else if (snapshot.hasError) {
+                                    return Text("Error");
+                                  } else {
+                                    if (snapshot.data != null) {
+                                      products.addAll(snapshot.data);
+                                      return GridView.count(
+                                        childAspectRatio: aspectRatio,
+                                        crossAxisCount: 2,
+                                        children: List.generate(
+                                          products == [] ? 0 : products.length,
+                                          (index) {
+                                            return ProductTile(
+                                                product: products[index]);
+                                          },
+                                        ),
+                                      );
+                                    } else {
+                                      return Text("No more data to show");
+                                    }
+                                  }
+                                },
+                              ),
                             ),
                           ),
 
@@ -135,7 +170,7 @@ class _ProductListPageState extends State<ProductListPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               GestureDetector(
-                                onTap: loadproduct,
+                                onTap: provider.loadMore,
                                 child: Container(
                                   padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                                   decoration: BoxDecoration(

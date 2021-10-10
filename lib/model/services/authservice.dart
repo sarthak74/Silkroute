@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'dart:developer' as developer;
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:localstorage/localstorage.dart';
 
 class AuthService {
   Dio dio = new Dio();
@@ -54,28 +56,27 @@ class AuthService {
     }
   }
 
-  verifyotp(otp, token) async {
+  dynamic verifyotp(otp, token) async {
     try {
-      // dio.options.headers['Authorization'] = token;
-      // Response res = await dio.post(uri + "/otpverify",
-      //     data: {
-      //       "otp": otp,
-      //     },
-      //     options: Options(contentType: Headers.formUrlEncodedContentType));
+      var url = Uri.parse('http://192.168.43.220:4000/api/otpverify');
+      var tosend = {"otp": otp};
+      var res = await http.post(url,
+          body: tosend, headers: {HttpHeaders.authorizationHeader: token});
 
-      // var data = jsonDecode(res.toString());
-      // print("Otp response -- ${res.toString()}\nUser -- $data");
-      var data = {
-        "success": true,
-        "msg": 'You are authorized',
-        "isregistered": true,
-        "contact": "+917408159898",
-        "name": "Shashwat",
-        "userType": "Reseller"
-      };
-
+      var data = await jsonDecode(res.body);
+      print("Otp response - \ndata -- $data\nUser--${data['contact']}");
+      // var data = {
+      //   "success": true,
+      //   "msg": 'You are authorized',
+      //   "isregistered": true,
+      //   "contact": "7408159898",
+      //   "name": "Shashwat",
+      //   "userType": "Reseller"
+      // };
+      LocalStorage storage = LocalStorage('silkroute');
       String send = "";
       if (data["success"]) {
+        send += "1";
         Fluttertoast.showToast(
           msg: data['msg'],
           toastLength: Toast.LENGTH_SHORT,
@@ -84,8 +85,20 @@ class AuthService {
           textColor: Colors.grey[500],
           fontSize: 10,
         );
-        send += "1";
+        storage.clear();
+
+        storage.setItem('contact', data['contact']);
+        if (data['registered']) {
+          send += "1";
+          storage.setItem('userType', data['userType']);
+          storage.setItem('name', data['name']);
+          storage.setItem('user', data);
+          print("Storage User -- ${storage.getItem('user')}");
+        } else {
+          send += "0";
+        }
       } else {
+        send += "00";
         Fluttertoast.showToast(
           msg: data['msg'],
           toastLength: Toast.LENGTH_LONG,
@@ -94,22 +107,7 @@ class AuthService {
           textColor: Colors.red,
           fontSize: 10,
         );
-        send += "0";
       }
-      if (data["isregistered"]) {
-        send += "1";
-      } else {
-        send += "0";
-      }
-
-      send += data["contact"];
-
-      if (data["isregistered"]) {
-        send += data["name"];
-        send += "-";
-        send += data["userType"];
-      }
-
       return send;
     } on DioError catch (err) {
       Fluttertoast.showToast(
