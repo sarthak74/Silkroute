@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/widget/crate_product_tile.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
@@ -12,12 +13,40 @@ class CratePage1 extends StatefulWidget {
 }
 
 class _CratePage1State extends State<CratePage1> {
+  List products = [];
+  bool loading = true;
+  dynamic bill;
+
+  void loadProducts() async {
+    dynamic res = await CrateApi().getCrateItems();
+    var cratePr = res.item1;
+    for (var x in cratePr) {
+      var data = x.toMap();
+      setState(() {
+        products.add(data);
+      });
+    }
+    setState(() {
+      bill = res.item2.toMap();
+      loading = false;
+    });
+  }
+
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadProducts();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          CrateProductList(),
+          loading
+              ? Text("Loading Crate")
+              : CrateProductList(products: products),
 
           SizedBox(height: 20),
 
@@ -88,7 +117,7 @@ class _CratePage1State extends State<CratePage1> {
                   ),
                 ),
                 SizedBox(height: 20),
-                DetailPriceList(),
+                loading ? Text("Loading bill") : DetailPriceList(bill: bill),
               ],
             ),
           ),
@@ -135,25 +164,27 @@ class _CratePage1State extends State<CratePage1> {
 }
 
 class DetailPriceList extends StatefulWidget {
+  const DetailPriceList({this.bill});
+  final dynamic bill;
   @override
   _DetailPriceListState createState() => _DetailPriceListState();
 }
 
 class _DetailPriceListState extends State<DetailPriceList> {
-  List products = [];
   bool loading = true;
-  dynamic price;
+  dynamic price, bill;
   int savings = 0;
 
   void loadPrice() {
+    bill = widget.bill;
     setState(() {
       price = [
-        {"title": "Total Value", "value": 40000},
-        {"title": "Discount", "value": 28002},
-        {"title": "Coupon Discount", "value": 1000},
-        {"title": "Price After Discount", "value": 10998},
-        {"title": "GST", "value": 549.9},
-        {"title": "Logistics Cost", "value": 1043},
+        {"title": "Total Value", "value": bill['totalValue']},
+        {"title": "Discount", "value": bill['implicitDiscount']},
+        {"title": "Coupon Discount", "value": bill['couponDiscount']},
+        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
+        {"title": "GST", "value": bill['gst']},
+        {"title": "Logistics Cost", "value": bill['logistic']},
       ];
 
       for (int i = 0; i < price.length; i++) {
@@ -196,7 +227,9 @@ class _DetailPriceListState extends State<DetailPriceList> {
           padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
           child: PriceRow(
             title: "Total Cost",
-            value: "₹12590",
+            value: loading
+                ? Text("Calculating")
+                : widget.bill['totalCost'].toString(),
           ),
         ),
         Dash(
@@ -258,6 +291,8 @@ class _PriceRowState extends State<PriceRow> {
 }
 
 class CrateProductList extends StatefulWidget {
+  const CrateProductList({this.products});
+  final dynamic products;
   @override
   _CrateProductListState createState() => _CrateProductListState();
 }
@@ -265,29 +300,19 @@ class CrateProductList extends StatefulWidget {
 class _CrateProductListState extends State<CrateProductList> {
   List products = [];
   bool loading = true;
-  dynamic product = {
-    "id": 1,
-    "title": "Kanjeevaram Silk Saree",
-    "discount": true,
-    "mrp": 20000.0,
-    "discountValue": 70.0,
-    "quantity": 5,
-    "stock": 7,
-  };
 
-  void loadProducts() {
-    for (int i = 0; i < 3; i++) {
-      dynamic data = product;
-      products.add(data);
-    }
+  void loadProducts() async {
     setState(() {
+      products = widget.products;
       loading = false;
     });
   }
 
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadProducts();
+    });
     super.initState();
-    loadProducts();
   }
 
   @override

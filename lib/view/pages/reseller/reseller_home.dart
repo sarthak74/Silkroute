@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/showdailog.dart';
+import 'package:silkroute/model/services/ResellerHomeApi.dart';
 import 'package:silkroute/view/widget/carousel_indicator.dart';
 import 'package:silkroute/view/widget/footer.dart';
 import 'package:silkroute/view/widget/horizontal_list_view.dart';
@@ -15,43 +18,35 @@ class ResellerHome extends StatefulWidget {
 }
 
 class _ResellerHomeState extends State<ResellerHome> {
+  bool loading = true;
+
+  List<dynamic> adList = [];
+
+  List<dynamic> categories = [];
+
+  void loadVars() async {
+    List<dynamic> categoriess = await ResellerHomeApi().getCategories();
+    List<dynamic> adLists = await ResellerHomeApi().getOffers();
+    setState(() {
+      categories = categoriess;
+      adList = adLists;
+      loading = false;
+    });
+  }
+
+  @override
   void initState() {
     if (!Methods().isAuthenticated()) {
-      WidgetsBinding.instance.addPostFrameCallback(
-          (_) => NotRegisteredDialogMethod().check(context));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        NotRegisteredDialogMethod().check(context);
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        loadVars();
+      });
     }
     super.initState();
   }
-
-  List<String> adList = [
-    'https://codecanyon.img.customer.envatousercontent.com/files/201787761/banner%20intro.jpg?auto=compress%2Cformat&q=80&fit=crop&crop=top&max-h=8000&max-w=590&s=70a1c7c1e090863e2ea624db76295a0f',
-    'https://mk0adespressoj4m2p68.kinstacdn.com/wp-content/uploads/2019/07/facebook-offer-ads.jpg',
-    'https://assets.keap.com/image/upload/v1547580346/Blog%20thumbnail%20images/Screen_Shot_2019-01-15_at_12.25.23_PM.png',
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuX7EvcOkWOCYRFGR78Dxa2oNQb2OPCI7uqg&usqp=CAU'
-  ];
-
-  List<Map<String, String>> categories = [
-    {
-      "title": "Saree",
-      "url":
-          'https://codecanyon.img.customer.envatousercontent.com/files/201787761/banner%20intro.jpg?auto=compress%2Cformat&q=80&fit=crop&crop=top&max-h=8000&max-w=590&s=70a1c7c1e090863e2ea624db76295a0f',
-    },
-    {
-      "title": "Bridal",
-      "url":
-          'https://mk0adespressoj4m2p68.kinstacdn.com/wp-content/uploads/2019/07/facebook-offer-ads.jpg',
-    },
-    {
-      "title": "Suits",
-      "url":
-          'https://assets.keap.com/image/upload/v1547580346/Blog%20thumbnail%20images/Screen_Shot_2019-01-15_at_12.25.23_PM.png',
-    },
-    {
-      "title": "Shawl",
-      "url":
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuX7EvcOkWOCYRFGR78Dxa2oNQb2OPCI7uqg&usqp=CAU'
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +86,24 @@ class _ResellerHomeState extends State<ResellerHome> {
                       ///                        ///
                       //////////////////////////////
 
-                      HorizontalListView("CATEGORIES", categories),
+                      loading
+                          ? Container(
+                              height: MediaQuery.of(context).size.height * 0.2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xFF5B0D1B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : HorizontalListView("CATEGORIES", categories),
 
                       SizedBox(height: 20),
 
@@ -101,7 +113,24 @@ class _ResellerHomeState extends State<ResellerHome> {
                       ///                        ///
                       //////////////////////////////
 
-                      CarouselWithIndicator(adList),
+                      loading
+                          ? Container(
+                              height: MediaQuery.of(context).size.height * 0.2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xFF5B0D1B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : CarouselWithIndicator(adList),
 
                       //////////////////////////////
                       ///                        ///

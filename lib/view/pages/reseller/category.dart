@@ -8,52 +8,31 @@ import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 
 class CategoryPage extends StatefulWidget {
-  const CategoryPage({this.category});
+  const CategoryPage({this.categories, this.category});
 
-  final String category;
+  final dynamic category, categories;
 
   @override
   _CategoryPageState createState() => _CategoryPageState();
 }
 
 class _CategoryPageState extends State<CategoryPage> {
-  List<Map<String, String>> categories = [
-    {
-      "title": "Saree",
-      "url":
-          'https://codecanyon.img.customer.envatousercontent.com/files/201787761/banner%20intro.jpg?auto=compress%2Cformat&q=80&fit=crop&crop=top&max-h=8000&max-w=590&s=70a1c7c1e090863e2ea624db76295a0f',
-    },
-    {
-      "title": "Bridal",
-      "url":
-          'https://mk0adespressoj4m2p68.kinstacdn.com/wp-content/uploads/2019/07/facebook-offer-ads.jpg',
-    },
-    {
-      "title": "Suits",
-      "url":
-          'https://assets.keap.com/image/upload/v1547580346/Blog%20thumbnail%20images/Screen_Shot_2019-01-15_at_12.25.23_PM.png',
-    },
-    {
-      "title": "Shawl",
-      "url":
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuX7EvcOkWOCYRFGR78Dxa2oNQb2OPCI7uqg&usqp=CAU'
-    },
-  ];
-  List subcategories = [];
+  dynamic category = [];
   bool loading = true;
 
   void loadSubcategories() {
-    for (int i = 0; i < 20; i++) {
-      subcategories.add(widget.category + " Type" + i.toString());
-    }
     setState(() {
+      category = widget.category;
+      print("catg: $category");
       loading = false;
     });
   }
 
   void initState() {
     super.initState();
-    loadSubcategories();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadSubcategories();
+    });
   }
 
   @override
@@ -93,7 +72,7 @@ class _CategoryPageState extends State<CategoryPage> {
                       ///     Category Head      ///
                       ///                        ///
                       //////////////////////////////
-                      HorizontalListView("CATEGORIES", categories),
+                      HorizontalListView("CATEGORIES", widget.categories),
                       //CategoryHead(title: widget.category),
 
                       //////////////////////////////
@@ -115,12 +94,13 @@ class _CategoryPageState extends State<CategoryPage> {
                               : GridView.count(
                                   crossAxisCount: 2,
                                   children: List.generate(
-                                    subcategories == []
+                                    (category['subCat'] == [])
                                         ? 0
-                                        : subcategories.length,
+                                        : category['subCat'].length,
                                     (index) {
                                       return CategoryTile(
-                                          id: subcategories[index]);
+                                        subCat: category['subCat'][index],
+                                      );
                                     },
                                   ),
                                 ),

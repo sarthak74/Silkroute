@@ -19,12 +19,18 @@ class _WishlistPageState extends State<WishlistPage> {
   List<ProductList> products = [];
   bool loading = true;
 
+  void loadVars() async {
+    var pp = await WishlistApi().getProd();
+    setState(() {
+      products = pp;
+      loading = false;
+    });
+  }
+
+  @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      products = await WishlistApi().getProd();
-      setState(() {
-        loading = false;
-      });
+      loadVars();
     });
     super.initState();
   }

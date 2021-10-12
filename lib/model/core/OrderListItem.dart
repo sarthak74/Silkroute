@@ -1,37 +1,47 @@
 import 'dart:convert';
+import 'package:silkroute/model/core/Bill.dart';
+import 'package:silkroute/model/core/CrateListItem.dart';
 
 class OrderListItem {
   final String id;
-  final String title;
-  final String status;
+  final CrateListItem item;
+  final String latestStatus;
+  final Map<String, dynamic> status;
   final int ratingGiven;
   final int reviewGiven;
+  final Bill bill;
 
   OrderListItem({
     this.id,
-    this.title,
+    this.item,
+    this.latestStatus,
     this.status,
     this.ratingGiven,
     this.reviewGiven,
+    this.bill,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'title': title,
+      'item': item.toMap(),
+      'latestStatus': latestStatus,
       'status': status,
       'ratingGiven': ratingGiven,
       'reviewGiven': reviewGiven,
+      'bill': bill.toMap(),
     };
   }
 
   factory OrderListItem.fromMap(Map<String, dynamic> map) {
     return OrderListItem(
       id: map['id'],
-      title: map['title'],
-      status: map['status'],
+      item: CrateListItem.fromMap(map['item']),
+      latestStatus: map['latestStatus'],
+      status: Map<String, dynamic>.from(map['status']),
       ratingGiven: map['ratingGiven'],
       reviewGiven: map['reviewGiven'],
+      bill: Bill.fromMap(map['bill']),
     );
   }
 

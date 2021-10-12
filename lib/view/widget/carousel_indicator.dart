@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 
 class CarouselWithIndicator extends StatefulWidget {
   CarouselWithIndicator(this.adList);
-  final List<String> adList;
+  final List<dynamic> adList;
 
   _CarouselWithIndicatorState createState() => _CarouselWithIndicatorState();
 }
@@ -31,7 +31,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicator> {
               });
             },
           ),
-          items: widget.adList.map((url) {
+          items: widget.adList.map((offer) {
             return Builder(
               builder: (BuildContext context) {
                 return Container(
@@ -40,7 +40,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicator> {
                     border: Border.all(color: Color(0xFF5B0D1B), width: 5),
                     image: DecorationImage(
                       image: NetworkImage(
-                        url,
+                        offer['url'],
                         // width: 300,
                       ),
                       fit: BoxFit.fill,

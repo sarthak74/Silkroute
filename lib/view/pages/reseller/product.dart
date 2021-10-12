@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/model/services/CrateApi.dart';
+import 'package:silkroute/model/services/ProductListApi.dart';
+import 'package:silkroute/model/services/WishlistApi.dart';
 import 'package:silkroute/view/pages/reseller/order_page.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/subcategory_head.dart';
@@ -31,39 +35,12 @@ class _ProductPageState extends State<ProductPage> {
   bool loading = true;
   dynamic productDetails;
 
-  void loadProductDetails() {
+  void loadProductDetails() async {
+    var pp = await ProductListApi().getProductInfo(widget.id);
     setState(() {
-      productDetails = {
-        'id': "12",
-        "title": "Kanjeevaram Silk Saree",
-        "description":
-            "This is a premium pure silk kanjeeevaram saree made with soft hands and electron-size perfection",
-        "mrp": 20000,
-        "sp": 5999,
-        "wishlist": true,
-        "discount": true,
-        "totalSet": 12,
-        "min": 5,
-        "increment": 2,
-        "discountValue": 70,
-        "stockAvailability": 8,
-        "resellerCrateAvailability": 13,
-        "colors": [
-          Color(0xFFFF0000),
-          Color(0xFF00FF00),
-          Color(0xFF0000FF),
-          Color(0xFFF0F000),
-          Color(0xFFFF0000),
-          Color(0xFF00FF00),
-          Color(0xFF0000FF),
-          Color(0xFFF0F000),
-          Color(0xFFFF0000),
-          Color(0xFF00FF00),
-          Color(0xFF0000FF),
-          Color(0xFFF0F000),
-        ]
-      };
-
+      print("id: ${widget.id}");
+      productDetails = pp;
+      print("pro: $pp");
       loading = false;
     });
   }
@@ -205,6 +182,8 @@ class ProductCounter extends StatefulWidget {
 class _ProductCounterState extends State<ProductCounter> {
   num counter, min, max, gap;
   bool loading = true;
+  List<Color> proColors = [];
+  LocalStorage storage = LocalStorage('silkroute');
 
   void inc() {
     if (counter + gap <= max) {
@@ -223,13 +202,47 @@ class _ProductCounterState extends State<ProductCounter> {
   }
 
   void loadVars() {
+    print("pro: ${widget.product}");
     setState(() {
       counter = widget.product['min'];
       min = widget.product['min'];
       max = widget.product['totalSet'];
       gap = widget.product['increment'];
+
+      // ignore: todo
+      // TODO: proColors is list of colors of product in set
+
+      proColors.add(Color(0xFFFF0000));
+      proColors.add(Color(0xFF00FF00));
+      proColors.add(Color(0xFF0000FF));
+      proColors.add(Color(0xFFFF0000));
+      proColors.add(Color(0xFF00FF00));
+      proColors.add(Color(0xFF0000FF));
+      proColors.add(Color(0xFFFF0000));
+      proColors.add(Color(0xFF00FF00));
+      proColors.add(Color(0xFF0000FF));
+      proColors.add(Color(0xFFFF0000));
+      proColors.add(Color(0xFF00FF00));
+      proColors.add(Color(0xFF0000FF));
+
       loading = false;
     });
+  }
+
+  addToCrateHandler() {
+    var data = {
+      'id': widget.product['_id'].toString(),
+      'contact': storage.getItem('contact'),
+      'quantity': counter.toString(),
+      'colors': proColors.sublist(0, counter).toString(),
+      'mrp': widget.product['mrp'].toString(),
+      'disValue': widget.product['discountValue'].toString(),
+      'discount': widget.product['discount'].toString(),
+      'title': widget.product['title'].toString(),
+      'stock': widget.product['stockAvailability'].toString()
+    };
+    print("addToCrateHandler: $data");
+    CrateApi().setCrateItems(data);
   }
 
   @override
@@ -326,7 +339,7 @@ class _ProductCounterState extends State<ProductCounter> {
                           decoration: BoxDecoration(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(12.5)),
-                            color: widget.product['colors'][index],
+                            color: proColors[index],
                           ),
                         );
                       },
@@ -336,7 +349,7 @@ class _ProductCounterState extends State<ProductCounter> {
           SizedBox(height: 15),
 
           GestureDetector(
-            onTap: null,
+            onTap: addToCrateHandler,
             child: Container(
               width: MediaQuery.of(context).size.width * 0.5,
               decoration: BoxDecoration(
@@ -374,98 +387,125 @@ class ProductDescription extends StatefulWidget {
 }
 
 class _ProductDescriptionState extends State<ProductDescription> {
+  String sp;
+  bool loading = true;
+  void loadVars() {
+    setState(() {
+      sp = Math.getSp(widget.product['mrp'], widget.product['discountValue']);
+      print("sp: $sp");
+
+      loading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadVars();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    print("--> ${widget.product}");
-    return Container(
-      margin: EdgeInsets.fromLTRB(MediaQuery.of(context).size.width * 0.05, 10,
-          MediaQuery.of(context).size.width * 0.05, 0),
-      alignment: Alignment.topLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(widget.product['title'], style: textStyle(15, Colors.black)),
-          Text(widget.product['description'],
-              style: textStyle(12, Colors.grey)),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              widget.product['discount']
-                  ? Row(
-                      children: <Widget>[
-                        Text(
-                          ("₹" + widget.product['mrp'].toString()).toString(),
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              color: Color(0xFF5B0D1B),
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.lineThrough,
-                              decorationThickness: 3,
-                            ),
+    return loading
+        ? Text("Loading")
+        : Container(
+            margin: EdgeInsets.fromLTRB(
+                MediaQuery.of(context).size.width * 0.05,
+                10,
+                MediaQuery.of(context).size.width * 0.05,
+                0),
+            alignment: Alignment.topLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(widget.product['title'],
+                    style: textStyle(15, Colors.black)),
+                Text(widget.product['description'],
+                    style: textStyle(12, Colors.grey)),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    widget.product['discount']
+                        ? Row(
+                            children: <Widget>[
+                              Text(
+                                ("₹" + widget.product['mrp'].toString())
+                                    .toString(),
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    color: Color(0xFF5B0D1B),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationThickness: 3,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                ("₹" + sp.toString()).toString(),
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    color: Color(0xFF5B0D1B),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                ("-" +
+                                        widget.product['discountValue']
+                                            .toString() +
+                                        "%")
+                                    .toString(),
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: <Widget>[
+                              Text(
+                                ("₹" + widget.product['mrp'].toString())
+                                    .toString(),
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    color: Color(0xFF5B0D1B),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationThickness: 3,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        SizedBox(width: 5),
-                        Text(
-                          ("₹" + widget.product['sp'].toString()).toString(),
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              color: Color(0xFF5B0D1B),
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 5),
-                        Text(
-                          ("-" +
-                                  widget.product['discountValue'].toString() +
-                                  "%")
-                              .toString(),
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              color: Colors.green,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      children: <Widget>[
-                        Text(
-                          ("₹" + widget.product['mrp'].toString()).toString(),
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              color: Color(0xFF5B0D1B),
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.lineThrough,
-                              decorationThickness: 3,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 2, color: Colors.black),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      padding: EdgeInsets.all(5),
+                      child: Text(
+                        ("Set of " + widget.product['totalSet'].toString())
+                            .toString(),
+                        style: textStyle(10, Colors.black),
+                      ),
                     ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(width: 2, color: Colors.black),
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ],
                 ),
-                padding: EdgeInsets.all(5),
-                child: Text(
-                  ("Set of " + widget.product['totalSet'].toString())
-                      .toString(),
-                  style: textStyle(10, Colors.black),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+              ],
+            ),
+          );
   }
 }
 
@@ -478,10 +518,13 @@ class ProductImage extends StatefulWidget {
 }
 
 class _ProductImageState extends State<ProductImage> {
-  bool loading = true;
+  bool loading = true, wishlist = false;
   int selected = 0;
   List images = [];
+  List<String> wishlists = [];
   String url = "assets/images/";
+  LocalStorage storage = LocalStorage('silkroute');
+  dynamic user;
 
   Future<void> loadImages() async {
     setState(() {
@@ -489,11 +532,39 @@ class _ProductImageState extends State<ProductImage> {
     });
   }
 
+  void wishlistFunction() async {
+    String pid = widget.productDetails['_id'];
+    if (!wishlists.contains(pid)) {
+      setState(() {
+        wishlists.add(pid);
+        user['wishlist'] = wishlists;
+        storage.setItem('user', user);
+      });
+    } else {
+      setState(() {
+        wishlists.remove(pid);
+        user['wishlist'] = wishlists;
+        storage.setItem('user', user);
+      });
+    }
+
+    await WishlistApi().setWishlist();
+  }
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadImages().then((value) {
         setState(() {
+          var user = storage.getItem('user');
+          List<dynamic> xy = user['wishlist'];
+
+          for (dynamic x in xy) {
+            wishlists.add(x.toString());
+          }
+          wishlist =
+              wishlists.contains(widget.productDetails['_id'].toString());
+          user = storage.getItem('user');
           loading = false;
         });
       });
@@ -579,12 +650,7 @@ class _ProductImageState extends State<ProductImage> {
                   child: Align(
                     alignment: Alignment.topRight,
                     child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          widget.productDetails['wishlist'] =
-                              !widget.productDetails['wishlist'];
-                        });
-                      },
+                      onTap: wishlistFunction,
                       child: Container(
                         width: 35,
                         height: 35,
@@ -599,16 +665,14 @@ class _ProductImageState extends State<ProductImage> {
                               blurRadius: 4.0,
                             ),
                           ],
-                          color: !widget.productDetails['wishlist']
-                              ? Color(0xFFFFFFFF)
-                              : Color(0xFFE1AC5D),
+                          color:
+                              !wishlist ? Color(0xFFFFFFFF) : Color(0xFFE1AC5D),
                         ),
                         child: Icon(
                           Icons.widgets,
                           size: 20,
-                          color: widget.productDetails['wishlist']
-                              ? Color(0xFFFFFFFF)
-                              : Color(0xFFE1AC5D),
+                          color:
+                              wishlist ? Color(0xFFFFFFFF) : Color(0xFFE1AC5D),
                         ),
                       ),
                     ),

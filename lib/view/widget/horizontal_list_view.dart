@@ -5,7 +5,7 @@ import 'package:silkroute/view/pages/reseller/category.dart';
 
 class HorizontalListView extends StatefulWidget {
   HorizontalListView(this.title, this.productList);
-  final List<Map<String, String>> productList;
+  final List<dynamic> productList;
   final String title;
 
   _HorizontalListViewState createState() => _HorizontalListViewState();
@@ -71,8 +71,9 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      CategoryPage(category: product["title"]),
+                                  builder: (context) => CategoryPage(
+                                      categories: widget.productList,
+                                      category: product),
                                 ),
                               );
                             },

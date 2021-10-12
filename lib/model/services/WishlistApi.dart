@@ -32,11 +32,15 @@ class WishlistApi {
       var user = storage.getItem('user');
       var wishlists = user['wishlist'];
       for (String pId in wishlists) {
+        if (pId == null || pId == "null") {
+          continue;
+        }
         var reqBody = {"id": pId};
         var uri = Math().ip();
         var url = Uri.parse(uri + '/manufacturerApi/getProductInfo');
         final res = await http.post(url, body: reqBody);
         dynamic product = jsonDecode(res.body);
+        product["id"] = pId.toString();
         ProductList fp = ProductList.fromMap(product);
         products.add(fp);
       }

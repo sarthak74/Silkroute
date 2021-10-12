@@ -3,9 +3,9 @@ import 'package:silkroute/view/pages/reseller/product.dart';
 import 'package:silkroute/view/pages/reseller/productlist.dart';
 
 class CategoryTile extends StatefulWidget {
-  const CategoryTile({this.id});
+  const CategoryTile({this.subCat});
 
-  final String id;
+  final dynamic subCat;
 
   @override
   _CategoryTileState createState() => _CategoryTileState();
@@ -19,7 +19,8 @@ class _CategoryTileState extends State<CategoryTile> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => ProductListPage(headtext: widget.id)),
+              builder: (context) =>
+                  ProductListPage(headtext: widget.subCat['title'])),
         );
       },
       child: Container(
@@ -35,7 +36,7 @@ class _CategoryTileState extends State<CategoryTile> {
         ),
         alignment: Alignment.center,
         child: Text(
-          widget.id,
+          widget.subCat['title'],
           style: TextStyle(
             color: Colors.white,
             fontSize: 15,

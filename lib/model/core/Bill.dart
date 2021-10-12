@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class Bill {
-  final String totalValue;
+  final num totalValue;
   final num implicitDiscount;
   final num priceAfterDiscount;
   final num couponDiscount;

@@ -19,27 +19,22 @@ class ProductTile extends StatefulWidget {
 
 class _ProductTileState extends State<ProductTile> {
   LocalStorage storage = LocalStorage('silkroute');
-  dynamic user;
+  dynamic user, productd;
   List<String> wishlists = [];
 
   void wishlistFunction() async {
-    print("product: ${widget.product} ${widget.product.id}");
     String pid = widget.product.id;
     if (!wishlists.contains(pid)) {
-      print("add");
       setState(() {
         wishlists.add(pid);
         user['wishlist'] = wishlists;
         storage.setItem('user', user);
-        print("new wishlist:  $wishlists\n");
       });
     } else {
-      print("remove");
       setState(() {
         wishlists.remove(pid);
         user['wishlist'] = wishlists;
         storage.setItem('user', user);
-        print("new wishlist:  $wishlists\n");
       });
     }
 
@@ -50,6 +45,7 @@ class _ProductTileState extends State<ProductTile> {
     setState(() {
       user = storage.getItem('user');
     });
+    print("id: ${widget.product.id}");
     List<dynamic> xy = user['wishlist'];
     for (dynamic x in xy) {
       setState(() {

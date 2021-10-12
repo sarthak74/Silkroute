@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/model/core/Bill.dart';
@@ -10,19 +11,20 @@ class CrateApi {
 
   Future<Tuple<List<CrateListItem>, Bill>> getCrateItems() async {
     try {
-      var data = {
-        // userid
-      };
-      var url = Uri.parse(endpoint + '/CrateApi/getAllProducts');
+      var data = {'contact': storage.getItem('contact')};
+      var url = Uri.parse(endpoint + '/crateApi/getAllProducts');
       final res = await http.post(url, body: data);
+      print("res: $res");
       var decodedRes2 = jsonDecode(res.body);
+      print("decodedRes2: $decodedRes2");
       List<CrateListItem> resp = [];
       for (var i in decodedRes2[0]) {
         CrateListItem r = CrateListItem.fromMap(i);
         resp.add(r);
       }
+      print("resp: $resp");
       Bill bill = Bill.fromMap(decodedRes2[1]);
-
+      print("bill: $bill");
       return Tuple<List<CrateListItem>, Bill>(resp, bill);
     } catch (e) {
       print("error - $e");
@@ -30,14 +32,14 @@ class CrateApi {
     }
   }
 
-  setCrateItems() async {
+  setCrateItems(body) async {
     try {
-      var data = {
-        // list of cratelistitems (only id, quantity, & color)
-        // rest calculate in backend and fill db
-      };
-      var url = Uri.parse(endpoint + '/CrateApi/setItems');
+      var data = body;
+      print("Set Crate items body: $data");
+      var url = Uri.parse(endpoint + '/crateApi/setItem');
+      print("1");
       final res = await http.post(url, body: data);
+      print("1");
       print(res.statusCode);
     } catch (e) {
       print("error - $e");
