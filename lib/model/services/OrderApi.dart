@@ -7,13 +7,11 @@ import 'package:silkroute/model/core/OrderListItem.dart';
 class OrderApi {
   LocalStorage storage = LocalStorage('silkroute');
 
-  Future<List<OrderListItem>> getmyorders() async {
+  Future<List<OrderListItem>> getOrders() async {
     try {
-      var reqBody = {
-        //userID
-      };
+      var reqBody = {"contact": storage.getItem("contact")};
       var uri = Math().ip();
-      var url = Uri.parse(uri + '/x/y/z');
+      var url = Uri.parse(uri + '/resellerApi/getOrders');
       final res = await http.post(url, body: reqBody);
       var decodedRes2 = jsonDecode(res.body);
       List<OrderListItem> resp = [];

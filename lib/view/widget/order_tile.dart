@@ -12,6 +12,11 @@ class OrderTile extends StatefulWidget {
 
 class _OrderTileState extends State<OrderTile> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
@@ -37,11 +42,11 @@ class _OrderTileState extends State<OrderTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  widget.order['title'],
+                  widget.order['item']['title'],
                   style: textStyle(12, Colors.black),
                 ),
                 Text(
-                  widget.order['status'],
+                  widget.order['latestStatus'],
                   style: textStyle(12, Colors.grey[500]),
                 ),
                 SizedBox(height: 5),
@@ -79,8 +84,7 @@ class _OrderTileState extends State<OrderTile> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        OrderPage(id: (widget.order["id"]).toString()),
+                    builder: (context) => OrderPage(order: widget.order),
                   ),
                 );
               },

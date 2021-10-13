@@ -92,31 +92,6 @@ class _NavbarState extends State<Navbar> {
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(width: 5),
-                      Text(
-                        "LEVEL: ",
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.black87,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.black54,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.black54,
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),

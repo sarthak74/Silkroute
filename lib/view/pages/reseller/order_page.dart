@@ -23,62 +23,55 @@ TextStyle textStyle(num size, Color color) {
 }
 
 class OrderPage extends StatefulWidget {
-  const OrderPage({this.id});
-  final String id;
+  const OrderPage({this.order});
+  final dynamic order;
 
   @override
   _OrderPageState createState() => _OrderPageState();
 }
 
 class _OrderPageState extends State<OrderPage> {
-  dynamic orderDetails;
+  dynamic orderDetails, bill;
   bool loading = true;
 
   dynamic price;
-  int savings = 0;
+  num savings = 0, totalCost = 0;
 
   void loadPrice() {
     setState(() {
+      bill = widget.order['bill'];
       price = [
-        {"title": "Total Value", "value": 40000},
-        {"title": "Discount", "value": 28002},
-        {"title": "Coupon Discount", "value": 1000},
-        {"title": "Price After Discount", "value": 10998},
-        {"title": "GST", "value": 549.9},
-        {"title": "Logistics Cost", "value": 1043},
+        {"title": "Total Value", "value": bill['totalValue']},
+        {"title": "Discount", "value": bill['implicitDiscount']},
+        {"title": "Coupon Discount", "value": bill['couponDiscount']},
+        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
+        {"title": "GST", "value": bill['gst']},
+        {"title": "Logistics Cost", "value": bill['logistic']},
       ];
 
-      for (int i = 0; i < price.length; i++) {
-        var x = price[i]['title'].split(' ');
-        if (x[0] == 'Discount' || x[0] == 'Coupon') {
-          savings += price[i]['value'];
-        }
-      }
+      totalCost = bill['totalCost'];
+
+      savings = bill['totalValue'] - totalCost;
+      loading = false;
     });
   }
 
   void loadOrder() {
     setState(() {
+      List<Color> colors = [];
+      for (var color in widget.order['colors']) {
+        colors.add(
+            Color(int.parse(color.toString().split('(')[1].split(')')[0])));
+      }
       orderDetails = {
-        "title": "Kanjeevaram Silk Saree",
-        "quantity": 5,
-        "color": [
-          0xFFC80D0D,
-          0xFFE3740C,
-          0xFF1DDADA,
-          0xFF5451C7,
-          0xFF127D2A,
-          0xFF9E9B9B,
-          0xFFC1C5C5
-        ],
-        "status": "Out for Delivery",
-        "rating": 3
+        "title": widget.order['item']['title'],
+        "quantity": widget.order['item']['quantity'],
+        "color": colors,
+        "status": widget.order['latestStatus'],
+        "rating": widget.order['ratingGiven']
       };
     });
     loadPrice();
-    setState(() {
-      loading = false;
-    });
   }
 
   @override
@@ -141,7 +134,9 @@ class _OrderPageState extends State<OrderPage> {
                                     OrderStatus(orderDetails: orderDetails),
                                     StarRating(orderDetails: orderDetails),
                                     OrderPriceDetails(
-                                        price: price, savings: savings),
+                                        price: price,
+                                        savings: savings,
+                                        totalCost: totalCost),
                                   ],
                                 ),
                               ),
@@ -169,9 +164,10 @@ class _OrderPageState extends State<OrderPage> {
 }
 
 class OrderPriceDetails extends StatefulWidget {
-  OrderPriceDetails({this.price, this.savings});
+  OrderPriceDetails({this.price, this.savings, this.totalCost});
   final dynamic price;
-  final int savings;
+  final num savings;
+  final num totalCost;
   @override
   _OrderPriceDetailsState createState() => _OrderPriceDetailsState();
 }
@@ -209,7 +205,10 @@ class _OrderPriceDetailsState extends State<OrderPriceDetails> {
             ),
           ),
           SizedBox(height: 20),
-          OrderPriceDetailsList(price: widget.price),
+          OrderPriceDetailsList(
+              price: widget.price,
+              savings: widget.savings,
+              totalCost: widget.totalCost),
         ],
       ),
     );
@@ -217,16 +216,17 @@ class _OrderPriceDetailsState extends State<OrderPriceDetails> {
 }
 
 class OrderPriceDetailsList extends StatefulWidget {
-  OrderPriceDetailsList({this.price, this.savings});
+  OrderPriceDetailsList({this.price, this.savings, this.totalCost});
   final dynamic price;
-  final int savings;
+  final num savings;
+  final num totalCost;
   @override
   _OrderPriceDetailsListState createState() => _OrderPriceDetailsListState();
 }
 
 class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
   dynamic price;
-  int savings = 0;
+  num savings = 0;
 
   void initState() {
     super.initState();
@@ -258,7 +258,7 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
           padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
           child: PriceRow(
             title: "Total Cost",
-            value: "₹12590",
+            value: "₹" + widget.totalCost.toString(),
           ),
         ),
         Dash(
@@ -266,16 +266,19 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
           dashColor: Colors.grey[700],
         ),
         SizedBox(height: 10),
-        Text(
-          ("You saved ₹" + savings.toString() + " on this order").toString(),
-          style: GoogleFonts.poppins(
-            textStyle: TextStyle(
-              color: Colors.green,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        (savings > 0)
+            ? Text(
+                ("You saved ₹" + savings.toString() + " on this order")
+                    .toString(),
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    color: Colors.green,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : Text(""),
       ],
     );
   }
@@ -444,7 +447,7 @@ class _OrderStatusState extends State<OrderStatus> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           SizedBox(height: 10),
-                          Text("Order Places",
+                          Text("Order Placed",
                               style: textStyle(12, Colors.black54)),
                           SizedBox(height: 45),
                           Text("Dispatched from Source",
@@ -478,101 +481,131 @@ class OrderPageTitle extends StatefulWidget {
 }
 
 class _OrderPageTitleState extends State<OrderPageTitle> {
-  dynamic orderDetails, moreColor = true;
+  dynamic orderDetails, moreColor = true, loading = true;
+
+  void loadVars() {
+    setState(() {
+      orderDetails = widget.orderDetails;
+      loading = false;
+    });
+  }
 
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadVars();
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    orderDetails = widget.orderDetails;
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.03,
-        vertical: 15,
-      ),
-      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-            width: MediaQuery.of(context).size.width * 0.25,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/1.png"),
-                fit: BoxFit.fill,
-              ),
-            ),
-          ),
-          SizedBox(width: 20),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.5,
+    return loading
+        ? Container(
+            height: MediaQuery.of(context).size.height * 0.2,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
-                  orderDetails['title'],
-                  style: textStyle(12, Colors.black),
-                ),
-                Text(
-                  ("Quantity: " + orderDetails['quantity'].toString())
-                      .toString(),
-                  style: textStyle(12, Colors.black),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: 130,
-                      height: 20,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: Math().min(orderDetails['color'].length, 5),
-                        itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            width: 20,
-                            height: 20,
-                            margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                              color: Color(orderDetails['color'][index]),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // moreColor
-                    //     ?
-                    Container(
-                      width: 25,
-                      height: 25,
-                      margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(12.5)),
-                        border: Border.all(width: 2, color: Colors.grey[500]),
-                        color: Colors.white,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        "+" + (orderDetails['color'].length - 5).toString(),
-                        style: textStyle(10, Colors.grey[500]),
-                      ),
-                    )
-                    // : SizedBox(width: 1),
-                  ],
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF5B0D1B),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          )
+        : Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.03,
+              vertical: 15,
+            ),
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.25,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/images/1.png"),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        orderDetails['title'],
+                        style: textStyle(12, Colors.black),
+                      ),
+                      Text(
+                        ("Quantity: " + orderDetails['quantity'].toString())
+                            .toString(),
+                        style: textStyle(12, Colors.black),
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        children: <Widget>[
+                          SizedBox(
+                            width: 130,
+                            height: 20,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount:
+                                  Math().min(orderDetails['color'].length, 5),
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                  width: 20,
+                                  height: 20,
+                                  margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                  decoration: BoxDecoration(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                    color: orderDetails['color'][index],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          // moreColor
+                          //     ?
+                          Container(
+                            width: 25,
+                            height: 25,
+                            margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12.5)),
+                              border:
+                                  Border.all(width: 2, color: Colors.grey[500]),
+                              color: Colors.white,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "+" +
+                                  (orderDetails['color'].length - 5).toString(),
+                              style: textStyle(10, Colors.grey[500]),
+                            ),
+                          )
+                          // : SizedBox(width: 1),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 }

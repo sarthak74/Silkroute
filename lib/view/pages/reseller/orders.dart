@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/view/pages/reseller/order_page.dart';
 import 'package:silkroute/view/widget/footer.dart';
 import 'package:silkroute/view/widget/navbar.dart';
@@ -89,24 +90,22 @@ class _OrderListState extends State<OrderList> {
   List orders = [];
   bool loading = true;
 
-  void loadOrders() {
+  void loadOrders() async {
+    dynamic res = await OrderApi().getOrders();
     setState(() {
-      for (int i = 0; i < 5; i++) {
-        dynamic order = {
-          "id": i.toString(),
-          "title": "Kanjeevaram Silk Saree",
-          "status": "Out for delivery",
-        };
-        orders.add(order);
+      for (var x in res) {
+        var data = x.toMap();
+        orders.add(data);
       }
+
+      loading = false;
     });
   }
 
   void initState() {
     super.initState();
-    loadOrders();
-    setState(() {
-      loading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadOrders();
     });
   }
 

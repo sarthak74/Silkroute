@@ -10,8 +10,8 @@ class User {
   final String gstin;
   final String email;
   final bool registered;
-  final num contact;
-  final num altContact;
+  final String contact;
+  final String altContact;
 
   User({
     this.name,

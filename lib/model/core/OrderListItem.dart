@@ -6,14 +6,18 @@ class OrderListItem {
   final String id;
   final CrateListItem item;
   final String latestStatus;
+  final String address;
   final Map<String, dynamic> status;
-  final int ratingGiven;
-  final int reviewGiven;
+  final num ratingGiven;
+  final List colors;
+  final num reviewGiven;
   final Bill bill;
 
   OrderListItem({
     this.id,
     this.item,
+    this.colors,
+    this.address,
     this.latestStatus,
     this.status,
     this.ratingGiven,
@@ -25,6 +29,8 @@ class OrderListItem {
     return {
       'id': id,
       'item': item.toMap(),
+      'address': address,
+      'colors': colors,
       'latestStatus': latestStatus,
       'status': status,
       'ratingGiven': ratingGiven,
@@ -38,6 +44,8 @@ class OrderListItem {
       id: map['id'],
       item: CrateListItem.fromMap(map['item']),
       latestStatus: map['latestStatus'],
+      address: map['address'],
+      colors: map['colors'],
       status: Map<String, dynamic>.from(map['status']),
       ratingGiven: map['ratingGiven'],
       reviewGiven: map['reviewGiven'],

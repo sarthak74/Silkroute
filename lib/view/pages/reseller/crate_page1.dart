@@ -173,11 +173,11 @@ class DetailPriceList extends StatefulWidget {
 class _DetailPriceListState extends State<DetailPriceList> {
   bool loading = true;
   dynamic price, bill;
-  int savings = 0;
+  num savings = 0;
 
   void loadPrice() {
-    bill = widget.bill;
     setState(() {
+      bill = widget.bill;
       price = [
         {"title": "Total Value", "value": bill['totalValue']},
         {"title": "Discount", "value": bill['implicitDiscount']},
@@ -199,8 +199,10 @@ class _DetailPriceListState extends State<DetailPriceList> {
   }
 
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadPrice();
+    });
     super.initState();
-    loadPrice();
   }
 
   @override
