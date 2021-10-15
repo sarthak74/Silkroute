@@ -28,6 +28,7 @@ dependencies:
   intl: ^0.17.0
   provider: ^4.3.3
   carousel_slider: ^3.0.0
+  multi_select_flutter: ^4.0.0
   localstorage:
   dio:
   im_stepper: ^0.1.3

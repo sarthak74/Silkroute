@@ -48,7 +48,7 @@ class ProductListApi {
         "Category": cat,
       };
       var uri = Math().ip();
-      var url = Uri.parse(uri + '/ResellerApi/getProdfromCat');
+      var url = Uri.parse(uri + '/resellerApi/getProdfromCat');
       final res = await http.post(url, body: data);
       var decodedRes2 = jsonDecode(res.body);
       List<ProductList> resp = [];
@@ -63,20 +63,26 @@ class ProductListApi {
     }
   }
 
-  Future<List<ProductList>> getProdListfromSearch(keyword) async {
+  Future<List<ProductList>> getProdListfromSearch(keyword, sortBy) async {
     try {
-      var data = {
-        "keyword": keyword,
-      };
+      var data = {"keyword": keyword, "sortBy": sortBy};
+
+      print("data $data");
       var uri = Math().ip();
-      var url = Uri.parse(uri + '/ResellerApi/getProdfromSearch');
-      final res = await http.post(url, body: data);
+      var url = Uri.parse(uri + '/resellerApi/getProdfromSearch');
+
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+
       var decodedRes2 = jsonDecode(res.body);
+
       List<ProductList> resp = [];
       for (var i in decodedRes2) {
         ProductList r = ProductList.fromMap(i);
         resp.add(r);
       }
+      print("posted $resp");
       return resp;
     } catch (e) {
       print("error - $e");

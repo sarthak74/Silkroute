@@ -13,7 +13,6 @@ class NotificationDialogBoxState extends State<NotificationDialogBox> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 30),
           child: Text(
             AppLocalizations.of(context).notifications,
             style: TextStyle(

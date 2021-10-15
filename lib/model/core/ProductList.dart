@@ -24,6 +24,7 @@ class ProductList {
   final num mrp;
   final num discountValue;
   final String category;
+  final String subCat;
   final String userContact;
   final String dateAdded;
   final String description;
@@ -41,6 +42,7 @@ class ProductList {
     this.mrp,
     this.discountValue,
     this.category,
+    this.subCat,
     this.userContact,
     this.dateAdded,
     this.description,
@@ -60,6 +62,7 @@ class ProductList {
       'mrp': mrp,
       'discountValue': discountValue,
       'category': category,
+      'subCat': subCat,
       'userContact': userContact,
       'dateAdded': dateAdded,
       'description': description,
@@ -80,6 +83,7 @@ class ProductList {
       mrp: map['mrp'],
       discountValue: map['discountValue'],
       category: map['category'],
+      subCat: map['subCat'],
       userContact: map['userContact'],
       dateAdded: map['dateAdded'],
       description: map['description'],

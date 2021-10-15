@@ -25,24 +25,6 @@ class _ProductListPageState extends State<ProductListPage> {
   bool loading = true;
 
   dynamic provider = new ProductListProvider();
-  // void loadproduct() {
-  //   print("here");
-  //   print("here + $provider");
-
-  //   provider.getTwentyProduct();
-  //   provider.productListStream.listen((snapshot) {
-  //     //print("snapshot -- $snapshot");
-  //     for (var x in snapshot) {
-  //       setState(() {
-  //         products.add(x);
-  //       });
-  //     }
-  //     //print("products -- $products");
-  //     setState(() {
-  //       loading = false;
-  //     });
-  //   });
-  // }
 
   @override
   void initState() {
@@ -114,22 +96,6 @@ class _ProductListPageState extends State<ProductListPage> {
                               horizontal:
                                   MediaQuery.of(context).size.width * 0.05,
                             ),
-                            // child: SizedBox(
-                            //   height: MediaQuery.of(context).size.height * 0.5,
-                            //   child: loading
-                            //       ? Text("Loading Loading")
-                            //       : GridView.count(
-                            //           childAspectRatio: aspectRatio,
-                            //           crossAxisCount: 2,
-                            //           children: List.generate(
-                            //             products == [] ? 0 : products.length,
-                            //             (index) {
-                            //               return ProductTile(
-                            //                   product: products[index]);
-                            //             },
-                            //           ),
-                            //         ),
-                            // ),
                             child: SizedBox(
                               height: MediaQuery.of(context).size.height * 0.5,
                               child: StreamBuilder<List<ProductList>>(
@@ -165,6 +131,8 @@ class _ProductListPageState extends State<ProductListPage> {
                               ),
                             ),
                           ),
+
+                          //////// LOAD MORE BUTTON
 
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
