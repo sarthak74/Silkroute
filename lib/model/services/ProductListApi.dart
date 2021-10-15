@@ -63,9 +63,10 @@ class ProductListApi {
     }
   }
 
-  Future<List<ProductList>> getProdListfromSearch(keyword, sortBy) async {
+  Future<List<ProductList>> getProdListfromSearch(
+      keyword, sortBy, filter) async {
     try {
-      var data = {"keyword": keyword, "sortBy": sortBy};
+      var data = {"keyword": keyword, "sortBy": sortBy, "filter": filter};
 
       print("data $data");
       var uri = Math().ip();

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/services/ProductListApi.dart';
@@ -134,37 +136,36 @@ class _SearchPageState extends State<SearchPage> {
         double fh = MediaQuery.of(context).size.height;
         double fw = MediaQuery.of(context).size.width;
         _products = [];
-        return loading
-            ? Text("Loading")
-            : GestureDetector(
-                onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
-                child: Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  drawer: Navbar(),
-                  primary: false,
-                  body: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage("assets/images/1.png"),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        //////////////////////////////
-                        ///                        ///
-                        ///         TopBar         ///
-                        ///                        ///
-                        //////////////////////////////
+        return GestureDetector(
+          onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            drawer: Navbar(),
+            primary: false,
+            body: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/1.png"),
+                  fit: BoxFit.fill,
+                ),
+              ),
+              child: Column(
+                children: <Widget>[
+                  //////////////////////////////
+                  ///                        ///
+                  ///         TopBar         ///
+                  ///                        ///
+                  //////////////////////////////
 
-                        TopBar(),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.1),
+                  TopBar(),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
 
-                        Expanded(
-                          child: CustomScrollView(slivers: [
+                  Expanded(
+                    child: loading
+                        ? Text("Loading")
+                        : CustomScrollView(slivers: [
                             SliverList(
                               delegate: SliverChildListDelegate([
                                 Container(
@@ -293,11 +294,14 @@ class _SearchPageState extends State<SearchPage> {
                                       builder: (context, snapshot) {
                                         if (snapshot.connectionState ==
                                             ConnectionState.waiting) {
+                                          print("ye");
                                           return Text("");
                                         } else if (snapshot.connectionState ==
                                             ConnectionState.done) {
+                                          print("fetched");
                                           return Text("Fetched");
                                         } else if (snapshot.hasError) {
+                                          print("error");
                                           return Text("Error");
                                         } else {
                                           if (snapshot.data != null) {
@@ -318,6 +322,7 @@ class _SearchPageState extends State<SearchPage> {
                                               ),
                                             );
                                           } else {
+                                            print("nom");
                                             return Text("No more data to show");
                                           }
                                         }
@@ -341,7 +346,7 @@ class _SearchPageState extends State<SearchPage> {
                                             },
                                             child: Container(
                                               padding: EdgeInsets.fromLTRB(
-                                                  20, 10, 20, 10),
+                                                  10, 5, 10, 5),
                                               decoration: BoxDecoration(
                                                 color: Colors.grey[300],
                                                 borderRadius: BorderRadius.all(
@@ -351,27 +356,28 @@ class _SearchPageState extends State<SearchPage> {
                                                 children: <Widget>[
                                                   Text(
                                                     "Apply Sort",
-                                                    style: textStyle(
-                                                        13, Colors.black),
-                                                  ),
-                                                  Icon(
-                                                    Icons.arrow_forward,
-                                                    size: 15,
-                                                    color: Colors.black,
+                                                    style: GoogleFonts.poppins(
+                                                      textStyle: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                           )
                                         : Container(),
-                                    SizedBox(width: 20),
+                                    SizedBox(width: 10),
                                     _btnShow
                                         ? GestureDetector(
                                             onTap: () => _searchProvider
                                                 .loadMore(_searchText),
                                             child: Container(
                                               padding: EdgeInsets.fromLTRB(
-                                                  20, 10, 20, 10),
+                                                  10, 5, 10, 5),
                                               decoration: BoxDecoration(
                                                 color: Colors.grey[300],
                                                 borderRadius: BorderRadius.all(
@@ -381,20 +387,21 @@ class _SearchPageState extends State<SearchPage> {
                                                 children: <Widget>[
                                                   Text(
                                                     "Load More",
-                                                    style: textStyle(
-                                                        13, Colors.black),
-                                                  ),
-                                                  Icon(
-                                                    Icons.arrow_forward,
-                                                    size: 15,
-                                                    color: Colors.black,
+                                                    style: GoogleFonts.poppins(
+                                                      textStyle: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                           )
                                         : Container(),
-                                    SizedBox(width: 20),
+                                    SizedBox(width: 10),
                                     _filterShow
                                         ? GestureDetector(
                                             onTap: () {
@@ -404,7 +411,7 @@ class _SearchPageState extends State<SearchPage> {
                                             },
                                             child: Container(
                                               padding: EdgeInsets.fromLTRB(
-                                                  20, 10, 20, 10),
+                                                  10, 5, 10, 5),
                                               decoration: BoxDecoration(
                                                 color: Colors.grey[300],
                                                 borderRadius: BorderRadius.all(
@@ -414,13 +421,14 @@ class _SearchPageState extends State<SearchPage> {
                                                 children: <Widget>[
                                                   Text(
                                                     "Apply Filters",
-                                                    style: textStyle(
-                                                        13, Colors.black),
-                                                  ),
-                                                  Icon(
-                                                    Icons.arrow_forward,
-                                                    size: 15,
-                                                    color: Colors.black,
+                                                    style: GoogleFonts.poppins(
+                                                      textStyle: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -438,19 +446,19 @@ class _SearchPageState extends State<SearchPage> {
                               child: Container(),
                             ),
                           ]),
-                        ),
-
-                        //////////////////////////////
-                        ///                        ///
-                        ///         Footer         ///
-                        ///                        ///
-                        //////////////////////////////
-                        Footer(),
-                      ],
-                    ),
                   ),
-                  // bottomNavigationBar: Footer(),
-                ),
-              );
+
+                  //////////////////////////////
+                  ///                        ///
+                  ///         Footer         ///
+                  ///                        ///
+                  //////////////////////////////
+                  Footer(),
+                ],
+              ),
+            ),
+            // bottomNavigationBar: Footer(),
+          ),
+        );
       });
 }

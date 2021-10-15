@@ -64,52 +64,58 @@ class _CategoryPageState extends State<CategoryPage> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.1),
 
               Expanded(
-                child: CustomScrollView(slivers: [
-                  SliverList(
-                    delegate: SliverChildListDelegate([
-                      //////////////////////////////
-                      ///                        ///
-                      ///     Category Head      ///
-                      ///                        ///
-                      //////////////////////////////
-                      HorizontalListView("CATEGORIES", widget.categories),
-                      //CategoryHead(title: widget.category),
+                child: loading
+                    ? Text("Loading")
+                    : CustomScrollView(slivers: [
+                        SliverList(
+                          delegate: SliverChildListDelegate([
+                            //////////////////////////////
+                            ///                        ///
+                            ///     Category Head      ///
+                            ///                        ///
+                            //////////////////////////////
+                            HorizontalListView("CATEGORIES", widget.categories),
+                            //CategoryHead(title: widget.category),
 
-                      //////////////////////////////
-                      ///                        ///
-                      ///         Lists          ///
-                      ///                        ///
-                      //////////////////////////////
+                            //////////////////////////////
+                            ///                        ///
+                            ///         Lists          ///
+                            ///                        ///
+                            //////////////////////////////
 
-                      SizedBox(height: 20),
+                            SizedBox(height: 20),
 
-                      Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.05,
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                horizontal:
+                                    MediaQuery.of(context).size.width * 0.05,
+                              ),
+                              child: SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.6,
+                                child: loading
+                                    ? Text("Loading Loading")
+                                    : GridView.count(
+                                        crossAxisCount: 2,
+                                        children: List.generate(
+                                          (category['subCat'] == [])
+                                              ? 0
+                                              : category['subCat'].length,
+                                          (index) {
+                                            return CategoryTile(
+                                              category: category["title"],
+                                              subCat: category['subCat'][index],
+                                            );
+                                          },
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ]),
                         ),
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.6,
-                          child: loading
-                              ? Text("Loading Loading")
-                              : GridView.count(
-                                  crossAxisCount: 2,
-                                  children: List.generate(
-                                    (category['subCat'] == [])
-                                        ? 0
-                                        : category['subCat'].length,
-                                    (index) {
-                                      return CategoryTile(
-                                        subCat: category['subCat'][index],
-                                      );
-                                    },
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ]),
-                  ),
-                  SliverFillRemaining(hasScrollBody: false, child: Container()),
-                ]),
+                        SliverFillRemaining(
+                            hasScrollBody: false, child: Container()),
+                      ]),
               ),
 
               //////////////////////////////

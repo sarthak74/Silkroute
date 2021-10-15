@@ -16,11 +16,13 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
   bool loading = true, loadBrand = false;
   String category = "";
 
-  dynamic data, filter;
+  dynamic data;
+
   List<String> categories = [];
   Map<String, List<String>> brands = {};
+  Map<String, dynamic> filter = {};
   List<String> selBrand = [], cBrand = [];
-  RangeValues _currentRangeValues = const RangeValues(1000, 50000);
+  RangeValues _currentRangeValues;
 
   void loadVars() {
     setState(() {
@@ -34,9 +36,14 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
           j++;
         }
       }
-      category = categories[0];
+      filter["category"] = SearchProvider().filter["category"];
+      filter["sp"] = SearchProvider().filter["sp"];
+
+      category = filter["category"];
       cBrand = brands[category];
-      print("$categories\n$brands\n$cBrand");
+      _currentRangeValues = RangeValues(filter["sp"]["\u0024gte"].toDouble(),
+          filter["sp"]["\u0024lte"].toDouble());
+      print("$categories\n$brands\n$cBrand\n$filter");
       loading = false;
     });
   }
@@ -68,9 +75,10 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
                   ),
                   SizedBox(height: 20),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Text("Category: ", style: textStyle(13, Colors.black)),
+                      Text("Category:", style: textStyle(13, Colors.black)),
+                      SizedBox(width: 20),
                       DropdownButton<String>(
                         style: TextStyle(color: Colors.black),
                         underline: Container(
@@ -85,8 +93,14 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
                         }).toList(),
                         onChanged: (val) {
                           setState(() {
-                            print("object $val");
+                            print("object $val $filter");
                             category = val;
+                            if (filter == null) {
+                              filter["category"] =
+                                  SearchProvider().filter["category"];
+                              filter["sp"] = SearchProvider().filter["sp"];
+                            }
+                            filter["category"] = category;
                             cBrand = brands[category];
                             print("cbran $cBrand");
                           });
@@ -97,6 +111,8 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
                   ),
                   SizedBox(height: 20),
                   MultiSelectDialogField(
+                    selectedItemsTextStyle: textStyle(13, Colors.white),
+                    searchTextStyle: textStyle(13, Colors.black),
                     items: cBrand.map((e) => MultiSelectItem(e, e)).toList(),
                     listType: MultiSelectListType.CHIP,
                     selectedColor: Color(0xFF5B0D1B),
@@ -110,13 +126,30 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
                       ),
                     ),
                     onConfirm: (values) {
+                      if (filter == null) {
+                        filter["category"] =
+                            SearchProvider().filter["category"];
+                        filter["sp"] = SearchProvider().filter["sp"];
+                      }
                       selBrand = values;
+                      filter["subCat"] = {"\u0024in": values};
                     },
                   ),
                   SizedBox(height: 20),
-                  Text(
-                    "Price Range",
-                    style: textStyle(13, Colors.black),
+                  Row(
+                    children: [
+                      Text(
+                        "Price Range: ",
+                        style: textStyle(13, Colors.black),
+                      ),
+                      SizedBox(width: 10),
+                      Text(("(" +
+                              _currentRangeValues.start.round().toString() +
+                              " - " +
+                              _currentRangeValues.end.round().toString() +
+                              ")")
+                          .toString())
+                    ],
                   ),
                   RangeSlider(
                     values: _currentRangeValues,
@@ -131,7 +164,12 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
                     ),
                     onChanged: (RangeValues values) {
                       setState(() {
+                        if (filter == null) filter = {};
                         _currentRangeValues = values;
+                        filter["sp"] = {
+                          "\u0024gte": _currentRangeValues.start.round(),
+                          "\u0024lte": _currentRangeValues.end.round(),
+                        };
                       });
                     },
                   ),
@@ -140,6 +178,7 @@ class _FilterDialogBoxState extends State<FilterDialogBox> {
                     alignment: Alignment.center,
                     child: GestureDetector(
                       onTap: () {
+                        print("filter optns $filter");
                         setState(() {
                           SearchProvider().setFilter(filter);
                         });

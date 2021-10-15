@@ -12,9 +12,9 @@ import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 
 class ProductListPage extends StatefulWidget {
-  const ProductListPage({this.headtext});
-
-  final String headtext;
+  const ProductListPage({this.category, this.subCat});
+  final String category;
+  final String subCat;
 
   @override
   _ProductListPageState createState() => _ProductListPageState();
@@ -79,7 +79,7 @@ class _ProductListPageState extends State<ProductListPage> {
                           ///                        ///
                           //////////////////////////////
 
-                          CategoryHead(title: widget.headtext),
+                          CategoryHead(title: widget.subCat),
                           // TODO: Change design of category
                           // TODO: Sort & Filter functionality
 

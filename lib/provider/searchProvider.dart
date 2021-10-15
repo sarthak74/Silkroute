@@ -11,7 +11,17 @@ class SearchProvider extends ChangeNotifier {
   List<ProductList> _productApiResult = [];
   List<ProductList> products = [];
   static dynamic _sortBy = {"title": 1};
-  static dynamic _filter = {};
+  static dynamic _filter = {
+    "category": "Saree",
+    "sp": {
+      "\u0024gte": 1000,
+      "\u0024lte": 50000,
+    }
+  };
+
+  get filter {
+    return _filter;
+  }
 
   void productApiResult(value) {
     _productApiResult = value;
@@ -35,7 +45,8 @@ class SearchProvider extends ChangeNotifier {
   }
 
   Future<dynamic> getProductHelper(qry) async {
-    _productApiResult = await _apicaller.getProdListfromSearch(qry, _sortBy);
+    _productApiResult =
+        await _apicaller.getProdListfromSearch(qry, _sortBy, filter);
   }
 
   Future<void> getTwentyProduct(qry) async {
