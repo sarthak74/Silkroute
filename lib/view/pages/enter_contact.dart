@@ -23,22 +23,27 @@ class EnterContactState extends State<EnterContactPage> {
 
     String token, to;
     var res;
+    try {
+      res = await AuthService().auth(contact);
+      // token = (str.split('"')[11]).toString(),
 
-    res = await AuthService().auth(contact);
-    // token = (str.split('"')[11]).toString(),
+      if (res[0]) {
+        token = res[1];
 
-    if (res[0]) {
-      token = res[1];
+        storage.setItem('token', token);
+        to = storage.getItem('token');
 
-      storage.setItem('token', token);
-      to = storage.getItem('token');
+        Navigator.of(context).pushNamed("/otp_verification");
+      }
 
-      Navigator.of(context).pushNamed("/otp_verification");
+      setState(() {
+        sending = false;
+      });
+    } catch (err) {
+      setState(() {
+        sending = false;
+      });
     }
-
-    setState(() {
-      sending = false;
-    });
   }
 
   String contact = "", indicatorText = "";

@@ -13,6 +13,12 @@ import 'package:silkroute/view/widget/top_picks.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 
 class ResellerHome extends StatefulWidget {
+  static dynamic categoriess;
+
+  void initState() async {
+    categoriess = await ResellerHomeApi().getCategories();
+  }
+
   @override
   _ResellerHomeState createState() => _ResellerHomeState();
 }
@@ -25,10 +31,10 @@ class _ResellerHomeState extends State<ResellerHome> {
   List<dynamic> categories = [];
 
   void loadVars() async {
-    List<dynamic> categoriess = await ResellerHomeApi().getCategories();
+    ResellerHome.categoriess = await ResellerHomeApi().getCategories();
     List<dynamic> adLists = await ResellerHomeApi().getOffers();
     setState(() {
-      categories = categoriess;
+      categories = ResellerHome.categoriess;
       adList = adLists;
       loading = false;
     });

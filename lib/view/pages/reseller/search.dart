@@ -294,14 +294,11 @@ class _SearchPageState extends State<SearchPage> {
                                       builder: (context, snapshot) {
                                         if (snapshot.connectionState ==
                                             ConnectionState.waiting) {
-                                          print("ye");
                                           return Text("");
                                         } else if (snapshot.connectionState ==
                                             ConnectionState.done) {
-                                          print("fetched");
                                           return Text("Fetched");
                                         } else if (snapshot.hasError) {
-                                          print("error");
                                           return Text("Error");
                                         } else {
                                           if (snapshot.data != null) {
@@ -322,7 +319,6 @@ class _SearchPageState extends State<SearchPage> {
                                               ),
                                             );
                                           } else {
-                                            print("nom");
                                             return Text("No more data to show");
                                           }
                                         }

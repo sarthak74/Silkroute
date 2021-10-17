@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/provider/ProductListProvider.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
 
 class HorizontalListView extends StatefulWidget {
@@ -68,6 +69,12 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                         child: ClipRRect(
                           child: GestureDetector(
                             onTap: () {
+                              setState(() {
+                                ProductListProvider().filter["category"] =
+                                    product['title'];
+                                print(
+                                    "cat: ${ProductListProvider().filter["category"]}");
+                              });
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

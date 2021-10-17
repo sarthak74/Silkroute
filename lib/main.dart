@@ -4,6 +4,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/l10n/l10n.dart';
+import 'package:silkroute/view/pages/merchant/add_new.dart';
+import 'package:silkroute/view/pages/merchant/add_new_product_page.dart';
+import 'package:silkroute/view/pages/merchant/dashboard.dart';
+import 'package:silkroute/view/pages/merchant/merchant_orders.dart';
+import 'package:silkroute/view/pages/merchant/merchant_profile.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/pages/enter_contact.dart';
@@ -74,7 +79,7 @@ class MyApp extends StatelessWidget {
                   RegisterDetailPage(),
               "/reseller_home": (BuildContext context) => ResellerHome(),
               "/reseller_profile": (BuildContext context) => ResellerProfile(),
-              "/merchant_home": (BuildContext context) => ResellerHome(),
+              "/merchant_home": (BuildContext context) => MerchantHome(),
               "/categories": (BuildContext context) =>
                   CategoryPage(category: "saree"),
               "/search": (BuildContext context) => SearchPage(),
@@ -82,6 +87,13 @@ class MyApp extends StatelessWidget {
               "/crate": (BuildContext context) => CratePage(),
               "/orders": (BuildContext context) => Orders(),
               "/faqs": (BuildContext context) => Faqs(),
+              "/add_new": (BuildContext context) => AddNewPage(),
+              "/merchant_dashboard": (BuildContext context) =>
+                  MerchantDashboard(),
+              "/merchant_profile": (BuildContext context) => MerchantProfile(),
+              "/add_new_product_page": (BuildContext context) =>
+                  AddNewProductPage(),
+              "/merchant_orders": (BuildContext context) => MerchantOrders(),
             },
           );
         },

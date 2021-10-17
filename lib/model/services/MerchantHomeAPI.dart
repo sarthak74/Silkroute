@@ -9,10 +9,31 @@ class MerchantHomeApi {
   Future<List<ProductList>> getProductList() async {
     try {
       var data = {
-        "contact": "7408159898",
+        "contact": storage.getItem('contact'),
       };
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getAllProducts');
+      final res = await http.post(url, body: data);
+      var decodedRes2 = jsonDecode(res.body);
+      List<ProductList> resp = [];
+      for (var i in decodedRes2) {
+        ProductList r = ProductList.fromMap(i);
+        resp.add(r);
+      }
+      return resp;
+    } catch (e) {
+      print("error - $e");
+      return e;
+    }
+  }
+
+  Future<List<ProductList>> getEightProducts() async {
+    try {
+      var data = {
+        "contact": storage.getItem('contact'),
+      };
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/manufacturerApi/getEightProducts');
       final res = await http.post(url, body: data);
       var decodedRes2 = jsonDecode(res.body);
       List<ProductList> resp = [];

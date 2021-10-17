@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/view/widget/profile_pic_picker.dart';
 
 class Navbar extends StatefulWidget {
@@ -10,29 +11,41 @@ class Navbar extends StatefulWidget {
 }
 
 class _NavbarState extends State<Navbar> {
-  bool isAuth;
+  bool isAuth, loading = true;
   Icon log;
   String nextRoute;
   String name;
+  String userType;
   LocalStorage storage = LocalStorage('silkroute');
 
-  var navBarList = [
-    {"name": "Profile", "url": "/reseller_profile"},
-    {"name": "Orders", "url": "/orders"},
-    {"name": "FAQs", "url": "/faqs"},
-    {"name": "Contact Us", "url": "/contact_us"},
-    {"name": "Change Language", "url": "/"}
-  ];
+  dynamic navBarList;
+
+  void loadVars() {
+    setState(() {
+      userType = Methods().getUser()["userType"];
+      isAuth = Methods().isAuthenticated();
+      log = isAuth ? Icon(Icons.logout) : Icon(Icons.login);
+      nextRoute = isAuth ? "/localization_page" : "/enter_contact";
+      name = storage.getItem('name');
+
+      var profileUrl =
+          (userType == "Reseller") ? "/reseller_profile" : "/merchant_profile";
+      var orderUrl = (userType == "Reseller") ? "/orders" : "/merchant_orders";
+      navBarList = [
+        {"name": "Profile", "url": profileUrl},
+        {"name": "Orders", "url": orderUrl},
+        {"name": "FAQs", "url": "/faqs"},
+        {"name": "Contact Us", "url": "/contact_us"},
+        {"name": "Change Language", "url": "/"}
+      ];
+      loading = false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      name = storage.getItem('name');
-    });
-    isAuth = Methods().isAuthenticated();
-    log = isAuth ? Icon(Icons.logout) : Icon(Icons.login);
-    nextRoute = isAuth ? "/localization_page" : "/enter_contact";
+    loadVars();
   }
 
   @override
@@ -49,51 +62,55 @@ class _NavbarState extends State<Navbar> {
             child: Container(
               alignment: Alignment.center,
               height: MediaQuery.of(context).size.height * 0.12,
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      ProfilePic(storage.getItem("contact")),
-                      Container(
-                        alignment: Alignment.center,
-                        height: MediaQuery.of(context).size.height * 0.12,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
+              child: loading
+                  ? Text("Loading")
+                  : Column(
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                (name == null) ? "name" : name.split(" ")[0],
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            GestureDetector(
-                              onTap: () => {
-                                Methods().logout(context),
-                                Navigator.of(context)
-                                    .pushNamed('/localization_page'),
-                              },
-                              child: Text(
-                                "Log Out",
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 15,
-                                ),
+                            ProfilePic(storage.getItem("contact")),
+                            Container(
+                              alignment: Alignment.center,
+                              height: MediaQuery.of(context).size.height * 0.12,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Flexible(
+                                    child: Text(
+                                      (name == null)
+                                          ? "name"
+                                          : name.split(" ")[0],
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 5),
+                                  GestureDetector(
+                                    onTap: () => {
+                                      Methods().logout(context),
+                                      Navigator.of(context)
+                                          .pushNamed('/localization_page'),
+                                    },
+                                    child: Text(
+                                      "Log Out",
+                                      style: TextStyle(
+                                        color: Colors.black54,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                      ],
+                    ),
             ),
             // decoration: BoxDecoration(
             //   color: Colors.grey,

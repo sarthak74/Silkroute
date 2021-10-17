@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:silkroute/methods/isauthenticated.dart';
+import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/model/services/authservice.dart';
 import 'package:silkroute/view/widget/next_page_button.dart';
 import 'package:silkroute/view/widget/text_field.dart';
@@ -105,7 +107,8 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                             {
                               if (res[1] == '1')
                                 {
-                                  nextpage = (userType == "Reseller")
+                                  nextpage = (Methods().getUser()["userType"] ==
+                                          "Reseller")
                                       ? "/reseller_home"
                                       : "/merchant_home",
                                 }

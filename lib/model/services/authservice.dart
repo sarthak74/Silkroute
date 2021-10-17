@@ -5,22 +5,24 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/math.dart';
 
 class AuthService {
   Dio dio = new Dio();
   // String uri = "http://localhost:4000/authenticate";
-  // String uri =
-  //     "https://organic-express-farmer-backend.herokuapp.com/authenticate";
-  String uri = "http://192.168.43.220:4000/api";
+
+  String uri = Math().ip() + "/api";
   auth(contact) async {
     try {
+      print("auth + $contact");
       Response res = await dio.post(uri + "/auth",
           data: {
             "contact": contact,
           },
           options: Options(contentType: Headers.formUrlEncodedContentType));
-
+      print("auth res+ $res");
       var data = jsonDecode(res.toString());
+      print("auth data+ $data");
       // var data = {
       //   "msg": "Otp Sent Succesfully",
       //   "token": "test",
@@ -58,7 +60,7 @@ class AuthService {
 
   dynamic verifyotp(otp, token) async {
     try {
-      var url = Uri.parse('http://192.168.43.220:4000/api/otpverify');
+      var url = Uri.parse(uri + '/otpverify');
       var tosend = {"otp": otp};
       var res = await http.post(url,
           body: tosend, headers: {HttpHeaders.authorizationHeader: token});

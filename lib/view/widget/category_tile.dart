@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:silkroute/provider/ProductListProvider.dart';
 import 'package:silkroute/view/pages/reseller/product.dart';
 import 'package:silkroute/view/pages/reseller/productlist.dart';
 
@@ -17,6 +18,10 @@ class _CategoryTileState extends State<CategoryTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        setState(() {
+          ProductListProvider().filter["subCat"] = [widget.subCat['title']];
+          print("subCats: ${ProductListProvider().filter["subCat"]}");
+        });
         Navigator.push(
           context,
           MaterialPageRoute(

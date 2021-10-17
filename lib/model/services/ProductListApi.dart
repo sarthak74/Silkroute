@@ -9,7 +9,7 @@ class ProductListApi {
   Future<List<ProductList>> getProductList() async {
     try {
       var data = {
-        "contact": "7408159898",
+        "contact": storage.getItem('contact'),
       };
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getAllProducts');
@@ -42,15 +42,18 @@ class ProductListApi {
     }
   }
 
-  Future<List<ProductList>> getProdListfromCat(String cat) async {
+  Future<List<ProductList>> getProdListfromCat(sortBy, filter) async {
     try {
-      var data = {
-        "Category": cat,
-      };
+      var data = {"sortBy": sortBy, "filter": filter};
+      print("data $data");
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/getProdfromCat');
-      final res = await http.post(url, body: data);
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      print("res $res");
       var decodedRes2 = jsonDecode(res.body);
+      print("dec $decodedRes2");
       List<ProductList> resp = [];
       for (var i in decodedRes2) {
         ProductList r = ProductList.fromMap(i);

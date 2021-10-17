@@ -23,7 +23,7 @@ class _CategoryPageState extends State<CategoryPage> {
   void loadSubcategories() {
     setState(() {
       category = widget.category;
-      print("catg: $category");
+      print("catg: $category\n${widget.categories}");
       loading = false;
     });
   }

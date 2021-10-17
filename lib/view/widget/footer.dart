@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:silkroute/model/core/ProductList.dart';
+import 'package:silkroute/model/core/User.dart';
+import 'package:silkroute/model/services/ProductListApi.dart';
+import 'package:silkroute/provider/ProductListProvider.dart';
+import 'package:silkroute/view/pages/reseller/category.dart';
+import 'package:silkroute/view/pages/reseller/reseller_home.dart';
 
 class Footer extends StatefulWidget {
   @override
@@ -6,6 +12,11 @@ class Footer extends StatefulWidget {
 }
 
 class _FooterState extends State<Footer> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,7 +39,14 @@ class _FooterState extends State<Footer> {
           ),
           GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed("/categories");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CategoryPage(
+                      categories: ResellerHome.categoriess,
+                      category: ResellerHome.categoriess[0]),
+                ),
+              );
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

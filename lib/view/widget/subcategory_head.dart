@@ -14,7 +14,7 @@ class _CategoryHeadState extends State<CategoryHead> {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      height: MediaQuery.of(context).size.height * 0.15,
+      height: MediaQuery.of(context).size.height * 0.10,
       margin: EdgeInsets.symmetric(
         horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
@@ -27,7 +27,7 @@ class _CategoryHeadState extends State<CategoryHead> {
         children: <Widget>[
           Image.asset(
             "assets/images/1.png",
-            height: MediaQuery.of(context).size.height * 0.1,
+            height: MediaQuery.of(context).size.height * 0.07,
           ),
           Text(
             widget.title,

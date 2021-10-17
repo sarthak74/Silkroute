@@ -79,7 +79,12 @@ class _LocalizationAppPageState extends State<LocalizationAppPage> {
                       iconSize: 40.0,
                       onPressed: () {
                         Methods().isAuthenticated()
-                            ? Navigator.of(context).pushNamed("/reseller_home")
+                            ? (Methods().getUser()["userType"] ==
+                                    "Manufacturer")
+                                ? Navigator.of(context)
+                                    .pushNamed("/merchant_home")
+                                : Navigator.of(context)
+                                    .pushNamed("/reseller_home")
                             : Navigator.of(context).pushNamed("/enter_contact");
                       },
                     ),

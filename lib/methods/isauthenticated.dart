@@ -17,6 +17,11 @@ class Methods {
     return (contact != null && contact.length == 10);
   }
 
+  dynamic getUser() {
+    var user = storage.getItem('user');
+    return user;
+  }
+
   void logout(context) {
     storage.clear();
     print(
