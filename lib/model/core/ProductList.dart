@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
+
 /*
 id: String,
 title: String,
@@ -22,36 +24,43 @@ class ProductList {
   final String title;
   final bool discount;
   final num mrp;
+  final num sp;
   final num discountValue;
   final String category;
-  final String subCat;
+  final dynamic subCat;
   final String userContact;
   final String dateAdded;
   final String description;
-  final num totalSet;
+  final num setSize;
   final num min;
-  final num increment;
   final num stockAvailability;
   final num resellerCrateAvailability;
+  final dynamic images;
+  final double halfSetPrice;
+  final double fullSetPrice;
   final dynamic colors;
-
+  final dynamic specifications;
   ProductList({
     this.id,
     this.title,
     this.discount,
     this.mrp,
+    this.sp,
     this.discountValue,
     this.category,
     this.subCat,
     this.userContact,
     this.dateAdded,
     this.description,
-    this.totalSet,
+    this.setSize,
     this.min,
-    this.increment,
     this.stockAvailability,
     this.resellerCrateAvailability,
+    this.images,
+    this.halfSetPrice,
+    this.fullSetPrice,
     this.colors,
+    this.specifications,
   });
 
   Map<String, dynamic> toMap() {
@@ -60,18 +69,22 @@ class ProductList {
       'title': title,
       'discount': discount,
       'mrp': mrp,
+      'sp': sp,
       'discountValue': discountValue,
       'category': category,
       'subCat': subCat,
       'userContact': userContact,
       'dateAdded': dateAdded,
       'description': description,
-      'totalSet': totalSet,
+      'setSize': setSize,
       'min': min,
-      'increment': increment,
       'stockAvailability': stockAvailability,
       'resellerCrateAvailability': resellerCrateAvailability,
+      'images': images,
+      'halfSetPrice': halfSetPrice,
+      'fullSetPrice': fullSetPrice,
       'colors': colors,
+      'specifications': specifications,
     };
   }
 
@@ -81,18 +94,22 @@ class ProductList {
       title: map['title'],
       discount: map['discount'],
       mrp: map['mrp'],
+      sp: map['sp'],
       discountValue: map['discountValue'],
       category: map['category'],
       subCat: map['subCat'],
       userContact: map['userContact'],
       dateAdded: map['dateAdded'],
       description: map['description'],
-      totalSet: map['totalSet'],
+      setSize: map['setSize'],
       min: map['min'],
-      increment: map['increment'],
       stockAvailability: map['stockAvailability'],
       resellerCrateAvailability: map['resellerCrateAvailability'],
+      images: map['images'],
+      halfSetPrice: map['halfSetPrice'],
+      fullSetPrice: map['fullSetPrice'],
       colors: map['colors'],
+      specifications: map['specifications'],
     );
   }
 

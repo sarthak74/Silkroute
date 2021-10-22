@@ -87,7 +87,6 @@ class MyApp extends StatelessWidget {
               "/crate": (BuildContext context) => CratePage(),
               "/orders": (BuildContext context) => Orders(),
               "/faqs": (BuildContext context) => Faqs(),
-              "/add_new": (BuildContext context) => AddNewPage(),
               "/merchant_dashboard": (BuildContext context) =>
                   MerchantDashboard(),
               "/merchant_profile": (BuildContext context) => MerchantProfile(),

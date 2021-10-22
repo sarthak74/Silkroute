@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/services/WishlistApi.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/subcategory_head.dart';
 import 'package:silkroute/view/widget/product_tile.dart';
 import 'package:silkroute/view/widget/footer.dart';
@@ -91,24 +92,31 @@ class _WishlistPageState extends State<WishlistPage> {
                         margin: EdgeInsets.symmetric(
                           horizontal: MediaQuery.of(context).size.width * 0.05,
                         ),
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.6,
-                          child: loading
-                              ? Text("Loading")
-                              : GridView.count(
-                                  childAspectRatio: aspectRatio,
-                                  crossAxisCount: 2,
-                                  children: List.generate(
-                                    (products == [] || products == null)
-                                        ? 0
-                                        : products.length,
-                                    (index) {
-                                      return ProductTile(
-                                          product: products[index]);
-                                    },
-                                  ),
-                                ),
-                        ),
+                        alignment: Alignment.center,
+                        child: (products.length > 0)
+                            ? SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.6,
+                                child: loading
+                                    ? Text("Loading")
+                                    : GridView.count(
+                                        childAspectRatio: aspectRatio,
+                                        crossAxisCount: 2,
+                                        children: List.generate(
+                                          (products == [] || products == null)
+                                              ? 0
+                                              : products.length,
+                                          (index) {
+                                            return ProductTile(
+                                                product: products[index]);
+                                          },
+                                        ),
+                                      ),
+                              )
+                            : Text(
+                                "No Items to show",
+                                style: textStyle(15, Colors.grey[400]),
+                              ),
                       ),
                     ]),
                   ),

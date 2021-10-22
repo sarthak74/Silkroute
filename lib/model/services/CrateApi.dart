@@ -27,7 +27,7 @@ class CrateApi {
       print("bill: $bill");
       return Tuple<List<CrateListItem>, Bill>(resp, bill);
     } catch (e) {
-      print("error - $e");
+      print("get crate items error - $e");
       return e;
     }
   }
@@ -37,9 +37,21 @@ class CrateApi {
       var data = body;
       print("Set Crate items body: $data");
       var url = Uri.parse(endpoint + '/crateApi/setItem');
-      print("1");
       final res = await http.post(url, body: data);
-      print("1");
+      print(res.statusCode);
+    } catch (e) {
+      print("Set crate items error - $e");
+    }
+  }
+
+  removeCrateItem(id) async {
+    try {
+      var data = {"id": id, "contact": storage.getItem('contact')};
+
+      var url = Uri.parse(endpoint + '/crateApi/removeItem');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
       print(res.statusCode);
     } catch (e) {
       print("error - $e");

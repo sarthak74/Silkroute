@@ -116,9 +116,9 @@ class _ProductListPageState extends State<ProductListPage> {
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   loadproduct();
     // });
+    super.initState();
     loadVars();
     _searchProvider.search();
-    super.initState();
   }
 
   @override

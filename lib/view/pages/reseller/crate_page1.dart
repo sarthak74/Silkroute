@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
+import 'package:silkroute/provider/CrateProvider.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/crate_product_tile.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
 
@@ -207,50 +209,54 @@ class _DetailPriceListState extends State<DetailPriceList> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        ListView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: 6,
-          padding: EdgeInsets.all(10),
-          itemBuilder: (BuildContext context, int index) {
-            return PriceRow(
-              title: price[index]['title'],
-              value: ("₹" + (price[index]['value']).toString()).toString(),
-            );
-          },
-        ),
-        Dash(
-          length: MediaQuery.of(context).size.width * 0.8,
-          dashColor: Colors.grey[700],
-        ),
-        Container(
-          padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-          child: PriceRow(
-            title: "Total Cost",
-            value: loading
-                ? Text("Calculating")
-                : widget.bill['totalCost'].toString(),
-          ),
-        ),
-        Dash(
-          length: MediaQuery.of(context).size.width * 0.8,
-          dashColor: Colors.grey[700],
-        ),
-        SizedBox(height: 10),
-        Text(
-          ("You saved ₹" + savings.toString() + " on this order").toString(),
-          style: GoogleFonts.poppins(
-            textStyle: TextStyle(
-              color: Colors.green,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
+    return loading
+        ? Text("Loading")
+        : Column(
+            children: <Widget>[
+              ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: 6,
+                padding: EdgeInsets.all(10),
+                itemBuilder: (BuildContext context, int index) {
+                  return PriceRow(
+                    title: price[index]['title'],
+                    value:
+                        ("₹" + (price[index]['value']).toString()).toString(),
+                  );
+                },
+              ),
+              Dash(
+                length: MediaQuery.of(context).size.width * 0.8,
+                dashColor: Colors.grey[700],
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                child: PriceRow(
+                  title: "Total Cost",
+                  value: loading
+                      ? "Calculating..."
+                      : widget.bill['totalCost'].toString(),
+                ),
+              ),
+              Dash(
+                length: MediaQuery.of(context).size.width * 0.8,
+                dashColor: Colors.grey[700],
+              ),
+              SizedBox(height: 10),
+              Text(
+                ("You saved ₹" + savings.toString() + " on this order")
+                    .toString(),
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    color: Colors.green,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
   }
 }
 
@@ -304,8 +310,9 @@ class _CrateProductListState extends State<CrateProductList> {
   bool loading = true;
 
   void loadProducts() async {
+    var pro = widget.products;
     setState(() {
-      products = widget.products;
+      products = pro;
       loading = false;
     });
   }
@@ -321,12 +328,24 @@ class _CrateProductListState extends State<CrateProductList> {
   Widget build(BuildContext context) {
     return loading
         ? Text("Loading Loading")
-        : ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: products.length,
-            itemBuilder: (BuildContext context, int index) {
-              return CrateProductTile(product: products[index]);
-            });
+        : (products.length > 0)
+            ? ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: products.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return CrateProductTile(
+                      product: products[index], index: index);
+                },
+              )
+            : Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.1,
+                alignment: Alignment.center,
+                child: Text(
+                  "No Items to show",
+                  style: textStyle(15, Colors.grey[400]),
+                ),
+              );
   }
 }

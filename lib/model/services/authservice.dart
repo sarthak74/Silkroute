@@ -58,7 +58,7 @@ class AuthService {
     }
   }
 
-  dynamic verifyotp(otp, token) async {
+  Future<dynamic> verifyotp(otp, token) async {
     try {
       var url = Uri.parse(uri + '/otpverify');
       var tosend = {"otp": otp};
@@ -76,8 +76,12 @@ class AuthService {
       //   "userType": "Reseller"
       // };
       LocalStorage storage = LocalStorage('silkroute');
+
       String send = "";
+      print("print");
+      print("print ${data['success']}");
       if (data["success"]) {
+        print("suces");
         send += "1";
         Fluttertoast.showToast(
           msg: data['msg'],
@@ -91,6 +95,7 @@ class AuthService {
 
         storage.setItem('contact', data['contact']);
         if (data['registered']) {
+          print("red");
           send += "1";
           storage.setItem('userType', data['userType']);
           storage.setItem('name', data['name']);

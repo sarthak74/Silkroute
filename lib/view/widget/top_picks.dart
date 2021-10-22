@@ -50,7 +50,7 @@ class _TopPicksState extends State<TopPicks> {
                         border: Border.all(color: Colors.black54, width: 2),
                         borderRadius: BorderRadius.all(Radius.circular(20)),
                         image: DecorationImage(
-                          image: AssetImage("assets/images/3.jpg"),
+                          image: AssetImage("assets/images/1.png"),
                           fit: BoxFit.fill,
                         ),
                       ),
@@ -68,7 +68,7 @@ class _TopPicksState extends State<TopPicks> {
                         border: Border.all(color: Colors.black54, width: 2),
                         borderRadius: BorderRadius.all(Radius.circular(20)),
                         image: DecorationImage(
-                          image: AssetImage("assets/images/3.jpg"),
+                          image: AssetImage("assets/images/1.png"),
                           fit: BoxFit.fill,
                         ),
                       ),
@@ -88,7 +88,7 @@ class _TopPicksState extends State<TopPicks> {
                     border: Border.all(color: Colors.black54, width: 2),
                     borderRadius: BorderRadius.all(Radius.circular(20)),
                     image: DecorationImage(
-                      image: AssetImage("assets/images/3.jpg"),
+                      image: AssetImage("assets/images/1.png"),
                       fit: BoxFit.fill,
                     ),
                   ),

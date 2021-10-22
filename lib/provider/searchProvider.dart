@@ -7,7 +7,7 @@ import 'package:silkroute/model/services/ProductListApi.dart';
 class SearchProvider extends ChangeNotifier {
   final _apicaller = ProductListApi();
   dynamic _streamController = StreamController<List<ProductList>>();
-  int i = 0, len, _maxLen = 2;
+  int i = 0, len, _maxLen = 5;
   List<ProductList> _productApiResult = [];
   List<ProductList> products = [];
   static dynamic _sortBy = {"title": 1};

@@ -47,6 +47,7 @@ class _ProductTileState extends State<ProductTile> {
     });
     print("id: ${widget.product.id}");
     List<dynamic> xy = user['wishlist'];
+    if (xy == null) xy = [];
     for (dynamic x in xy) {
       setState(() {
         wishlists.add(x.toString());
@@ -67,9 +68,8 @@ class _ProductTileState extends State<ProductTile> {
     num mrp = widget.product.mrp;
     num discountValue = widget.product.discountValue;
     String sp;
-    if (widget.product.discount) {
-      sp = Math.getSp(mrp, discountValue);
-    }
+
+    sp = Math.getSp(mrp, discountValue);
 
     return GestureDetector(
       onTap: () {
@@ -83,7 +83,7 @@ class _ProductTileState extends State<ProductTile> {
       },
       child: Container(
         margin: EdgeInsets.symmetric(
-          horizontal: MediaQuery.of(context).size.width * 0.02,
+          horizontal: MediaQuery.of(context).size.width * 0.015,
           vertical: MediaQuery.of(context).size.height * 0.01,
         ),
         alignment: Alignment.center,
@@ -112,7 +112,7 @@ class _ProductTileState extends State<ProductTile> {
                   fit: BoxFit.fill,
                 ),
               ),
-              width: MediaQuery.of(context).size.width * 0.4,
+              width: MediaQuery.of(context).size.width * 0.41,
               height: MediaQuery.of(context).size.height * 0.22,
               padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: Column(
@@ -192,8 +192,8 @@ class _ProductTileState extends State<ProductTile> {
                 color: Color(0xFFFAF5ED),
               ),
               height: MediaQuery.of(context).size.height * 0.11,
-              width: MediaQuery.of(context).size.width * 0.4,
-              padding: EdgeInsets.all(10),
+              width: MediaQuery.of(context).size.width * 0.41,
+              padding: EdgeInsets.all(5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,8 +256,6 @@ class _ProductTileState extends State<ProductTile> {
                                   color: Color(0xFF5B0D1B),
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.lineThrough,
-                                  decorationThickness: 3,
                                 ),
                               ),
                             ),

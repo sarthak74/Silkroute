@@ -100,24 +100,23 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                   dynamic user;
                   print("In Otp -- Token is $token");
 
-                  await AuthService().verifyotp(userOtp, token).then(
-                        (res) => {
-                          print("\nOtp result --- $res\n"),
-                          if (res[0] == '1')
-                            {
-                              if (res[1] == '1')
-                                {
-                                  nextpage = (Methods().getUser()["userType"] ==
-                                          "Reseller")
-                                      ? "/reseller_home"
-                                      : "/merchant_home",
-                                }
-                              else
-                                {nextpage = "/register_detail"},
-                              navigate = true
-                            }
-                        },
-                      );
+                  AuthService().verifyotp(userOtp, token).then((res) => {
+                        user = Methods().getUser(),
+                        print("User --  $user"),
+                        print("\nOtp result --- $res\n"),
+                        if (res[0] == '1')
+                          {
+                            if (res[1] == '1')
+                              {
+                                nextpage = (user["userType"] == "Reseller")
+                                    ? "/reseller_home"
+                                    : "/merchant_home",
+                              }
+                            else
+                              {nextpage = "/register_detail"},
+                            navigate = true
+                          }
+                      });
 
                   navigate ? Navigator.of(context).pushNamed(nextpage) : null;
                 },

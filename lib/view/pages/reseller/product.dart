@@ -181,59 +181,46 @@ class ProductCounter extends StatefulWidget {
 
 class _ProductCounterState extends State<ProductCounter> {
   num counter, min, max, gap;
-  bool loading = true;
-  List<Color> proColors = [];
+  bool loading = true, addingtoCrate = false;
+  List proColors = [];
+  String url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0";
   LocalStorage storage = LocalStorage('silkroute');
 
   void inc() {
-    if (counter + gap <= max) {
-      setState(() {
-        counter += gap;
-      });
-    }
+    setState(() {
+      counter = max;
+    });
   }
 
   void dec() {
-    if (counter - gap >= min) {
-      setState(() {
-        counter -= gap;
-      });
-    }
+    setState(() {
+      counter = min;
+    });
   }
 
   void loadVars() {
-    print("pro: ${widget.product}");
     setState(() {
       counter = widget.product['min'];
       min = widget.product['min'];
       max = widget.product['totalSet'];
-      gap = widget.product['increment'];
 
       // ignore: todo
-      // TODO: proColors is list of colors of product in set
+      // TODO: proColors is list of colors/images of product in set
 
-      proColors.add(Color(0xFFFF0000));
-      proColors.add(Color(0xFF00FF00));
-      proColors.add(Color(0xFF0000FF));
-      proColors.add(Color(0xFFFF0000));
-      proColors.add(Color(0xFF00FF00));
-      proColors.add(Color(0xFF0000FF));
-      proColors.add(Color(0xFFFF0000));
-      proColors.add(Color(0xFF00FF00));
-      proColors.add(Color(0xFF0000FF));
-      proColors.add(Color(0xFFFF0000));
-      proColors.add(Color(0xFF00FF00));
-      proColors.add(Color(0xFF0000FF));
+      proColors = widget.product["colors"];
 
       loading = false;
     });
   }
 
-  addToCrateHandler() {
+  addToCrateHandler() async {
+    setState(() {
+      addingtoCrate = true;
+    });
     var data = {
       'id': widget.product['_id'].toString(),
       'contact': storage.getItem('contact'),
-      'quantity': counter.toString(),
+      'quantity': "1",
       'colors': proColors.sublist(0, counter).toString(),
       'mrp': widget.product['mrp'].toString(),
       'disValue': widget.product['discountValue'].toString(),
@@ -241,8 +228,14 @@ class _ProductCounterState extends State<ProductCounter> {
       'title': widget.product['title'].toString(),
       'stock': widget.product['stockAvailability'].toString()
     };
+
     print("addToCrateHandler: $data");
-    CrateApi().setCrateItems(data);
+
+    await CrateApi().setCrateItems(data);
+
+    setState(() {
+      addingtoCrate = false;
+    });
   }
 
   @override
@@ -337,10 +330,10 @@ class _ProductCounterState extends State<ProductCounter> {
                           width: 25,
                           margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12.5)),
-                            color: proColors[index],
-                          ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12.5)),
+                              image: DecorationImage(
+                                  image: NetworkImage(url), fit: BoxFit.fill)),
                         );
                       },
                     ),
@@ -367,7 +360,16 @@ class _ProductCounterState extends State<ProductCounter> {
                     size: 15,
                   ),
                   SizedBox(width: 10),
-                  Text("Add to Crate", style: textStyle(15, Colors.black)),
+                  addingtoCrate
+                      ? Container(
+                          width: MediaQuery.of(context).size.width * 0.05,
+                          height: MediaQuery.of(context).size.width * 0.05,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF5B0D1B),
+                          ),
+                        )
+                      : Text("Add to Crate",
+                          style: textStyle(13, Colors.black)),
                 ],
               ),
             ),
@@ -482,8 +484,6 @@ class _ProductDescriptionState extends State<ProductDescription> {
                                     color: Color(0xFF5B0D1B),
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.lineThrough,
-                                    decorationThickness: 3,
                                   ),
                                 ),
                               ),
@@ -522,13 +522,13 @@ class _ProductImageState extends State<ProductImage> {
   int selected = 0;
   List images = [];
   List<String> wishlists = [];
-  String url = "assets/images/";
+  String url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0";
   LocalStorage storage = LocalStorage('silkroute');
   dynamic user;
 
   Future<void> loadImages() async {
     setState(() {
-      images = ["1.png", "1.png", "1.png", "1.png"];
+      images = widget.productDetails["images"];
     });
   }
 
@@ -555,6 +555,7 @@ class _ProductImageState extends State<ProductImage> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadImages().then((value) {
+        print("images: $images");
         setState(() {
           var user = storage.getItem('user');
           List<dynamic> xy = user['wishlist'];
@@ -623,8 +624,7 @@ class _ProductImageState extends State<ProductImage> {
                                         ),
                                 ],
                                 image: DecorationImage(
-                                  image: AssetImage(
-                                      (url + images[index]).toString()),
+                                  image: NetworkImage(url),
                                   fit: BoxFit.fill,
                                 ),
                               ),
@@ -642,7 +642,7 @@ class _ProductImageState extends State<ProductImage> {
                   height: 280,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage((url + images[selected]).toString()),
+                      image: NetworkImage(url.toString()),
                       fit: BoxFit.fill,
                     ),
                   ),

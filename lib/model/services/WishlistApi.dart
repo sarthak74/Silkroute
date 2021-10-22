@@ -31,6 +31,9 @@ class WishlistApi {
       List<ProductList> products = [];
       var user = storage.getItem('user');
       var wishlists = user['wishlist'];
+      if (wishlists == null) {
+        return products;
+      }
       for (String pId in wishlists) {
         if (pId == null || pId == "null") {
           continue;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:silkroute/provider/NewProductProvider.dart';
 
 class Math {
   static String getSp(num mrp, num discount) {
@@ -17,8 +18,8 @@ class Math {
   }
 
   String ip() {
-    return "http://localhost:4000";
-    // return "http://192.168.43.220:4000";
+    // return "http://localhost:4000";
+    return "http://192.168.43.220:4000";
   }
 
   double aspectRatio(context) {
@@ -27,6 +28,18 @@ class Math {
             0.86 /
             MediaQuery.of(context).size.height);
     return aspectRatio;
+  }
+
+  double getHalfSetPrice() {
+    // Half set price calculation
+    double price = NewProductProvider.setSize * 150.12;
+    return price;
+  }
+
+  double getFullSetPrice() {
+    // Full set price calculation
+    double price = NewProductProvider.setSize * 277.12;
+    return price;
   }
 }
 

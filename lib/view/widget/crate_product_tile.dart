@@ -1,17 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/model/services/CrateApi.dart';
 
 class CrateProductTile extends StatefulWidget {
-  const CrateProductTile({this.product});
+  const CrateProductTile({this.product, this.index});
 
   final dynamic product;
+  final int index;
 
   @override
   _CrateProductTileState createState() => _CrateProductTileState();
 }
 
 class _CrateProductTileState extends State<CrateProductTile> {
+  bool removing = false;
+  void removeHandler() async {
+    setState(() {
+      removing = true;
+    });
+    String id = widget.product["id"];
+    print("remve product: $id");
+    await CrateApi().removeCrateItem(id);
+    print("removed");
+    setState(() {
+      removing = false;
+    });
+    Navigator.popAndPushNamed(context, "/crate");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     num mrp = widget.product['mrp'];
@@ -78,8 +100,8 @@ class _CrateProductTileState extends State<CrateProductTile> {
                             style: GoogleFonts.poppins(
                               textStyle: TextStyle(
                                 color: Color(0xFF5B0D1B),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.lineThrough,
                                 decorationThickness: 3,
                               ),
@@ -91,8 +113,8 @@ class _CrateProductTileState extends State<CrateProductTile> {
                             style: GoogleFonts.poppins(
                               textStyle: TextStyle(
                                 color: Color(0xFF5B0D1B),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -102,8 +124,8 @@ class _CrateProductTileState extends State<CrateProductTile> {
                             style: GoogleFonts.poppins(
                               textStyle: TextStyle(
                                 color: Colors.green,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -116,10 +138,8 @@ class _CrateProductTileState extends State<CrateProductTile> {
                             style: GoogleFonts.poppins(
                               textStyle: TextStyle(
                                 color: Color(0xFF5B0D1B),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.lineThrough,
-                                decorationThickness: 3,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -136,7 +156,7 @@ class _CrateProductTileState extends State<CrateProductTile> {
                               textStyle: TextStyle(
                                 color: Colors.grey[500],
                                 fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -150,7 +170,9 @@ class _CrateProductTileState extends State<CrateProductTile> {
                     ///////  REMOVE BUTTON
 
                     GestureDetector(
-                      onTap: null,
+                      onTap: () {
+                        removeHandler();
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.black, width: 2),
@@ -162,7 +184,7 @@ class _CrateProductTileState extends State<CrateProductTile> {
                           children: <Widget>[
                             Icon(Icons.delete, size: 15),
                             Text(
-                              "Remove",
+                              removing ? "Removing" : "Remove",
                               style: GoogleFonts.poppins(
                                 textStyle: TextStyle(
                                   color: Colors.black,
