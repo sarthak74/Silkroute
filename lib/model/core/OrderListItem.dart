@@ -6,13 +6,12 @@ import 'package:silkroute/model/core/CrateListItem.dart';
 
 class OrderListItem {
   final String id;
-  final CrateListItem item;
+  final List<CrateListItem> items;
   final String latestStatus;
-  final String address;
+  final dynamic address;
   final Map<String, dynamic> status;
   final num ratingGiven;
-  final List colors;
-  final num reviewGiven;
+  final dynamic reviewGiven;
   final Bill bill;
   final String title;
   final dynamic dispatchDate;
@@ -20,12 +19,11 @@ class OrderListItem {
   final String paymentStatus;
   OrderListItem({
     this.id,
-    this.item,
+    this.items,
     this.latestStatus,
     this.address,
     this.status,
     this.ratingGiven,
-    this.colors,
     this.reviewGiven,
     this.bill,
     this.title,
@@ -37,12 +35,11 @@ class OrderListItem {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'item': item.toMap(),
+      'item': items.map((item) => item.toMap()),
       'latestStatus': latestStatus,
       'address': address,
       'status': status,
       'ratingGiven': ratingGiven,
-      'colors': colors,
       'reviewGiven': reviewGiven,
       'bill': bill.toMap(),
       'title': title,
@@ -55,12 +52,11 @@ class OrderListItem {
   factory OrderListItem.fromMap(Map<String, dynamic> map) {
     return OrderListItem(
       id: map['id'],
-      item: CrateListItem.fromMap(map['item']),
+      items: map['items'].map((item) => item.fromMap()),
       latestStatus: map['latestStatus'],
       address: map['address'],
       status: Map<String, dynamic>.from(map['status']),
       ratingGiven: map['ratingGiven'],
-      colors: List.from(map['colors']),
       reviewGiven: map['reviewGiven'],
       bill: Bill.fromMap(map['bill']),
       title: map['title'],
@@ -77,6 +73,6 @@ class OrderListItem {
 
   @override
   String toString() {
-    return 'OrderListItem(id: $id, item: $item, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, colors: $colors, reviewGiven: $reviewGiven, bill: $bill, title: $title, dispatchDate: $dispatchDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus)';
+    return 'OrderListItem(id: $id, item: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, dispatchDate: $dispatchDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus)';
   }
 }

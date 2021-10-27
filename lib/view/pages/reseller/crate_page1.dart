@@ -8,8 +8,9 @@ import 'package:silkroute/view/widget/crate_product_tile.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
 
 class CratePage1 extends StatefulWidget {
-  CratePage1({this.pageController});
+  CratePage1({this.pageController, this.products, this.bill});
   final PageController pageController;
+  final dynamic products, bill;
   @override
   _CratePage1State createState() => _CratePage1State();
 }
@@ -20,16 +21,17 @@ class _CratePage1State extends State<CratePage1> {
   dynamic bill;
 
   void loadProducts() async {
-    dynamic res = await CrateApi().getCrateItems();
-    var cratePr = res.item1;
-    for (var x in cratePr) {
-      var data = x.toMap();
-      setState(() {
-        products.add(data);
-      });
-    }
+    // dynamic res = await CrateApi().getCrateItems();
+    // var cratePr = res.item1;
+    // for (var x in cratePr) {
+    //   var data = x.toMap();
+    //   setState(() {
+    //     products.add(data);
+    //   });
+    // }
     setState(() {
-      bill = res.item2.toMap();
+      products = widget.products;
+      bill = widget.bill;
       loading = false;
     });
   }

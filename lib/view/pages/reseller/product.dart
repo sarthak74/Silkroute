@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/model/services/ProductListApi.dart';
 import 'package:silkroute/model/services/WishlistApi.dart';
@@ -58,72 +60,75 @@ class _ProductPageState extends State<ProductPage> {
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        // resizeToAvoidBottomInset: true,
         drawer: Navbar(),
         primary: false,
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/1.png"),
-              fit: BoxFit.fill,
-            ),
-          ),
-          child: Column(
-            children: <Widget>[
-              //////////////////////////////
-              ///                        ///
-              ///         TopBar         ///
-              ///                        ///
-              //////////////////////////////
-
-              TopBar(),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-
-              Expanded(
-                child: Container(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(35),
-                      topRight: Radius.circular(35),
-                    ),
-                    color: Colors.white,
-                  ),
-                  child: CustomScrollView(slivers: [
-                    SliverList(
-                      delegate: SliverChildListDelegate([
-                        loading
-                            ? Text("Loading")
-                            : SingleChildScrollView(
-                                child: Column(
-                                  children: <Widget>[
-                                    ProductImage(
-                                        productDetails: productDetails),
-                                    ProductDescription(product: productDetails),
-                                    ProductCounter(product: productDetails),
-                                    ProductAvailability(
-                                        product: productDetails),
-                                  ],
-                                ),
-                              ),
-                      ]),
-                    ),
-                    SliverFillRemaining(
-                        hasScrollBody: false, child: Container()),
-                  ]),
-                ),
+        body: SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/1.png"),
+                fit: BoxFit.fill,
               ),
+            ),
+            child: Column(
+              children: <Widget>[
+                //////////////////////////////
+                ///                        ///
+                ///         TopBar         ///
+                ///                        ///
+                //////////////////////////////
 
-              //////////////////////////////
-              ///                        ///
-              ///         Footer         ///
-              ///                        ///
-              //////////////////////////////
-              Footer(),
-            ],
+                TopBar(),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+
+                Expanded(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(35),
+                        topRight: Radius.circular(35),
+                      ),
+                      color: Colors.white,
+                    ),
+                    child: CustomScrollView(slivers: [
+                      SliverList(
+                        delegate: SliverChildListDelegate([
+                          loading
+                              ? Text("Loading")
+                              : SingleChildScrollView(
+                                  child: Column(
+                                    children: <Widget>[
+                                      ProductImage(
+                                          productDetails: productDetails),
+                                      ProductDescription(
+                                          product: productDetails),
+                                      ProductCounter(product: productDetails),
+                                      ProductAvailability(
+                                          product: productDetails),
+                                    ],
+                                  ),
+                                ),
+                        ]),
+                      ),
+                      SliverFillRemaining(
+                          hasScrollBody: false, child: Container()),
+                    ]),
+                  ),
+                ),
+
+                //////////////////////////////
+                ///                        ///
+                ///         Footer         ///
+                ///                        ///
+                //////////////////////////////
+                Footer(),
+              ],
+            ),
           ),
         ),
         // bottomNavigationBar: Footer(),
@@ -183,8 +188,10 @@ class _ProductCounterState extends State<ProductCounter> {
   num counter, min, max, gap;
   bool loading = true, addingtoCrate = false;
   List proColors = [];
-  String url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0";
+  String url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0",
+      _qty = "";
   LocalStorage storage = LocalStorage('silkroute');
+  TextEditingController _qtyController = TextEditingController();
 
   void inc() {
     setState(() {
@@ -217,10 +224,24 @@ class _ProductCounterState extends State<ProductCounter> {
     setState(() {
       addingtoCrate = true;
     });
+    if (_qtyController.text.length < 1) {
+      setState(() {
+        addingtoCrate = false;
+        Toast().notifyErr("Enter some quantity");
+      });
+      return;
+    }
+    if (int.parse(_qtyController.text) > widget.product['stockAvailability']) {
+      setState(() {
+        addingtoCrate = false;
+        Toast().notifyErr("We have less stock available");
+      });
+      return;
+    }
     var data = {
       'id': widget.product['_id'].toString(),
       'contact': storage.getItem('contact'),
-      'quantity': "1",
+      'quantity': _qty,
       'colors': proColors.sublist(0, counter).toString(),
       'mrp': widget.product['mrp'].toString(),
       'disValue': widget.product['discountValue'].toString(),
@@ -234,7 +255,9 @@ class _ProductCounterState extends State<ProductCounter> {
     await CrateApi().setCrateItems(data);
 
     setState(() {
+      _qtyController.text = "";
       addingtoCrate = false;
+      Toast().notifySuccess("Added to Crate");
     });
   }
 
@@ -341,38 +364,74 @@ class _ProductCounterState extends State<ProductCounter> {
           ),
           SizedBox(height: 15),
 
-          GestureDetector(
-            onTap: addToCrateHandler,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.5,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 2),
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-              ),
-              padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.shopping_cart,
-                    color: Colors.black,
-                    size: 15,
+          Row(
+            children: <Widget>[
+              Container(
+                width: 92,
+                child: TextFormField(
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                  keyboardType: TextInputType.number,
+                  onChanged: (val) async {
+                    setState(() {
+                      _qty = _qtyController.text;
+                    });
+                  },
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  SizedBox(width: 10),
-                  addingtoCrate
-                      ? Container(
-                          width: MediaQuery.of(context).size.width * 0.05,
-                          height: MediaQuery.of(context).size.width * 0.05,
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF5B0D1B),
-                          ),
-                        )
-                      : Text("Add to Crate",
-                          style: textStyle(13, Colors.black)),
-                ],
+                  controller: _qtyController,
+                  decoration: InputDecoration(
+                    hintText: "Enter Quantity",
+                    isDense: true,
+                    focusColor: Color(0xFF5B0D1B),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(width: 2, color: Color(0xFF5B0D1B)),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              SizedBox(width: 10),
+              GestureDetector(
+                onTap: addToCrateHandler,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 2),
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                  ),
+                  padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.shopping_cart,
+                        color: Colors.black,
+                        size: 15,
+                      ),
+                      SizedBox(width: 10),
+                      addingtoCrate
+                          ? Container(
+                              width: MediaQuery.of(context).size.width * 0.05,
+                              height: MediaQuery.of(context).size.width * 0.05,
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF5B0D1B),
+                              ),
+                            )
+                          : Text("Add to Crate",
+                              style: textStyle(13, Colors.black)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -7,6 +7,7 @@ class CrateListItem {
   final num mrp;
   final num discountValue;
   final num quantity;
+  final List<dynamic> colors;
   final num stock;
 
   CrateListItem({
@@ -16,6 +17,7 @@ class CrateListItem {
     this.mrp,
     this.discountValue,
     this.quantity,
+    this.colors,
     this.stock,
   });
 
@@ -27,6 +29,7 @@ class CrateListItem {
       'mrp': mrp,
       'discountValue': discountValue,
       'quantity': quantity,
+      'colors': colors,
       'stock': stock,
     };
   }
@@ -39,6 +42,7 @@ class CrateListItem {
       mrp: map['mrp'],
       discountValue: map['discountValue'],
       quantity: map['quantity'],
+      colors: map['colors'],
       stock: map['stock'],
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:silkroute/model/core/CrateListItem.dart';
+import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/view/pages/reseller/address.dart';
 import 'package:silkroute/view/pages/reseller/crate_page1.dart';
 import 'package:silkroute/view/pages/reseller/payment.dart';
@@ -25,7 +27,31 @@ class CratePage extends StatefulWidget {
 class _CratePageState extends State<CratePage> {
   bool addressStatus = CratePage().addressStatus,
       paymentStatus = CratePage().paymentStatus;
+  List<CrateListItem> _crateList;
+  List products = [];
+  bool loading = true;
+  dynamic bill;
+
+  void loadProducts() async {
+    dynamic res = await CrateApi().getCrateItems();
+    _crateList = res.item1;
+    print("crate_pr: $_crateList");
+    for (var x in _crateList) {
+      var data = x.toMap();
+      setState(() {
+        products.add(data);
+      });
+    }
+    setState(() {
+      bill = res.item2.toMap();
+      loading = false;
+    });
+  }
+
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadProducts();
+    });
     super.initState();
   }
 
@@ -49,19 +75,19 @@ class _CratePageState extends State<CratePage> {
 
       setState(() {
         if (val == 0) {
-          print("\nPage -- 0\n");
+          // print("\nPage -- 0\n");
           addressStatus = false;
           paymentStatus = false;
           CratePage().addressStatus = false;
           CratePage().paymentStatus = false;
         } else if (val == 1) {
-          print("\nPage -- 1\n");
+          // print("\nPage -- 1\n");
           addressStatus = true;
           paymentStatus = false;
           CratePage().addressStatus = true;
           CratePage().paymentStatus = false;
         } else {
-          print("\nPage -- 2\n");
+          // print("\nPage -- 2\n");
           addressStatus = true;
           paymentStatus = true;
           CratePage().addressStatus = true;
@@ -74,164 +100,190 @@ class _CratePageState extends State<CratePage> {
       child: Scaffold(
         drawer: Navbar(),
         primary: false,
-        resizeToAvoidBottomInset: false,
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/1.png"),
-              fit: BoxFit.fill,
+        // resizeToAvoidBottomInset: false,
+        body: SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/1.png"),
+                fit: BoxFit.fill,
+              ),
             ),
-          ),
-          child: Column(
-            children: <Widget>[
-              //////////////////////////////
-              ///                        ///
-              ///         TopBar         ///
-              ///                        ///
-              //////////////////////////////
+            child: loading
+                ? Text("Loading")
+                : Column(
+                    children: <Widget>[
+                      //////////////////////////////
+                      ///                        ///
+                      ///         TopBar         ///
+                      ///                        ///
+                      //////////////////////////////
 
-              TopBar(),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                      TopBar(),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.15),
 
-              Expanded(
-                child: CustomScrollView(slivers: [
-                  SliverList(
-                    delegate: SliverChildListDelegate([
-                      ////////////////////////
-                      ///  Top BreadCrumb  ///
-                      ////////////////////////
+                      Expanded(
+                        child: CustomScrollView(slivers: [
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              ////////////////////////
+                              ///  Top BreadCrumb  ///
+                              ////////////////////////
 
-                      Container(
-                        padding: EdgeInsets.fromLTRB(
-                          MediaQuery.of(context).size.width * 0.15,
-                          0,
-                          MediaQuery.of(context).size.width * 0.15,
-                          0,
-                        ),
-                        child: Column(
-                          children: <Widget>[
-                            Stack(
-                              children: <Widget>[
-                                /////  Left Connector
-                                Positioned(
-                                  bottom: 11,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.36,
-                                  child: Container(
-                                    margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 1,
-                                        color: addressStatus
-                                            ? Color(0xFF5B0D1B)
-                                            : Colors.grey[400],
-                                      ),
-                                    ),
-                                  ),
+                              Container(
+                                padding: EdgeInsets.fromLTRB(
+                                  MediaQuery.of(context).size.width * 0.15,
+                                  0,
+                                  MediaQuery.of(context).size.width * 0.15,
+                                  0,
                                 ),
-
-                                /////  Right Connector
-                                Positioned(
-                                  bottom: 11,
-                                  left:
-                                      MediaQuery.of(context).size.width * 0.34,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.36,
-                                  child: Container(
-                                    margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 1,
-                                        color: paymentStatus
-                                            ? Color(0xFF5B0D1B)
-                                            : Colors.grey[400],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                child: Column(
                                   children: <Widget>[
-                                    /// Crate Status
-                                    Icon(
-                                      Icons.circle,
-                                      color: Color(0xFF5B0D1B),
-                                    ),
+                                    Stack(
+                                      children: <Widget>[
+                                        /////  Left Connector
+                                        Positioned(
+                                          bottom: 11,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.36,
+                                          child: Container(
+                                            margin: EdgeInsets.fromLTRB(
+                                                10, 0, 10, 0),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                width: 1,
+                                                color: addressStatus
+                                                    ? Color(0xFF5B0D1B)
+                                                    : Colors.grey[400],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
 
-                                    /// Address Status
-                                    Icon(
-                                      Icons.circle,
-                                      color: addressStatus
-                                          ? Color(0xFF5B0D1B)
-                                          : Colors.grey[400],
-                                    ),
+                                        /////  Right Connector
+                                        Positioned(
+                                          bottom: 11,
+                                          left: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.34,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.36,
+                                          child: Container(
+                                            margin: EdgeInsets.fromLTRB(
+                                                10, 0, 10, 0),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                width: 1,
+                                                color: paymentStatus
+                                                    ? Color(0xFF5B0D1B)
+                                                    : Colors.grey[400],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
 
-                                    /// Payment Status
-                                    Icon(
-                                      Icons.circle,
-                                      color: paymentStatus
-                                          ? Color(0xFF5B0D1B)
-                                          : Colors.grey[400],
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            /// Crate Status
+                                            Icon(
+                                              Icons.circle,
+                                              color: Color(0xFF5B0D1B),
+                                            ),
+
+                                            /// Address Status
+                                            Icon(
+                                              Icons.circle,
+                                              color: addressStatus
+                                                  ? Color(0xFF5B0D1B)
+                                                  : Colors.grey[400],
+                                            ),
+
+                                            /// Payment Status
+                                            Icon(
+                                              Icons.circle,
+                                              color: paymentStatus
+                                                  ? Color(0xFF5B0D1B)
+                                                  : Colors.grey[400],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text("Crate",
+                                            style: textStyle(
+                                                12.0, Color(0xFF5B0D1B))),
+                                        Text("Address",
+                                            style: textStyle(
+                                                12.0,
+                                                addressStatus
+                                                    ? Color(0xFF5B0D1B)
+                                                    : Colors.grey[400])),
+                                        Text("Payment",
+                                            style: textStyle(
+                                                12.0,
+                                                paymentStatus
+                                                    ? Color(0xFF5B0D1B)
+                                                    : Colors.grey[400])),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text("Crate",
-                                    style: textStyle(12.0, Color(0xFF5B0D1B))),
-                                Text("Address",
-                                    style: textStyle(
-                                        12.0,
-                                        addressStatus
-                                            ? Color(0xFF5B0D1B)
-                                            : Colors.grey[400])),
-                                Text("Payment",
-                                    style: textStyle(
-                                        12.0,
-                                        paymentStatus
-                                            ? Color(0xFF5B0D1B)
-                                            : Colors.grey[400])),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      0.05),
+
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.55,
+                                child: PageView(
+                                  controller: pageController,
+                                  children: [
+                                    CratePage1(
+                                      pageController: pageController,
+                                      products: products,
+                                      bill: bill,
+                                    ),
+                                    AddressPage(pageController: pageController),
+                                    PaymentPage(
+                                      pageController: pageController,
+                                      crateList: _crateList,
+                                      bill: bill,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ]),
+                          ),
+                          SliverFillRemaining(
+                              hasScrollBody: false, child: Container()),
+                        ]),
                       ),
 
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.05),
-
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.55,
-                        child: PageView(
-                          controller: pageController,
-                          children: [
-                            CratePage1(pageController: pageController),
-                            AddressPage(pageController: pageController),
-                            PaymentPage(),
-                          ],
-                        ),
-                      ),
-                    ]),
+                      //////////////////////////////
+                      ///                        ///
+                      ///         Footer         ///
+                      ///                        ///
+                      //////////////////////////////
+                      Footer(),
+                    ],
                   ),
-                  SliverFillRemaining(hasScrollBody: false, child: Container()),
-                ]),
-              ),
-
-              //////////////////////////////
-              ///                        ///
-              ///         Footer         ///
-              ///                        ///
-              //////////////////////////////
-              Footer(),
-            ],
           ),
         ),
         // bottomNavigationBar: Footer(),

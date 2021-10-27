@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatefulWidget {
   CustomTextField(
-      this.labelText, this.hintText, this.isPassword, this.onchanged);
-  final String labelText, hintText;
+      this.labelText, this.hintText, this.isPassword, this.onchanged,
+      {this.initialValue});
+  final String labelText, hintText, initialValue;
   final bool isPassword;
   final onchanged;
   CustomTextFieldState createState() => new CustomTextFieldState();
@@ -16,7 +17,8 @@ class CustomTextFieldState extends State<CustomTextField> {
       data: new ThemeData(
         primaryColor: Colors.black87,
       ),
-      child: new TextField(
+      child: new TextFormField(
+        initialValue: widget.initialValue,
         obscureText: widget.isPassword,
         onChanged: widget.onchanged,
         decoration: new InputDecoration(

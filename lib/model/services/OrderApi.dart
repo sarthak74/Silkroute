@@ -21,7 +21,47 @@ class OrderApi {
       }
       return resp;
     } catch (e) {
-      print("error - $e");
+      print("Get Order error - $e");
+      return e;
+    }
+  }
+
+  Future<dynamic> setOrder(order) async {
+    try {
+      var data = order;
+      print("Set order data -  $data");
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/resellerApi/setOrder');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      print("Set order res -  ${res.body}");
+      var decodedRes2 = jsonDecode(res.body);
+      print("Set order res -  $decodedRes2");
+      print("Set order res -  ${decodedRes2['success']}");
+      return decodedRes2;
+    } catch (e) {
+      print("Set Order error - $e");
+      return e;
+    }
+  }
+
+  Future<dynamic> updateOrder(id, order) async {
+    try {
+      var data = {"id": id, "order": order};
+      print("Update order data -  $data");
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/resellerApi/updateOrder');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      print("Update order res -  ${res.body}");
+      var decodedRes2 = jsonDecode(res.body);
+      print("Update order res -  $decodedRes2");
+      print("Update order res -  ${decodedRes2['success']}");
+      return decodedRes2;
+    } catch (e) {
+      print("Update Order error - $e");
       return e;
     }
   }

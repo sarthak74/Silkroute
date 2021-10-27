@@ -37,7 +37,9 @@ class CrateApi {
       var data = body;
       print("Set Crate items body: $data");
       var url = Uri.parse(endpoint + '/crateApi/setItem');
-      final res = await http.post(url, body: data);
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
       print(res.statusCode);
     } catch (e) {
       print("Set crate items error - $e");

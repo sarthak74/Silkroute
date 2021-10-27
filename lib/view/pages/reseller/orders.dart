@@ -18,6 +18,16 @@ TextStyle textStyle(num size, Color color) {
   );
 }
 
+TextStyle textStyle1(num size, Color color, FontWeight wt) {
+  return GoogleFonts.poppins(
+    textStyle: TextStyle(
+      color: color,
+      fontSize: size.toDouble(),
+      fontWeight: wt,
+    ),
+  );
+}
+
 class Orders extends StatefulWidget {
   @override
   _OrdersState createState() => _OrdersState();
