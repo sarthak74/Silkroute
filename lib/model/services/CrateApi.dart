@@ -2,21 +2,22 @@ import 'dart:convert';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/model/core/Bill.dart';
 import 'package:silkroute/model/core/CrateListItem.dart';
 
 class CrateApi {
   LocalStorage storage = LocalStorage('silkroute');
-  String endpoint = "http://192.168.43.220:4000";
+  String endpoint = Math().ip();
 
   Future<Tuple<List<CrateListItem>, Bill>> getCrateItems() async {
     try {
-      var data = {'contact': storage.getItem('contact')};
-      var url = Uri.parse(endpoint + '/crateApi/getAllProducts');
+      var contact = await storage.getItem('contact');
+      var data = {'contact': contact};
+      print("get crate items: $data");
+      var url = Uri.parse(Math().ip() + '/crateApi/getAllProducts');
       final res = await http.post(url, body: data);
-      print("res: $res");
       var decodedRes2 = jsonDecode(res.body);
-      print("decodedRes2: $decodedRes2");
       List<CrateListItem> resp = [];
       for (var i in decodedRes2[0]) {
         CrateListItem r = CrateListItem.fromMap(i);

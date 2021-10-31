@@ -38,6 +38,7 @@ class _OrderPageState extends State<OrderPage> {
   num savings = 0, totalCost = 0;
 
   void loadPrice() {
+    print("order: ${widget.order}");
     setState(() {
       bill = widget.order['bill'];
       price = [
@@ -57,19 +58,9 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   void loadOrder() {
+    print("order: ${widget.order}");
     setState(() {
-      List<Color> colors = [];
-      for (var color in widget.order['colors']) {
-        colors.add(
-            Color(int.parse(color.toString().split('(')[1].split(')')[0])));
-      }
-      orderDetails = {
-        "title": widget.order['item']['title'],
-        "quantity": widget.order['item']['quantity'],
-        "color": colors,
-        "status": widget.order['latestStatus'],
-        "rating": widget.order['ratingGiven']
-      };
+      orderDetails = widget.order["items"];
     });
     loadPrice();
   }
@@ -125,14 +116,35 @@ class _OrderPageState extends State<OrderPage> {
                     SliverList(
                       delegate: SliverChildListDelegate([
                         loading
-                            ? Text("Loading")
+                            ? Container(
+                                margin: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.height *
+                                        0.3),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    SizedBox(
+                                      height: 30,
+                                      width: 30,
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF5B0D1B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
                             : SingleChildScrollView(
                                 child: Column(
                                   children: <Widget>[
                                     // OrderPageTitle
                                     OrderPageTitle(orderDetails: orderDetails),
-                                    OrderStatus(orderDetails: orderDetails),
-                                    StarRating(orderDetails: orderDetails),
+                                    OrderStatus(orderDetails: {
+                                      "status": widget.order["latestStatus"]
+                                    }),
+                                    StarRating(orderDetails: {
+                                      "rating": widget.order["ratingGiven"]
+                                    }),
                                     OrderPriceDetails(
                                         price: price,
                                         savings: savings,
@@ -268,7 +280,7 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
         SizedBox(height: 10),
         (savings > 0)
             ? Text(
-                ("You saved ₹" + savings.toString() + " on this order")
+                ("You saved ₹" + savings.toStringAsFixed(2) + " on this order")
                     .toString(),
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(
@@ -331,11 +343,13 @@ class StarRating extends StatefulWidget {
 }
 
 class _StarRatingState extends State<StarRating> {
-  dynamic orderDetails;
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    orderDetails = widget.orderDetails;
-    orderDetails['rating'] *= 1.0;
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: MediaQuery.of(context).size.width * 0.03,
@@ -352,7 +366,7 @@ class _StarRatingState extends State<StarRating> {
         children: <Widget>[
           SmoothStarRating(
             starCount: 5,
-            rating: orderDetails['rating'],
+            rating: double.parse(widget.orderDetails['rating'].toString()),
             color: Colors.orange,
             borderColor: Colors.black,
           ),
@@ -371,105 +385,145 @@ class OrderStatus extends StatefulWidget {
 }
 
 class _OrderStatusState extends State<OrderStatus> {
-  bool isProfileExpanded = false;
+  bool isProfileExpanded = false, loading = true;
+  int index = 0;
+  List<Icon> icons = [];
+
+  dynamic orderDetails;
+  var statuses = [
+    "Order Placed",
+    "Dispatched from Source",
+    "Out for Delivery",
+    "Delivered"
+  ];
+  void loadVars() {
+    setState(() {
+      orderDetails = widget.orderDetails;
+      index = statuses.indexOf(orderDetails['status']);
+      for (int i = 0; i < index; i++) {
+        icons.add(Icon(Icons.check));
+      }
+      icons.add(Icon(Icons.radio_button_checked, color: Colors.white));
+      for (int i = index + 1; i < 4; i++) {
+        icons.add(Icon(Icons.radio_button_checked));
+      }
+      loading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadVars();
+  }
 
   @override
   Widget build(BuildContext context) {
-    dynamic orderDetails = widget.orderDetails;
-
-    return Container(
-      margin: EdgeInsets.symmetric(
-          horizontal: MediaQuery.of(context).size.width * 0.03),
-      decoration: BoxDecoration(),
-      child: ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(15)),
-        child: ExpansionPanelList(
-          expansionCallback: (int index, bool isExpanded) {
-            setState(() {
-              isProfileExpanded = !isExpanded;
-            });
-          },
-          expandedHeaderPadding: EdgeInsets.all(0),
-          animationDuration: Duration(milliseconds: 500),
-          children: [
-            ExpansionPanel(
-              backgroundColor: Colors.grey[200],
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return ListTile(
-                  title: Row(
-                    children: <Widget>[
-                      Icon(Icons.radio_button_checked,
-                          size: 20, color: Colors.black54),
-                      SizedBox(width: 10),
-                      Text(
-                        orderDetails['status'],
-                        style: textStyle(15, Colors.grey[700]),
-                      ),
-                    ],
+    return loading
+        ? Container(
+            margin: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF5B0D1B),
                   ),
-                );
-              },
-              body: ListTile(
-                title: Row(
-                  children: <Widget>[
-                    Container(
-                      width: 70,
-                      margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                      height: 240,
-                      child: IconStepper(
-                        enableNextPreviousButtons: false,
-                        enableStepTapping: false,
-                        stepColor: Colors.grey[400],
-                        direction: Axis.vertical,
-                        activeStepBorderColor: Colors.green,
-                        activeStepBorderWidth: 1,
-                        activeStepBorderPadding: 2.0,
-                        lineLength: 35,
-                        activeStep: 2,
-                        lineDotRadius: 2,
-                        activeStepColor: Colors.green,
-                        stepPadding: 0.0,
-                        lineColor: Colors.grey[400],
-                        stepRadius: 13,
-                        icons: [
-                          Icon(Icons.check),
-                          Icon(Icons.check),
-                          Icon(Icons.radio_button_checked, color: Colors.white),
-                          Icon(Icons.radio_button_checked),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                      height: 240,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(height: 10),
-                          Text("Order Placed",
-                              style: textStyle(12, Colors.black54)),
-                          SizedBox(height: 45),
-                          Text("Dispatched from Source",
-                              style: textStyle(12, Colors.black54)),
-                          SizedBox(height: 45),
-                          Text("Out for Delivery",
-                              style: textStyle(12, Colors.black54)),
-                          SizedBox(height: 45),
-                          Text("Delivered",
-                              style: textStyle(12, Colors.black54)),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
-              ),
-              isExpanded: isProfileExpanded,
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          )
+        : Container(
+            margin: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.03),
+            decoration: BoxDecoration(),
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(15)),
+              child: ExpansionPanelList(
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() {
+                    isProfileExpanded = !isExpanded;
+                  });
+                },
+                expandedHeaderPadding: EdgeInsets.all(0),
+                animationDuration: Duration(milliseconds: 500),
+                children: [
+                  ExpansionPanel(
+                    backgroundColor: Colors.grey[200],
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return ListTile(
+                        title: Row(
+                          children: <Widget>[
+                            Icon(Icons.radio_button_checked,
+                                size: 20, color: Colors.black54),
+                            SizedBox(width: 10),
+                            Text(
+                              orderDetails['status'],
+                              style: textStyle(15, Colors.grey[700]),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    body: ListTile(
+                      title: Row(
+                        children: <Widget>[
+                          Container(
+                            width: 70,
+                            margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
+                            height: 240,
+                            child: IconStepper(
+                              enableNextPreviousButtons: false,
+                              enableStepTapping: false,
+                              stepColor: Colors.grey[400],
+                              direction: Axis.vertical,
+                              activeStepBorderColor: Colors.green,
+                              activeStepBorderWidth: 1,
+                              activeStepBorderPadding: 2.0,
+                              lineLength: 35,
+                              activeStep: index,
+                              lineDotRadius: 2,
+                              activeStepColor: Colors.green,
+                              stepPadding: 0.0,
+                              lineColor: Colors.grey[400],
+                              stepRadius: 13,
+                              icons: icons,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
+                            height: 240,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                SizedBox(height: 10),
+                                Text("Order Placed",
+                                    style: textStyle(12, Colors.black54)),
+                                SizedBox(height: 45),
+                                Text("Dispatched from Source",
+                                    style: textStyle(12, Colors.black54)),
+                                SizedBox(height: 45),
+                                Text("Out for Delivery",
+                                    style: textStyle(12, Colors.black54)),
+                                SizedBox(height: 45),
+                                Text("Delivered",
+                                    style: textStyle(12, Colors.black54)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    isExpanded: isProfileExpanded,
+                  ),
+                ],
+              ),
+            ),
+          );
   }
 }
 
@@ -516,96 +570,108 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
               ],
             ),
           )
-        : Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.03,
-              vertical: 15,
-            ),
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.25,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/1.png"),
-                      fit: BoxFit.fill,
+        : ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: orderDetails.length,
+            itemBuilder: (BuildContext context, int i) {
+              return Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.03,
+                  vertical: 5,
+                ),
+                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.25,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/1.png"),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                SizedBox(width: 20),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        orderDetails['title'],
-                        style: textStyle(12, Colors.black),
-                      ),
-                      Text(
-                        ("Quantity: " + orderDetails['quantity'].toString())
-                            .toString(),
-                        style: textStyle(12, Colors.black),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
+                    SizedBox(width: 20),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          SizedBox(
-                            width: 130,
-                            height: 20,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount:
-                                  Math().min(orderDetails['color'].length, 5),
-                              itemBuilder: (BuildContext context, int index) {
-                                return Container(
-                                  width: 20,
-                                  height: 20,
-                                  margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                    color: orderDetails['color'][index],
-                                  ),
-                                );
-                              },
-                            ),
+                          Text(
+                            orderDetails[i]['title'],
+                            style: textStyle(12, Colors.black),
                           ),
-                          // moreColor
-                          //     ?
-                          Container(
-                            width: 25,
-                            height: 25,
-                            margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12.5)),
-                              border:
-                                  Border.all(width: 2, color: Colors.grey[500]),
-                              color: Colors.white,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              "+" +
-                                  (orderDetails['color'].length - 5).toString(),
-                              style: textStyle(10, Colors.grey[500]),
-                            ),
+                          Text(
+                            ("Quantity: " +
+                                    orderDetails[i]['quantity'].toString())
+                                .toString(),
+                            style: textStyle(12, Colors.black),
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            children: <Widget>[
+                              SizedBox(
+                                width: 130,
+                                height: 20,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: Math()
+                                      .min(orderDetails[i]['colors'].length, 5),
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Container(
+                                      width: 20,
+                                      height: 20,
+                                      margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10)),
+                                          image: DecorationImage(
+                                            image: NetworkImage(Math().ip() +
+                                                "/images/616ff5ab029b95081c237c89-color-0"),
+                                            fit: BoxFit.fill,
+                                          )),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // moreColor
+                              //     ?
+                              Container(
+                                width: 25,
+                                height: 25,
+                                margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12.5)),
+                                  border: Border.all(
+                                      width: 2, color: Colors.grey[500]),
+                                  color: Colors.white,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "+" +
+                                      (orderDetails[i]['colors'].length - 5)
+                                          .toString(),
+                                  style: textStyle(10, Colors.grey[500]),
+                                ),
+                              )
+                              // : SizedBox(width: 1),
+                            ],
                           )
-                          // : SizedBox(width: 1),
                         ],
-                      )
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
+              );
+            });
   }
 }

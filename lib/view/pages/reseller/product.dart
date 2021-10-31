@@ -242,7 +242,7 @@ class _ProductCounterState extends State<ProductCounter> {
       'id': widget.product['_id'].toString(),
       'contact': storage.getItem('contact'),
       'quantity': _qty,
-      'colors': proColors.sublist(0, counter).toString(),
+      'colors': proColors.sublist(0, counter),
       'mrp': widget.product['mrp'].toString(),
       'disValue': widget.product['discountValue'].toString(),
       'discount': widget.product['discount'].toString(),

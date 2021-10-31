@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/model/core/CrateListItem.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
+import 'package:silkroute/model/services/shiprocketApi.dart';
 import 'package:silkroute/view/pages/reseller/address.dart';
 import 'package:silkroute/view/pages/reseller/crate_page1.dart';
 import 'package:silkroute/view/pages/reseller/payment.dart';
@@ -29,28 +32,77 @@ class _CratePageState extends State<CratePage> {
       paymentStatus = CratePage().paymentStatus;
   List<CrateListItem> _crateList;
   List products = [];
-  bool loading = true;
-  dynamic bill;
+  bool loading = true, error = false;
+  dynamic bill, _token;
+  LocalStorage storage = LocalStorage('silkroute');
 
-  void loadProducts() async {
+  void loadVars() async {
+    var shiprocket_auth = await storage.getItem('shiprocket_auth');
+    dynamic token, timestamp;
+    if (shiprocket_auth == null) {
+      final res = await ShiprocketApi().getToken();
+      if (res == null) {
+        error = true;
+        loading = false;
+        return;
+      }
+      token = res['token'];
+      timestamp = DateTime.now().toLocal().toIso8601String();
+
+      shiprocket_auth = {"token": token, "timestamp": timestamp};
+      await storage.setItem('shiprocket_auth', shiprocket_auth);
+      setState(() {
+        _token = token;
+      });
+    } else {
+      var token = shiprocket_auth['token'];
+      dynamic timestamp = DateTime.parse(shiprocket_auth['timestamp']);
+      print("t, a = $token\n $timestamp");
+      var now = DateTime.now();
+      final diff = (now.difference(timestamp).inHours.floor());
+      print("diff: $diff");
+      if (diff > 20) {
+        final res = await ShiprocketApi().getToken();
+        if (res == null) {
+          error = true;
+          loading = false;
+          return;
+        }
+        token = res['token'];
+        timestamp = DateTime.now().toLocal().toIso8601String();
+        shiprocket_auth = {"token": token, "timestamp": timestamp};
+        await storage.setItem('shiprocket_auth', shiprocket_auth);
+      }
+
+      setState(() {
+        _token = token;
+      });
+    }
+
+    await loadProducts();
+  }
+
+  Future<void> loadProducts() async {
     dynamic res = await CrateApi().getCrateItems();
     _crateList = res.item1;
     print("crate_pr: $_crateList");
     for (var x in _crateList) {
       var data = x.toMap();
+      print("cratepr $data");
       setState(() {
         products.add(data);
       });
     }
     setState(() {
       bill = res.item2.toMap();
+      print("mao bill : $bill");
       loading = false;
     });
   }
 
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadProducts();
+      loadVars();
     });
     super.initState();
   }
@@ -260,7 +312,13 @@ class _CratePageState extends State<CratePage> {
                                       products: products,
                                       bill: bill,
                                     ),
-                                    AddressPage(pageController: pageController),
+                                    AddressPage(
+                                      pageController: pageController,
+                                      productlength:
+                                          (products.length > 0) ? true : false,
+                                      crateList: _crateList,
+                                      bill: bill,
+                                    ),
                                     PaymentPage(
                                       pageController: pageController,
                                       crateList: _crateList,

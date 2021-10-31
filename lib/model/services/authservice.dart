@@ -91,15 +91,15 @@ class AuthService {
           textColor: Colors.grey[500],
           fontSize: 10,
         );
-        storage.clear();
+        await storage.clear();
 
-        storage.setItem('contact', data['contact']);
+        await storage.setItem('contact', data['contact']);
         if (data['registered']) {
           print("red");
           send += "1";
-          storage.setItem('userType', data['userType']);
-          storage.setItem('name', data['name']);
-          storage.setItem('user', data);
+          await storage.setItem('userType', data['userType']);
+          await storage.setItem('name', data['name']);
+          await storage.setItem('user', data);
           print("Storage User -- ${storage.getItem('user')}");
         } else {
           send += "0";

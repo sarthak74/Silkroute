@@ -42,7 +42,7 @@ class _OrderTileState extends State<OrderTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  widget.order['item']['title'],
+                  widget.order['title'],
                   style: textStyle(12, Colors.black),
                 ),
                 Text(

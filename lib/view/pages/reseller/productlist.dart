@@ -32,6 +32,7 @@ class _ProductListPageState extends State<ProductListPage> {
   bool _btnShow = true;
   bool _sortShow = false;
   bool _filterShow = false;
+  bool noMore = false;
 
   dynamic _searchProvider = new ProductListProvider();
   Icon radioOn, radioOff;
@@ -158,7 +159,23 @@ class _ProductListPageState extends State<ProductListPage> {
 
                   Expanded(
                     child: loading
-                        ? Text("Loading")
+                        ? Container(
+                            margin: EdgeInsets.only(
+                                top: MediaQuery.of(context).size.height * 0.1),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 30,
+                                  width: 30,
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF5B0D1B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
                         : CustomScrollView(slivers: [
                             SliverList(
                               delegate: SliverChildListDelegate([
@@ -169,8 +186,6 @@ class _ProductListPageState extends State<ProductListPage> {
                                 //////////////////////////////
 
                                 CategoryHead(title: widget.subCat),
-
-                                // TODO: Change design of category
 
                                 Container(
                                   margin: EdgeInsets.symmetric(
@@ -249,19 +264,43 @@ class _ProductListPageState extends State<ProductListPage> {
                                         } else {
                                           if (snapshot.data != null) {
                                             _products.addAll(snapshot.data);
-                                            return GridView.count(
-                                              childAspectRatio: aspectRatio,
-                                              crossAxisCount: 2,
-                                              children: List.generate(
-                                                _products == []
-                                                    ? 0
-                                                    : _products.length,
-                                                (index) {
-                                                  return ProductTile(
-                                                      product:
-                                                          _products[index]);
-                                                },
-                                              ),
+
+                                            noMore = (snapshot.data.length == 0)
+                                                ? true
+                                                : false;
+
+                                            return Column(
+                                              children: <Widget>[
+                                                GridView.count(
+                                                  shrinkWrap: true,
+                                                  physics:
+                                                      NeverScrollableScrollPhysics(),
+                                                  childAspectRatio: aspectRatio,
+                                                  crossAxisCount: 2,
+                                                  children: List.generate(
+                                                    _products == []
+                                                        ? 0
+                                                        : _products.length,
+                                                    (index) {
+                                                      return ProductTile(
+                                                          product:
+                                                              _products[index]);
+                                                    },
+                                                  ),
+                                                ),
+                                                SizedBox(height: 20),
+                                                noMore
+                                                    ? Center(
+                                                        child: Text(
+                                                        "No More Data to show",
+                                                        style: textStyle1(
+                                                          15,
+                                                          Colors.black54,
+                                                          FontWeight.w500,
+                                                        ),
+                                                      ))
+                                                    : Container(),
+                                              ],
                                             );
                                           } else {
                                             return Text("No more data to show");

@@ -18,8 +18,10 @@ class Math {
   }
 
   String ip() {
-    // return "http://localhost:4000";
-    return "http://192.168.43.220:4000";
+    var ip_local = "http://localhost:4000";
+    var ip_usb = "http://192.168.43.220:4000";
+    var ip_emulator = "http://10.0.2.2:4000";
+    return ip_usb;
   }
 
   double aspectRatio(context) {

@@ -1406,7 +1406,15 @@ class _UploadProductImagesState extends State<UploadProductImages> {
   final _picker = ImagePicker();
 
   pickImage(index) async {
-    final image = await _picker.pickImage(source: ImageSource.gallery);
+    final image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
+
+    final bytes = await image.length();
+    final kb = bytes / 1024;
+    print("kb: $kb");
+    // final mb = kb / 1024;
 
     setState(() {
       _image[index] = File(image.path);

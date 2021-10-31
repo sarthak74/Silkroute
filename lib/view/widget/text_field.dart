@@ -22,6 +22,7 @@ class CustomTextFieldState extends State<CustomTextField> {
         obscureText: widget.isPassword,
         onChanged: widget.onchanged,
         decoration: new InputDecoration(
+          isDense: true,
           border: OutlineInputBorder(
             borderSide: new BorderSide(
               color: Colors.black,
@@ -30,6 +31,7 @@ class CustomTextFieldState extends State<CustomTextField> {
           ),
           contentPadding: new EdgeInsets.symmetric(
             horizontal: 20.0,
+            vertical: 10,
           ),
           labelText: widget.labelText,
           prefixStyle: new TextStyle(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/provider/CrateProvider.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
@@ -49,7 +50,23 @@ class _CratePage1State extends State<CratePage1> {
       child: Column(
         children: <Widget>[
           loading
-              ? Text("Loading Crate")
+              ? Container(
+                  margin: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.3),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF5B0D1B),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               : CrateProductList(products: products),
 
           SizedBox(height: 20),
@@ -131,12 +148,16 @@ class _CratePage1State extends State<CratePage1> {
 
           GestureDetector(
             onTap: () {
-              setState(() {
-                widget.pageController.animateToPage(1,
-                    duration: Duration(milliseconds: 500),
-                    curve: Curves.easeOut);
-                CratePage().addressStatus = !CratePage().addressStatus;
-              });
+              if (products.length > 0) {
+                setState(() {
+                  widget.pageController.animateToPage(1,
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.easeOut);
+                  CratePage().addressStatus = !CratePage().addressStatus;
+                });
+              } else {
+                Toast().notifyInfo("Add some items to crate to proceed");
+              }
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -144,14 +165,18 @@ class _CratePage1State extends State<CratePage1> {
                 Container(
                   padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                   decoration: BoxDecoration(
-                    color: Color(0xFF5B0D1B),
+                    color: (products.length > 0)
+                        ? Color(0xFF5B0D1B)
+                        : Colors.grey[200],
                     borderRadius: BorderRadius.all(Radius.circular(20)),
                   ),
                   child: Text(
                     "Proceed",
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(
-                        color: Colors.white,
+                        color: (products.length > 0)
+                            ? Colors.white
+                            : Colors.black54,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
@@ -329,7 +354,23 @@ class _CrateProductListState extends State<CrateProductList> {
   @override
   Widget build(BuildContext context) {
     return loading
-        ? Text("Loading Loading")
+        ? Container(
+            margin:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.3),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF5B0D1B),
+                  ),
+                ),
+              ],
+            ),
+          )
         : (products.length > 0)
             ? ListView.builder(
                 physics: NeverScrollableScrollPhysics(),

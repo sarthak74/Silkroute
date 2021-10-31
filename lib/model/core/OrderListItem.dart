@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
+
 import 'package:silkroute/model/core/Bill.dart';
 import 'package:silkroute/model/core/CrateListItem.dart';
 
 class OrderListItem {
   final String id;
-  final List<CrateListItem> items;
+  final List<dynamic> items;
   final String latestStatus;
   final dynamic address;
   final Map<String, dynamic> status;
@@ -17,6 +18,8 @@ class OrderListItem {
   final dynamic dispatchDate;
   final String invoiceNumber;
   final String paymentStatus;
+  final String shipment_id;
+  final String shiprocket_order_id;
   OrderListItem({
     this.id,
     this.items,
@@ -30,12 +33,14 @@ class OrderListItem {
     this.dispatchDate,
     this.invoiceNumber,
     this.paymentStatus,
+    this.shipment_id,
+    this.shiprocket_order_id,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'item': items.map((item) => item.toMap()),
+      'items': items,
       'latestStatus': latestStatus,
       'address': address,
       'status': status,
@@ -43,16 +48,18 @@ class OrderListItem {
       'reviewGiven': reviewGiven,
       'bill': bill.toMap(),
       'title': title,
-      'dispathDate': dispatchDate,
+      'dispatchDate': dispatchDate,
       'invoiceNumber': invoiceNumber,
       'paymentStatus': paymentStatus,
+      'shipment_id': shipment_id,
+      'shiprocket_order_id': shiprocket_order_id,
     };
   }
 
   factory OrderListItem.fromMap(Map<String, dynamic> map) {
     return OrderListItem(
       id: map['id'],
-      items: map['items'].map((item) => item.fromMap()),
+      items: List<dynamic>.from(map['items']),
       latestStatus: map['latestStatus'],
       address: map['address'],
       status: Map<String, dynamic>.from(map['status']),
@@ -63,6 +70,8 @@ class OrderListItem {
       dispatchDate: map['dispatchDate'],
       invoiceNumber: map['invoiceNumber'],
       paymentStatus: map['paymentStatus'],
+      shipment_id: map['shipment_id'],
+      shiprocket_order_id: map['shiprocket_order_id'],
     );
   }
 
@@ -73,6 +82,6 @@ class OrderListItem {
 
   @override
   String toString() {
-    return 'OrderListItem(id: $id, item: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, dispatchDate: $dispatchDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus)';
+    return 'OrderListItem(id: $id, items: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, dispatchDate: $dispatchDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus, shipment_id: $shipment_id, shiprocket_order_id: $shiprocket_order_id)';
   }
 }

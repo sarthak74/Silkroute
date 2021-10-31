@@ -15,7 +15,9 @@ class OrderApi {
       final res = await http.post(url, body: reqBody);
       var decodedRes2 = jsonDecode(res.body);
       List<OrderListItem> resp = [];
+      print("decodedRes2 $decodedRes2");
       for (var i in decodedRes2) {
+        print("items: ${i['items']}");
         OrderListItem r = OrderListItem.fromMap(i);
         resp.add(r);
       }
@@ -42,13 +44,13 @@ class OrderApi {
       return decodedRes2;
     } catch (e) {
       print("Set Order error - $e");
-      return e;
+      return {"success": false};
     }
   }
 
-  Future<dynamic> updateOrder(id, order) async {
+  Future<dynamic> updateOrder(id, body) async {
     try {
-      var data = {"id": id, "order": order};
+      var data = {"id": id, "qry": body};
       print("Update order data -  $data");
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/updateOrder');

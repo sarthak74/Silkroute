@@ -122,7 +122,21 @@ class _OrderListState extends State<OrderList> {
   @override
   Widget build(BuildContext context) {
     return loading
-        ? Text("Loading...")
+        ? Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF5B0D1B),
+                  ),
+                ),
+              ],
+            ),
+          )
         : ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
