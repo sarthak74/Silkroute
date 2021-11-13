@@ -69,9 +69,10 @@ class ShiprocketApi {
 
   Future<dynamic> createOrder(order) async {
     try {
+      print("Create ShhipRocket Order");
       var _body = json.encode(order);
 
-      var shiprocket_auth = storage.getItem('shiprocket_auth');
+      var shiprocket_auth = await storage.getItem('shiprocket_auth');
       var _token = shiprocket_auth['token'];
       var _headers = {
         "Content-Type": "application/json",
@@ -88,6 +89,75 @@ class ShiprocketApi {
       return decoded;
     } catch (err) {
       print("create order err -- $err");
+    }
+  }
+
+  Future<dynamic> getAllPickupLocations() async {
+    try {
+      print("get all pickup loca");
+      var shiprocket_auth = await storage.getItem('shiprocket_auth');
+      var _token = shiprocket_auth['token'];
+      var _headers = {"Authorization": "Bearer $_token"};
+
+      var _uri = dotenv.env['shiprocket_get_all_pickup_locations_api'];
+      var _url = Uri.parse(_uri);
+
+      final res = await http.get(_url, headers: _headers);
+
+      var decoded = await jsonDecode(res.body);
+
+      return decoded;
+    } catch (err) {
+      print("get all pick loc err - $err");
+      return null;
+    }
+  }
+
+  Future<dynamic> requestNewPickupLocation(data) async {
+    try {
+      print("req new pickup loca");
+      var shiprocket_auth = await storage.getItem('shiprocket_auth');
+      var _token = shiprocket_auth['token'];
+      var _headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $_token"
+      };
+
+      var _uri = dotenv.env['shiprocket_add_new_pickup_location_api'];
+      var _url = Uri.parse(_uri);
+
+      final res = await http.post(_url, headers: _headers, body: data);
+
+      var decoded = await jsonDecode(res.body);
+
+      return decoded;
+    } catch (err) {
+      print("req new pick loc err - $err");
+      return null;
+    }
+  }
+
+  Future<dynamic> getChannels() async {
+    try {
+      print("get channels");
+      var shiprocket_auth = await storage.getItem('shiprocket_auth');
+      var _token = shiprocket_auth['token'];
+      var _headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $_token"
+      };
+
+      var _uri = dotenv.env['shiprocket_get_channels_api'];
+      var _url = Uri.parse(_uri);
+
+      final res = await http.get(_url, headers: _headers);
+
+      var decoded = await jsonDecode(res.body);
+
+      return decoded["data"];
+    } catch (err) {
+      print("get channels err - $err");
+      return null;
     }
   }
 }

@@ -18,8 +18,8 @@ class TopBannerState extends State<TopBanner> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.teal,
-            Colors.teal[200],
+            Color(0xFF530000),
+            Color.fromRGBO(129, 20, 20, 1),
           ],
         ),
       ),

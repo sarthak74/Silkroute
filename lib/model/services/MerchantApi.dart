@@ -54,4 +54,29 @@ class MerchantApi {
       return e;
     }
   }
+
+  Future<dynamic> getPendingOrders() async {
+    try {
+      print("get pending orders");
+      var data = {"contact": await storage.getItem("contact")};
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/manufacturerApi/getPendingOrders');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      var decodedRes2 = jsonDecode(res.body);
+      print("mer orders: $decodedRes2");
+      List<OrderListItem> resp = [];
+      for (var i in decodedRes2) {
+        print("mer order: $i");
+        OrderListItem r = OrderListItem.fromMap(i);
+        resp.add(r);
+      }
+      print("mer orders: $resp");
+      return resp;
+    } catch (e) {
+      print("get pending orders error - $e");
+      return e;
+    }
+  }
 }

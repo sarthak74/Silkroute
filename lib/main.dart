@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/l10n/l10n.dart';
+import 'package:silkroute/view/pages/loader.dart';
 import 'package:silkroute/view/pages/merchant/add_new.dart';
 import 'package:silkroute/view/pages/merchant/add_new_product_page.dart';
 import 'package:silkroute/view/pages/merchant/dashboard.dart';
@@ -26,42 +28,12 @@ import 'package:silkroute/view/pages/reseller/search.dart';
 import 'package:silkroute/view/pages/reseller/wishlist.dart';
 import 'package:silkroute/provider/locale_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-// const AndroidNotificationChannel channel = AndroidNotificationChannel(
-//   'high_importance_channel',
-//   'High Importance Notifications',
-//   'This channel is used for important notifications',
-//   importance: Importance.high,
-//   playSound: true,
-// );
-
-// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-//     FlutterLocalNotificationsPlugin();
-
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   await Firebase.initializeApp();
-//   print("bg message handler channel");
-// }
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:silkroute/methods/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp();
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // await flutterLocalNotificationsPlugin
-  //     .resolvePlatformSpecificImplementation<
-  //         AndroidFlutterLocalNotificationsPlugin>()
-  //     ?.createNotificationChannel(channel);
-
-  // await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-  //   alert: true,
-  //   badge: true,
-  //   sound: true,
-  // );
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -69,6 +41,23 @@ Future<void> main() async {
   ]);
 
   await SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+
+  await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(_firebasePushHandler);
+
+  AwesomeNotifications().initialize(null, [
+    NotificationChannel(
+      channelKey: 'key1',
+      channelName: 'notificationtest',
+      channelDescription: 'ex',
+      defaultColor: Colors.blue,
+      ledColor: Colors.white,
+      playSound: true,
+      enableLights: true,
+      enableVibration: true,
+    )
+  ]);
 
   LocalStorage storage = LocalStorage('silkroute');
 
@@ -103,10 +92,9 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
             ],
-            home: LocalizationAppPage(),
+            home: MainLoader(),
             routes: <String, WidgetBuilder>{
-              "/localization_page": (BuildContext context) =>
-                  LocalizationAppPage(),
+              "/localization_page": (BuildContext context) => MainLoader(),
               "/enter_contact": (BuildContext context) => EnterContactPage(),
               "/otp_verification": (BuildContext context) =>
                   OtpVerificationPage(),
@@ -132,4 +120,9 @@ class MyApp extends StatelessWidget {
           );
         },
       );
+}
+
+Future<void> _firebasePushHandler(RemoteMessage message) async {
+  print("Notififcation: ${message.data}");
+  AwesomeNotifications().createNotificationFromJsonData(message.data);
 }

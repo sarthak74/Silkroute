@@ -15,6 +15,8 @@ class NewProductProvider {
   static double halfSetPrice = 0.0;
   static double fullSetPrice = 0.0;
   static dynamic specifications = [];
+  static Map<String, double> halfSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
+  static Map<String, double> fullSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
 }
 
 /*

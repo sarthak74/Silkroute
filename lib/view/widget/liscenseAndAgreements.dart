@@ -26,10 +26,10 @@ class _AgreementsState extends State<Agreements> {
           padding: EdgeInsets.only(right: 10.0),
         ),
         new Text(
-          AppLocalizations.of(context).termsConditions,
+          "Terms and Conditions",
           style: TextStyle(
             fontSize: 15.0,
-            color: Colors.teal,
+            color: Color(0xFF530000),
           ),
         ),
       ],

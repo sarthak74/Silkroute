@@ -28,6 +28,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     "currAdd": "",
     "anotherNumber": "",
     "contact": "",
+    "gst": "",
     "userType": ""
   };
 
@@ -48,7 +49,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       );
       return false;
     }
-    reqFields = ["name", "currAdd", "contact", "userType"];
+    reqFields = ["name", "currAdd", "contact", "userType", "gst"];
     for (String x in reqFields) {
       print("$x - ${data[x].toString()}");
       if ((data[x].toString()).length == 0) {
@@ -121,13 +122,15 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
         Navigator.of(context).pop();
         Navigator.of(context).pushNamed("/enter_contact");
       } else {
-        storage.setItem('contact', data['contact']);
-        storage.setItem('isregistered', true);
-        storage.setItem('name', data['name']);
-        storage.setItem('userType', data['userType']);
+        await storage.setItem('contact', data['contact']);
+        await storage.setItem('isregistered', true);
+        await storage.setItem('name', data['name']);
+        await storage.setItem('userType', data['userType']);
+        await storage.setItem('gst', data['gst']);
 
-        String nextpage =
-            (userType == "Reseller") ? "/reseller_home" : "/manufacturer_home";
+        String nextpage = (data["userType"] == "Reseller")
+            ? "/reseller_home"
+            : "/manufacturer_home";
 
         Navigator.of(context).pop();
 
@@ -147,7 +150,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       if (states.any(interactiveStates.contains)) {
         return Colors.black;
       }
-      return Colors.teal;
+      return Color(0xFF530000);
     }
 
     return new Scaffold(
@@ -201,6 +204,18 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                 ),
 
                 CustomTextField(
+                  "GSTIN", "",
+                  false, // isPassword
+                  (val) {
+                    data["gst"] = val;
+                  },
+                ),
+
+                new SizedBox(
+                  height: 30.0,
+                ),
+
+                CustomTextField(
                   (AppLocalizations.of(context).anotherNumber), "",
                   false, // isPassword
                   (val) {
@@ -223,7 +238,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                           data["userType"] = val;
                         });
                       },
-                      userType,
+                      data["userType"],
                     ),
                     new SizedBox(
                       height: 30.0,
@@ -250,8 +265,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.teal,
-                          Colors.teal[200],
+                          Color(0xFF530000),
+                          Color.fromRGBO(129, 20, 20, 1),
                         ],
                       ),
                     ),

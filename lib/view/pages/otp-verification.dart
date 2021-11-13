@@ -82,7 +82,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
 
               new ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.teal,
+                  primary: Color(0xFF811111),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   ),
@@ -90,7 +90,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                   child: Text(
-                    AppLocalizations.of(context).verifyOTP,
+                    "Verify",
                     style: TextStyle(fontSize: 18),
                   ),
                 ),

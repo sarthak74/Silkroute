@@ -8,6 +8,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/model/services/PaymentGatewayService.dart';
+import 'package:silkroute/model/services/authservice.dart';
 import 'package:silkroute/model/services/shiprocketApi.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -506,60 +507,136 @@ class _AddressPageState extends State<AddressPage> {
   }
 
   String _id, _dbid, _date;
+  dynamic _merchant;
   var key = "rzp_test_XGLJQQbg9CfbPJ", secret = 'wzwPMXY3An2S8SPrmrnwrikM';
 
+  Future<dynamic> getPickup() async {
+    var allPickupLocations = await ShiprocketApi().getAllPickupLocations(),
+        new_loc = false;
+    List locations = [];
+    for (var x in allPickupLocations["data"]["shipping_address"]) {
+      locations.add(x["pickup_location"]);
+    }
+    var contact = await storage.getItem('contact');
+    var merchant = await AuthService().getinfo(contact);
+    setState(() {
+      _merchant = merchant;
+    });
+    if (!merchant) {
+      Toast().notifyErr("Some error occurred");
+      // refund
+      return "";
+    }
+    var pickup_location = merchant['_id'].toString();
+
+    if (!locations.contains(pickup_location)) {
+      setState(() {
+        new_loc = true;
+      });
+      var new_pickup_location = {
+        "pickup_location": merchant['_id'].toString(),
+        "name": merchant['name'],
+        "email": merchant['_id'].toString() + "@gmail.com",
+        "phone": merchant['contact'],
+        "address": merchant['currAdd']['address'],
+        "city": merchant['currAdd']['city'],
+        "state": merchant['currAdd']['state'],
+        "country": merchant['currAdd']['country'],
+        "pin_code": merchant['currAdd']['pincode']
+      };
+      await ShiprocketApi().requestNewPickupLocation(new_pickup_location);
+    }
+
+    return {"new_loc": new_loc, "pickup_location": pickup_location};
+  }
+
   Future<void> createtShiprocketOrder() async {
+    var pickup_location = await getPickup();
+    var channels = await ShiprocketApi().getChannels();
+    var channel_id = channels[0]["id"];
+
     // Billing - from
     // Shipping - to
+    /*
+    var data = {
+    "fullName": "",
+    "contact": "",
+    "pincode": "",
+    "state": "",
+    "city": "",
+    "addLine1": "",
+    "addLine2": ""
+  };
+    */
     var ship_order = {
       "order_id": _dbid,
       "order_date": _date,
-      "pickup_location": "Home", // manuf id\
-      "billing_customer_name": "Sarthak", // manuf name
-      "billing_last_name": "Gupta",
+      "channel_id": channel_id,
+      "pickup_location": pickup_location['pickup_location'], // manuf id\
+      "billing_customer_name": _merchant['name'], // manuf name
 
-      "billing_city": "Atarra", // manuf city
-      "billing_pincode": "210201",
-      "billing_state": "Uttar Pradesh",
-      "billing_country": "India",
-      "billing_email": "sarthak.igupta7379@gmail.com",
-      "billing_phone": "7408159898",
+      "billing_city": _merchant['currAdd']['city'], // manuf city
+      "billing_pincode": _merchant['currAdd']['pincode'],
+      "billing_state": _merchant['currAdd']['state'],
+      "billing_country": _merchant['currAdd']['country'],
+      "billing_email": _merchant['_id'].toString() + "@gmail.com",
+      "billing_phone": _merchant['contact'],
 
       "shipping_is_billing": false,
-      "shipping_customer_name": "", // cust name
-      "shipping_last_name": "",
-      "shipping_address": "",
-      "shipping_address_2": "",
-      "shipping_city": "",
-      "shipping_pincode": "",
-      "shipping_country": "",
-      "shipping_state": "",
-      "shipping_email": "",
-      "shipping_phone": "",
+      "shipping_customer_name": data['fullName'], // cust name
+
+      "shipping_address": data['addLine1'],
+
+      "shipping_city": data['city'],
+      "shipping_pincode": data['pincode'],
+      "shipping_country": 'India',
+      "shipping_state": data['state'],
+      "shipping_email": data['contact'] + "@gmail.com",
+      "shipping_phone": data['contact'],
       "order_items": _crateListM,
-      "payment_method": "",
-      "shipping_charges": "",
-      "giftwrap_charges": "",
-      "transaction_charges": "",
-      "total_discount": "",
-      "sub_total": "",
+      "payment_method": "Prepaid",
+
+      "sub_total": widget.bill['totalCost'],
       "length": "",
       "breadth": "",
       "height": "",
       "weight": "",
-      "ewaybill_no": "",
-      "customer_gstin": "",
-      "invoice_number": "",
-      "order_type": "",
     };
 
+    if (pickup_location["new_loc"] == true) {
+      ship_order["vendor_details"] = {
+        "email": _merchant['_id'].toString() + "@gmail.com",
+        "phone": _merchant['contact'],
+        "name": _merchant['Name'],
+        "address": _merchant['currAdd']['address'],
+        "city": _merchant['currAdd']['city'],
+        "state": _merchant['currAdd']['state'],
+        "country": _merchant['currAdd']["country"],
+        "pin_code": _merchant['currAdd']['pin_code'],
+        "pickup_location": _merchant['_id'].toString()
+      };
+    }
+
     final dynamic res = await ShiprocketApi().createOrder(ship_order);
-    if (res == null) {
+    if ((res == null) || (res['status'] != 1)) {
+      Toast().notifyErr(
+          "Some error occurred, refund is in process.\nDon't worry, we are working on it.");
+      return;
       // TODO: implement refund
     } else {
       var qry = {
-        'shipment_id': res['shipment_id'],
-        'shiprocket_order_id': res['order_id']
+        'shipment_id': res['payload']['shipment_id'],
+        'shiprocket_order_id': res['payload']['order_id'],
+        'merchant': _merchant['contact'],
+        'status': {
+          "pickup_scheduled_date": res['payload']['pickup_scheduled_date'],
+          "awb_code": res['payload']['awb_code'],
+          "assigned_date_time": res['payload']["assigned_date_time"],
+          "applied_weight": res['payload']["applied_weight"],
+          "label_url": res['payload']["label_url"],
+          "manifest_url": res['payload']["manifest_url"],
+          "routing_code": res['payload']["routing_code"]
+        }
       };
       await OrderApi().updateOrder(_id, qry);
     }

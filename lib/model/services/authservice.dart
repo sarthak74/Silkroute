@@ -130,40 +130,36 @@ class AuthService {
 
   getinfo(contact) async {
     try {
-      Response res = await dio.post(uri + "/getinfo",
-          data: {
-            "contact": contact,
-          },
-          options: Options(contentType: Headers.formUrlEncodedContentType));
-      var userData = jsonDecode(res.toString());
-
-      var data = {"success": true, "msg": "Success", "data": userData};
-
+      var url = Uri.parse(uri + '/getinfo');
+      var tosend = {"contact": contact};
+      final res = await http.post(url, body: tosend);
+      print("getinfo res --  $res");
+      var data = await jsonDecode(res.body);
+      print("getinfo data --  $data");
       if (data["success"]) {
-        return userData;
+        return data["user"];
       } else {
         Fluttertoast.showToast(
-          msg: "Successfully Registered",
-          toastLength: Toast.LENGTH_SHORT,
+          msg: "Some error occurred",
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.grey[100],
-          textColor: Colors.grey[500],
-          fontSize: 10,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 12,
         );
-        return "";
+        return null;
       }
     } on DioError catch (err) {
       // Fluttertoast.showToast(
       //   msg: err.response.data['msg'],
       // );
       Fluttertoast.showToast(
-        msg: err.response.data["msg"],
-        toastLength: Toast.LENGTH_SHORT,
+        msg: "Some error occurred",
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.grey[100],
-        textColor: Colors.red,
-        fontSize: 10,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 12,
       );
+      return null;
     }
   }
 

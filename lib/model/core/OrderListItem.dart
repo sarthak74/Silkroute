@@ -15,7 +15,7 @@ class OrderListItem {
   final dynamic reviewGiven;
   final Bill bill;
   final String title;
-  final dynamic dispatchDate;
+  final dynamic createdDate;
   final String invoiceNumber;
   final String paymentStatus;
   final String shipment_id;
@@ -30,7 +30,7 @@ class OrderListItem {
     this.reviewGiven,
     this.bill,
     this.title,
-    this.dispatchDate,
+    this.createdDate,
     this.invoiceNumber,
     this.paymentStatus,
     this.shipment_id,
@@ -48,7 +48,7 @@ class OrderListItem {
       'reviewGiven': reviewGiven,
       'bill': bill.toMap(),
       'title': title,
-      'dispatchDate': dispatchDate,
+      'createdDate': createdDate,
       'invoiceNumber': invoiceNumber,
       'paymentStatus': paymentStatus,
       'shipment_id': shipment_id,
@@ -62,12 +62,12 @@ class OrderListItem {
       items: List<dynamic>.from(map['items']),
       latestStatus: map['latestStatus'],
       address: map['address'],
-      status: Map<String, dynamic>.from(map['status']),
+      status: map['status'],
       ratingGiven: map['ratingGiven'],
       reviewGiven: map['reviewGiven'],
       bill: Bill.fromMap(map['bill']),
       title: map['title'],
-      dispatchDate: map['dispatchDate'],
+      createdDate: map['createdDate'],
       invoiceNumber: map['invoiceNumber'],
       paymentStatus: map['paymentStatus'],
       shipment_id: map['shipment_id'],
@@ -82,6 +82,6 @@ class OrderListItem {
 
   @override
   String toString() {
-    return 'OrderListItem(id: $id, items: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, dispatchDate: $dispatchDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus, shipment_id: $shipment_id, shiprocket_order_id: $shiprocket_order_id)';
+    return 'OrderListItem(id: $id, items: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, createdDate: $createdDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus, shipment_id: $shipment_id, shiprocket_order_id: $shiprocket_order_id)';
   }
 }

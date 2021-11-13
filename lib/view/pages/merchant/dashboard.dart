@@ -153,7 +153,7 @@ class DashboardThisWeek extends StatelessWidget {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.37,
                       child: Text(
-                        "Bonus",
+                        "Payment Pending",
                         style: textStyle(12, Colors.black54),
                       ),
                     ),
@@ -274,7 +274,7 @@ class DashboardThisMonth extends StatelessWidget {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.37,
                       child: Text(
-                        "Bonus",
+                        "Payment Pending",
                         style: textStyle(12, Colors.black54),
                       ),
                     ),

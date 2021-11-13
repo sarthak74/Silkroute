@@ -156,9 +156,12 @@ class EnterContactState extends State<EnterContactPage> {
                     ),
 
                     new ElevatedButton(
-                      onPressed: disabled ? null : navigatorFunction,
+                      onPressed:
+                          (disabled || sending) ? null : navigatorFunction,
                       style: ElevatedButton.styleFrom(
-                        primary: sending ? Colors.grey : Colors.teal,
+                        primary: (sending || disabled)
+                            ? Colors.grey
+                            : Color(0xFF811111),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
                         ),
@@ -166,7 +169,7 @@ class EnterContactState extends State<EnterContactPage> {
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                         child: Text(
-                          AppLocalizations.of(context).getOtp,
+                          "Get Otp",
                           style: TextStyle(fontSize: 18),
                         ),
                       ),

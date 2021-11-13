@@ -14,11 +14,40 @@ import 'package:silkroute/provider/NewProductProvider.dart';
 import 'package:silkroute/view/pages/merchant/merchant_home.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/navbar.dart';
+import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:silkroute/view/widget/text_field.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 import 'package:silkroute/view/widget2/footer.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
+
+InputDecoration textFormFieldInputDecorator(String labelText, String hintText,
+    {double hpadding = 20}) {
+  return new InputDecoration(
+    border: OutlineInputBorder(
+      borderSide: new BorderSide(
+        color: Colors.black,
+      ),
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+    ),
+    isDense: true,
+    contentPadding: new EdgeInsets.symmetric(
+      horizontal: hpadding,
+      vertical: 8,
+    ),
+    labelText: labelText,
+    hintText: hintText,
+    focusedBorder: OutlineInputBorder(
+      borderSide: new BorderSide(
+        color: Colors.black54,
+        width: 2,
+      ),
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+    ),
+    labelStyle: textStyle(11, Colors.black54),
+    hintStyle: textStyle1(11, Colors.black54, FontWeight.w300),
+  );
+}
 
 class AddNewProductPage extends StatefulWidget {
   const AddNewProductPage({Key key}) : super(key: key);
@@ -129,7 +158,7 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
 
                                     //// Final Price
 
-                                    FinalPrice(),
+                                    // FinalPrice(),
 
                                     //// UPLOAD BUTTON
 
@@ -169,7 +198,8 @@ class UploadButton extends StatefulWidget {
 
 class _UploadButtonState extends State<UploadButton> {
   LocalStorage storage = LocalStorage('silkroute');
-  List s = ["Fabric", "Length", "Weight", "Min Order Quotient"];
+  List s = ["Fabric", "Length", "Breadth", "Weight", "Min Order Quotient"];
+  bool _agree1 = false, _agree2 = false;
   int _imageCounter = 0;
   bool _uploadingImage = false;
   bool validateSpecs() {
@@ -187,7 +217,115 @@ class _UploadButtonState extends State<UploadButton> {
     return true;
   }
 
-  bool validateForm() {
+  Future<bool> validateForm() async {
+    await showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              elevation: 16,
+              content: Container(
+                height: MediaQuery.of(context).size.height * 0.5,
+                width: MediaQuery.of(context).size.height * 0.9,
+                // padding: EdgeInsets.symmetric(
+                //     horizontal: MediaQuery.of(context).size.width * 0.05),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: Text(
+                            "I agree that product is NOT already uploaded.",
+                            style:
+                                textStyle1(13, Colors.black, FontWeight.w500),
+                          ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                        Container(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _agree1 = !_agree1;
+                              });
+                            },
+                            child: Icon(
+                              !_agree1
+                                  ? Icons.check_box_outline_blank
+                                  : Icons.check_box,
+                              size: 25,
+                            ),
+                          ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: Text(
+                            "All the info is correct and sufficient quatity is available.",
+                            style:
+                                textStyle1(13, Colors.black, FontWeight.w500),
+                          ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                        Container(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _agree2 = !_agree2;
+                              });
+                            },
+                            child: Icon(
+                              !_agree2
+                                  ? Icons.check_box_outline_blank
+                                  : Icons.check_box,
+                              size: 25,
+                            ),
+                          ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        if (_agree1 && _agree2) {
+                          Navigator.pop(context);
+                        } else {
+                          Toast().notifyErr("Check agreement");
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(30, 5, 30, 5),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF5B0D1B),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: Text(
+                          "Confirm",
+                          style: textStyle(15, Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
     print(
         "-->\nimages-\n${NewProductProvider.images}\ncolors\n${NewProductProvider.colors}\n");
     if (NewProductProvider.title.length == 0) {
@@ -238,61 +376,82 @@ class _UploadButtonState extends State<UploadButton> {
       return false;
     }
 
+    for (var d in ['L', 'B', 'H']) {
+      if (NewProductProvider.fullSetSize[d] < 0.5) {
+        Toast().notifyErr("Invalid Full Set $d");
+        return false;
+      }
+      if (NewProductProvider.halfSetSize[d] < 0.5) {
+        Toast().notifyErr("Invalid Half Set $d");
+        return false;
+      }
+    }
+
     print("texts and images validated");
 
     return validateSpecs();
   }
 
   void uploadHandler() async {
-    if (validateForm()) {
-      Map<String, dynamic> data = {
-        "title": NewProductProvider.title,
-        "category": NewProductProvider.category,
-        "subCat": NewProductProvider.specifications[0]["value"],
-        "mrp": NewProductProvider.fullSetPrice,
-        'discount': false,
-        'discountValue': 0,
-        'userContact': storage.getItem("contact"),
-        'description': NewProductProvider.description,
-        'setSize': NewProductProvider.setSize,
-        'min': NewProductProvider.min,
-        'stockAvailability': NewProductProvider.stockAvailability,
-        'resellerCrateAvailability': 0,
-        // 'images': NewProductProvider.images,
-        'halfSetPrice': NewProductProvider.halfSetPrice,
-        'fullSetPrice': NewProductProvider.fullSetPrice,
-        // 'colors': NewProductProvider.colors,
-        'specifications': NewProductProvider.specifications.sublist(1, 5),
-      };
-      print("newP-> $data");
-      var id = await MerchantApi().addNewProduct(data);
-      id = id.toString();
-      print("uploaded: $id");
+    var isValid = await validateForm();
+    if (isValid) {
+      if (_agree1 && _agree2) {
+        Map<String, dynamic> data = {
+          "title": NewProductProvider.title,
+          "category": NewProductProvider.category,
+          "subCat": NewProductProvider.specifications[0]["value"],
+          "mrp": NewProductProvider.fullSetPrice,
+          'discount': false,
+          'discountValue': 0,
+          'userContact': storage.getItem("contact"),
+          'description': NewProductProvider.description,
+          'setSize': NewProductProvider.setSize,
+          'min': NewProductProvider.min,
+          'stockAvailability': NewProductProvider.stockAvailability,
+          'resellerCrateAvailability': 0,
+          // 'images': NewProductProvider.images,
+          'halfSetPrice': NewProductProvider.halfSetPrice,
+          'fullSetPrice': NewProductProvider.fullSetPrice,
+          'halfSetSize': NewProductProvider.halfSetPrice,
+          'fullSetSize': NewProductProvider.halfSetSize,
+          // 'colors': NewProductProvider.colors,
+          'specifications': NewProductProvider.specifications.sublist(1, 5),
+        };
+        print("newP-> $data");
+        var id = await MerchantApi().addNewProduct(data);
+        id = id.toString();
+        print("uploaded: $id");
 
-      setState(() {
-        _uploadingImage = true;
-        _imageCounter = 0;
-      });
-      for (int i = 0; i < NewProductProvider.images.length; i++) {
-        print("uploading main image ${NewProductProvider.images[i]}");
-        String name = (id + "-main-" + i.toString()).toString();
-        await UploadImageApi().uploadImage(NewProductProvider.images[i], name);
         setState(() {
-          _imageCounter = _imageCounter + 1;
+          _uploadingImage = true;
+          _imageCounter = 0;
         });
-      }
-      for (int i = 0; i < NewProductProvider.colors.length; i++) {
-        String name = (id + "-color-" + i.toString()).toString();
-        print("uploading color image ${NewProductProvider.colors[i]}");
-        await UploadImageApi().uploadImage(NewProductProvider.colors[i], name);
+        for (int i = 0; i < NewProductProvider.images.length; i++) {
+          print("uploading main image ${NewProductProvider.images[i]}");
+          String name = (id + "-main-" + i.toString()).toString();
+          await UploadImageApi()
+              .uploadImage(NewProductProvider.images[i], name);
+          setState(() {
+            _imageCounter = _imageCounter + 1;
+          });
+        }
+        for (int i = 0; i < NewProductProvider.colors.length; i++) {
+          String name = (id + "-color-" + i.toString()).toString();
+          print("uploading color image ${NewProductProvider.colors[i]}");
+          await UploadImageApi()
+              .uploadImage(NewProductProvider.colors[i], name);
+          setState(() {
+            _imageCounter = _imageCounter + 1;
+          });
+        }
         setState(() {
-          _imageCounter = _imageCounter + 1;
+          _uploadingImage = false;
         });
+        print("\nupdated\n");
+      } else {
+        Toast().notifyErr("Check Agreement");
+        return;
       }
-      setState(() {
-        _uploadingImage = false;
-      });
-      print("\nupdated\n");
     }
   }
 
@@ -404,7 +563,7 @@ class _FinalPriceState extends State<FinalPrice> {
                       },
                       child: Container(
                         padding:
-                            EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                             color: Colors.grey[200]),
@@ -426,7 +585,7 @@ class _FinalPriceState extends State<FinalPrice> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       if (less)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -435,8 +594,10 @@ class _FinalPriceState extends State<FinalPrice> {
                               "Half set Price",
                               style: textStyle(13, Colors.black87),
                             ),
-                            Text(halfSetPrice,
-                                style: textStyle(13, Colors.black87)),
+                            Text(
+                              halfSetPrice,
+                              style: textStyle(13, Colors.black87),
+                            ),
                           ],
                         ),
                       Row(
@@ -446,8 +607,10 @@ class _FinalPriceState extends State<FinalPrice> {
                             "Full Set Price",
                             style: textStyle(13, Colors.black87),
                           ),
-                          Text(fullSetPrice,
-                              style: textStyle(13, Colors.black87)),
+                          Text(
+                            fullSetPrice,
+                            style: textStyle(13, Colors.black87),
+                          ),
                         ],
                       ),
                     ],
@@ -513,6 +676,10 @@ class _SpecificationsState extends State<Specifications>
             "value": "",
           },
           {
+            "title": "xyz",
+            "value": "",
+          },
+          {
             "title": "Weight",
             "value": "",
           },
@@ -521,6 +688,7 @@ class _SpecificationsState extends State<Specifications>
             "value": "",
           }
         ];
+
         NewProductProvider.specifications.add({"title": "Type", "value": []});
         for (var x in _specs) {
           NewProductProvider.specifications.add(x);
@@ -700,13 +868,8 @@ class _SpecificationsState extends State<Specifications>
                                     child: new TextFormField(
                                       controller: _textControllers[i],
                                       focusNode: _focusNodes[i],
-                                      style: GoogleFonts.poppins(
-                                        textStyle: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
+                                      style: textStyle1(
+                                          13, Colors.black, FontWeight.w500),
                                       onChanged: (val) {
                                         setState(() {
                                           _specs[i]["value"] =
@@ -719,40 +882,8 @@ class _SpecificationsState extends State<Specifications>
                                               "nrep: ${NewProductProvider.specifications}");
                                         });
                                       },
-                                      decoration: new InputDecoration(
-                                        isDense: true,
-                                        border: OutlineInputBorder(
-                                          borderSide: new BorderSide(
-                                            color: Colors.black,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(30)),
-                                        ),
-                                        contentPadding:
-                                            new EdgeInsets.symmetric(
-                                          horizontal: 20.0,
-                                          vertical: 10,
-                                        ),
-                                        labelText: "Text Here",
-                                        hintText: "Enter Text Here",
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: new BorderSide(
-                                            color: Colors.black54,
-                                            width: 2,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(30)),
-                                        ),
-                                        labelStyle:
-                                            textStyle(13, Colors.black54),
-                                        hintStyle: GoogleFonts.poppins(
-                                          textStyle: TextStyle(
-                                            color: Colors.black54,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                        ),
-                                      ),
+                                      decoration: textFormFieldInputDecorator(
+                                          "Text Here", "Enter Text Here"),
                                     ),
                                   ),
                                 ),
@@ -784,6 +915,8 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
   bool loading = true;
   TextEditingController _halfController = new TextEditingController();
   TextEditingController _fullController = new TextEditingController();
+  TextEditingController _halfWtController = new TextEditingController();
+  TextEditingController _fullWtController = new TextEditingController();
 
   void loadVars() {
     setState(() {
@@ -806,7 +939,7 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
     setState(() {
       less = true;
 
-      NewProductProvider.min = (NewProductProvider.setSize / 2).floor();
+      NewProductProvider.min = (NewProductProvider.setSize / 2).ceil();
       print("min: ${NewProductProvider.min}");
     });
   }
@@ -828,181 +961,302 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  "Select Min Order Quantity: ",
-                  style: textStyle(13, Colors.black54),
-                ),
                 SizedBox(height: 10),
                 Row(
                   children: <Widget>[
+                    Text(
+                      "Want to sell Half set?",
+                      style: textStyle1(13, Colors.black54, FontWeight.w500),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
                     GestureDetector(
                       onTap: () {
-                        subtract();
+                        setState(() {
+                          less = !less;
+                          less ? subtract() : add();
+                        });
                       },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(width: 2, color: Colors.black87),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Text(
-                          "-",
-                          style: textStyle(15, Colors.black87),
-                        ),
-                      ),
+                      child: !less
+                          ? Icon(Icons.check_box_outline_blank)
+                          : Icon(Icons.check_box),
                     ),
-                    SizedBox(width: 8),
-                    GestureDetector(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(width: 2, color: Colors.black87),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Text(
-                          less
-                              ? ((NewProductProvider.setSize / 2).floor())
-                                  .toString()
-                              : NewProductProvider.setSize.toString(),
-                          style: textStyle(17, Colors.black87),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        add();
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(width: 2, color: Colors.black87),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Text(
-                          "+",
-                          style: textStyle(15, Colors.black87),
-                        ),
-                      ),
-                    ),
+                    SizedBox(width: 10),
+                    less
+                        ? Text(
+                            "(${NewProductProvider.min} units)",
+                            style:
+                                textStyle1(13, Colors.black54, FontWeight.w500),
+                          )
+                        : Container(),
                   ],
                 ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                SizedBox(height: 20),
+                Column(
                   children: <Widget>[
                     if (less)
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        child: Theme(
-                          data: new ThemeData(
-                            primaryColor: Colors.black87,
-                          ),
-                          child: new TextFormField(
-                            keyboardType:
-                                TextInputType.numberWithOptions(decimal: true),
-                            style: GoogleFonts.poppins(
-                              textStyle: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.35,
+                            child: Theme(
+                              data: new ThemeData(
+                                primaryColor: Colors.black87,
                               ),
-                            ),
-                            onChanged: (val) {
-                              setState(() {
-                                NewProductProvider.halfSetPrice =
-                                    double.parse(_halfController.text);
-                              });
-                            },
-                            controller: _halfController,
-                            decoration: new InputDecoration(
-                              border: OutlineInputBorder(
-                                borderSide: new BorderSide(
-                                  color: Colors.black,
-                                ),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(30)),
-                              ),
-                              contentPadding: new EdgeInsets.symmetric(
-                                horizontal: 20.0,
-                              ),
-                              labelText: "Half set price",
-                              hintText: "Enter price of half set",
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: new BorderSide(
-                                  color: Colors.black54,
-                                  width: 2,
-                                ),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(30)),
-                              ),
-                              labelStyle: textStyle(13, Colors.black54),
-                              hintStyle: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w300,
-                                ),
+                              child: new TextFormField(
+                                keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                                style: textStyle1(
+                                    15, Colors.black, FontWeight.w500),
+                                onChanged: (val) {
+                                  if (_halfController.text.length > 0) {
+                                    setState(() {
+                                      NewProductProvider.halfSetPrice =
+                                          double.parse(_halfController.text);
+                                    });
+                                  } else {
+                                    setState(() {
+                                      NewProductProvider.halfSetPrice = 0.0;
+                                    });
+                                  }
+                                },
+                                controller: _fullController,
+                                decoration: textFormFieldInputDecorator(
+                                    "Half set price", "Rupee (₹)"),
                               ),
                             ),
                           ),
-                        ),
+                          SizedBox(width: 10),
+                          Text(
+                            "Size: ",
+                            style:
+                                textStyle1(13, Colors.black87, FontWeight.w500),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.13,
+                            child: Theme(
+                              data: new ThemeData(
+                                primaryColor: Colors.black87,
+                              ),
+                              child: new TextFormField(
+                                keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                                style: textStyle1(
+                                    15, Colors.black, FontWeight.w500),
+                                onChanged: (val) {
+                                  print("val L: $val");
+                                  if (val.length > 0) {
+                                    setState(() {
+                                      NewProductProvider.halfSetSize['L'] =
+                                          double.parse(val);
+                                    });
+                                  } else {
+                                    setState(() {
+                                      NewProductProvider.halfSetSize['L'] = 0.0;
+                                    });
+                                  }
+                                },
+                                decoration: textFormFieldInputDecorator(
+                                    "L", "cm",
+                                    hpadding: 15),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.13,
+                            child: Theme(
+                              data: new ThemeData(
+                                primaryColor: Colors.black87,
+                              ),
+                              child: new TextFormField(
+                                keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                                style: textStyle1(
+                                    15, Colors.black, FontWeight.w500),
+                                onChanged: (val) {
+                                  print("val B: $val");
+                                  if (val.length > 0) {
+                                    setState(() {
+                                      NewProductProvider.halfSetSize['B'] =
+                                          double.parse(val);
+                                    });
+                                  } else {
+                                    setState(() {
+                                      NewProductProvider.halfSetSize['B'] = 0.0;
+                                    });
+                                  }
+                                },
+                                decoration: textFormFieldInputDecorator(
+                                    "B", "cm",
+                                    hpadding: 15),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.13,
+                            child: Theme(
+                              data: new ThemeData(
+                                primaryColor: Colors.black87,
+                              ),
+                              child: new TextFormField(
+                                keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                                style: textStyle1(
+                                    15, Colors.black, FontWeight.w500),
+                                onChanged: (val) {
+                                  print("val H: $val");
+                                  if (val.length > 0) {
+                                    setState(() {
+                                      NewProductProvider.halfSetSize['H'] =
+                                          double.parse(val);
+                                    });
+                                  } else {
+                                    setState(() {
+                                      NewProductProvider.halfSetSize['H'] = 0.0;
+                                    });
+                                  }
+                                },
+                                decoration: textFormFieldInputDecorator(
+                                    "H", "cm",
+                                    hpadding: 15),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      child: Theme(
-                        data: new ThemeData(
-                          primaryColor: Colors.black87,
-                        ),
-                        child: new TextFormField(
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.35,
+                          child: Theme(
+                            data: new ThemeData(
+                              primaryColor: Colors.black87,
                             ),
-                          ),
-                          onChanged: (val) {
-                            setState(() {
-                              NewProductProvider.fullSetPrice =
-                                  double.parse(_fullController.text);
-                            });
-                          },
-                          controller: _fullController,
-                          decoration: new InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide: new BorderSide(
-                                color: Colors.black,
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30)),
-                            ),
-                            contentPadding: new EdgeInsets.symmetric(
-                              horizontal: 20.0,
-                            ),
-                            labelText: "Full set price",
-                            hintText: "Enter price of half set",
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: new BorderSide(
-                                color: Colors.black54,
-                                width: 2,
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30)),
-                            ),
-                            labelStyle: textStyle(13, Colors.black54),
-                            hintStyle: GoogleFonts.poppins(
-                              textStyle: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w300,
-                              ),
+                            child: new TextFormField(
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
+                              style:
+                                  textStyle1(15, Colors.black, FontWeight.w500),
+                              onChanged: (val) {
+                                if (_fullController.text.length > 0) {
+                                  setState(() {
+                                    NewProductProvider.fullSetPrice =
+                                        double.parse(_fullController.text);
+                                  });
+                                } else {
+                                  setState(() {
+                                    NewProductProvider.fullSetPrice = 0.0;
+                                  });
+                                }
+                              },
+                              controller: _fullController,
+                              decoration: textFormFieldInputDecorator(
+                                  "Full set price", "Rupee (₹)"),
                             ),
                           ),
                         ),
-                      ),
+                        SizedBox(width: 10),
+                        Text(
+                          "Size: ",
+                          style:
+                              textStyle1(13, Colors.black87, FontWeight.w500),
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.13,
+                          child: Theme(
+                            data: new ThemeData(
+                              primaryColor: Colors.black87,
+                            ),
+                            child: new TextFormField(
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
+                              style:
+                                  textStyle1(15, Colors.black, FontWeight.w500),
+                              onChanged: (val) {
+                                print("val L: $val");
+                                if (val.length > 0) {
+                                  setState(() {
+                                    NewProductProvider.fullSetSize['L'] =
+                                        double.parse(val);
+                                  });
+                                } else {
+                                  setState(() {
+                                    NewProductProvider.fullSetSize['L'] = 0.0;
+                                  });
+                                }
+                              },
+                              decoration: textFormFieldInputDecorator("L", "cm",
+                                  hpadding: 15),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.13,
+                          child: Theme(
+                            data: new ThemeData(
+                              primaryColor: Colors.black87,
+                            ),
+                            child: new TextFormField(
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
+                              style:
+                                  textStyle1(15, Colors.black, FontWeight.w500),
+                              onChanged: (val) {
+                                print("val B: $val");
+                                if (val.length > 0) {
+                                  setState(() {
+                                    NewProductProvider.fullSetSize['B'] =
+                                        double.parse(val);
+                                  });
+                                } else {
+                                  setState(() {
+                                    NewProductProvider.fullSetSize['B'] = 0.0;
+                                  });
+                                }
+                              },
+                              decoration: textFormFieldInputDecorator("B", "cm",
+                                  hpadding: 15),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.13,
+                          child: Theme(
+                            data: new ThemeData(
+                              primaryColor: Colors.black87,
+                            ),
+                            child: new TextFormField(
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
+                              style:
+                                  textStyle1(15, Colors.black, FontWeight.w500),
+                              onChanged: (val) {
+                                print("val H: $val");
+                                if (val.length > 0) {
+                                  setState(() {
+                                    NewProductProvider.fullSetSize['H'] =
+                                        double.parse(val);
+                                  });
+                                } else {
+                                  setState(() {
+                                    NewProductProvider.fullSetSize['H'] = 0.0;
+                                  });
+                                }
+                              },
+                              decoration: textFormFieldInputDecorator("H", "cm",
+                                  hpadding: 15),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -1169,6 +1423,7 @@ class _ProductInfoState extends State<ProductInfo> {
                   },
                   controller: _titleController,
                   decoration: new InputDecoration(
+                    isDense: true,
                     border: OutlineInputBorder(
                       borderSide: new BorderSide(
                         color: Colors.black,
@@ -1177,6 +1432,7 @@ class _ProductInfoState extends State<ProductInfo> {
                     ),
                     contentPadding: new EdgeInsets.symmetric(
                       horizontal: 20.0,
+                      vertical: 8,
                     ),
                     labelText: "Product Title",
                     hintText: "Enter Product Title",
@@ -1230,7 +1486,9 @@ class _ProductInfoState extends State<ProductInfo> {
                     ),
                     contentPadding: new EdgeInsets.symmetric(
                       horizontal: 20.0,
+                      vertical: 8,
                     ),
+                    isDense: true,
                     labelText: "Product Description",
                     hintText: "Enter Product Description",
                     focusedBorder: OutlineInputBorder(
@@ -1305,8 +1563,10 @@ class _ProductInfoState extends State<ProductInfo> {
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(30)),
                           ),
+                          isDense: true,
                           contentPadding: new EdgeInsets.symmetric(
                             horizontal: 20.0,
+                            vertical: 8,
                           ),
                           labelText: "Set Size",
                           hintText: "Set Size",
@@ -1361,11 +1621,11 @@ class _ProductInfoState extends State<ProductInfo> {
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(30)),
                           ),
+                          isDense: true,
                           contentPadding: new EdgeInsets.symmetric(
-                            horizontal: 20.0,
-                          ),
-                          labelText: "Stock Availability",
-                          hintText: "Sets Available in Stock",
+                              horizontal: 20.0, vertical: 8),
+                          labelText: "Sets in stock",
+                          hintText: "No. of sets available",
                           focusedBorder: OutlineInputBorder(
                             borderSide: new BorderSide(
                               color: Colors.black54,
@@ -1431,7 +1691,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: EdgeInsets.symmetric(vertical: 8),
       height: 300,
       alignment: Alignment.topCenter,
       child: Row(
@@ -1495,7 +1755,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
               child: (_image[_selected] == null)
                   ? FittedBox(
                       child: Icon(
-                        Icons.file_upload,
+                        Icons.image,
                         color: Colors.black38,
                       ),
                     )

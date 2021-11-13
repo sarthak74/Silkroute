@@ -23,7 +23,7 @@ class MerchantOrderProvider extends ChangeNotifier {
         "paymentStatus": {
           "\u0024in": ["Completed", "Incomplete"]
         },
-        "dispatchDate": {
+        "createdDate": {
           "\u0024lte": DateFormat('yyyy-MM-dd hh:mm')
               .format(DateTime.now().add(Duration(days: 1))),
           "\u0024gte": DateFormat('yyyy-MM-dd hh:mm')
