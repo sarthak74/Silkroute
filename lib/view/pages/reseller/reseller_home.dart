@@ -44,11 +44,9 @@ class _ResellerHomeState extends State<ResellerHome> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    if (!Methods().isAuthenticated()) {
+  void init() async {
+    var isAuth = await Methods().isAuthenticated();
+    if (!isAuth) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         NotRegisteredDialogMethod().check(context);
       });
@@ -66,6 +64,12 @@ class _ResellerHomeState extends State<ResellerHome> {
         print(message.notification.title);
       }
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    init();
   }
 
   @override

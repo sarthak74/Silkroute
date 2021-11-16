@@ -26,6 +26,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
   var data = {
     "name": "",
     "currAdd": "",
+    "businessName": "",
     "anotherNumber": "",
     "contact": "",
     "gst": "",
@@ -84,13 +85,30 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     }
   }
 
+  bool loading = true;
+
+  void getContact() async {
+    var contact1 = await storage.getItem('contact');
+    var businessName = await storage.getItem('businessName');
+    var currAdd = await storage.getItem('currAdd');
+    var gst = await storage.getItem('gst');
+    var anotherNumber = await storage.getItem('anotherNumber');
+    setState(() {
+      contact = contact1;
+      data["contact"] = contact;
+      data["userType"] = "Reseller";
+      if (businessName != null) data["businessName"] = businessName;
+      if (currAdd != null) data["currAdd"] = currAdd;
+      if (gst != null) data["gst"] = gst;
+      if (anotherNumber != null) data["anotherNumber"] = anotherNumber;
+      loading = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    setState(() {
-      contact = storage.getItem('contact');
-      data["contact"] = contact;
-    });
+    getContact();
   }
 
   void agreementCheckFunction(bool agreementCheckCurrent) {
@@ -103,7 +121,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     print("\nRD--\n$data\n");
     var res;
     if (contact == null) {
-      Fluttertoast.showToast(
+      await Fluttertoast.showToast(
         msg: "Verify your Contact in previous step",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
@@ -114,8 +132,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       Navigator.of(context).pushNamed("/enter_contact");
     } else {
       res = await AuthService().register(data);
-      if (storage.getItem('contact') != null) {
-        storage.deleteItem('contact');
+      if (await storage.getItem('contact') != null) {
+        await storage.deleteItem('contact');
       }
 
       if (res == false) {
@@ -125,12 +143,15 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
         await storage.setItem('contact', data['contact']);
         await storage.setItem('isregistered', true);
         await storage.setItem('name', data['name']);
+        await storage.setItem('businessName', data['businessName']);
         await storage.setItem('userType', data['userType']);
-        await storage.setItem('gst', data['gst']);
+        // await storage.setItem('gst', data['gst']);
 
         String nextpage = (data["userType"] == "Reseller")
             ? "/reseller_home"
             : "/manufacturer_home";
+
+        print("object $nextpage");
 
         Navigator.of(context).pop();
 
@@ -153,138 +174,171 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       return Color(0xFF530000);
     }
 
-    return new Scaffold(
-      body: new SingleChildScrollView(
-        child: new Container(
-          margin: new EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width * 0.05,
-          ),
-          child: new Center(
-            child: new Column(
+    return loading
+        ? Container(
+            height: MediaQuery.of(context).size.height * 0.2,
+            margin: EdgeInsets.fromLTRB(
+                0, MediaQuery.of(context).size.height * 0.2, 0, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                // Navbar(),
-                new SizedBox(
-                  height: 50,
-                ),
-
-                // Add Profile Picture
-                ProfilePic(contact),
-                new SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.05,
-                ),
-
-                // Name of User
-
-                CustomTextField(
-                  (AppLocalizations.of(context).name + "*")
-                      .toString(), // labeltext
-                  "", // hinttext
-                  false, // isPassword
-                  (val) {
-                    check();
-                    // onChnaged
-                    data["name"] = val;
-                  },
-                ),
-
-                new SizedBox(
-                  height: 30.0,
-                ),
-
-                CustomTextField(
-                  (AppLocalizations.of(context).currAdd + "*").toString(), "",
-                  false, // isPassword
-                  (val) {
-                    data["currAdd"] = val;
-                  },
-                ),
-
-                new SizedBox(
-                  height: 30.0,
-                ),
-
-                CustomTextField(
-                  "GSTIN", "",
-                  false, // isPassword
-                  (val) {
-                    data["gst"] = val;
-                  },
-                ),
-
-                new SizedBox(
-                  height: 30.0,
-                ),
-
-                CustomTextField(
-                  (AppLocalizations.of(context).anotherNumber), "",
-                  false, // isPassword
-                  (val) {
-                    data["anotherNumber"] = val;
-                  },
-                ),
-
-                new SizedBox(
-                  height: 30.0,
-                ),
-
-                Row(
-                  children: <Widget>[
-                    Text("You are "),
-                    SizedBox(width: 10),
-                    Dropdown(
-                      ["Reseller", "Manufacturer"],
-                      (val) {
-                        setState(() {
-                          data["userType"] = val;
-                        });
-                      },
-                      data["userType"],
-                    ),
-                    new SizedBox(
-                      height: 30.0,
-                    ),
-                  ],
-                ),
-
-                // Terms and Conditions
-
-                Agreements(
-                    agreementCheck, agreementCheckFunction, checkboxColor),
-
-                // navigator
-
-                new Align(
-                  alignment: Alignment.topRight,
-                  child: new Container(
-                    width: 70,
-                    height: 70,
-                    margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(70)),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0xFF530000),
-                          Color.fromRGBO(129, 20, 20, 1),
-                        ],
-                      ),
-                    ),
-                    child: new IconButton(
-                      icon: Icon(
-                        Icons.keyboard_arrow_right,
-                        color: Colors.white,
-                      ),
-                      iconSize: 40.0,
-                      onPressed: (validForm()) ? navigatorFuntion : null,
-                    ),
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF5B0D1B),
                   ),
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
+          )
+        : new Scaffold(
+            body: new SingleChildScrollView(
+              child: new Container(
+                margin: new EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.05,
+                ),
+                child: new Center(
+                  child: new Column(
+                    children: <Widget>[
+                      // Navbar(),
+                      new SizedBox(
+                        height: 50,
+                      ),
+
+                      // Add Profile Picture
+                      ProfilePic(contact),
+                      new SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.05,
+                      ),
+
+                      // Name of User
+
+                      CustomTextField(
+                        ("Name*").toString(), // labeltext
+                        "", // hinttext
+                        false, // isPassword
+                        (val) {
+                          check();
+                          // onChnaged
+                          data["name"] = val;
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 30.0,
+                      ),
+
+                      CustomTextField(
+                        ("Legal Name of business*").toString(), // labeltext
+                        "", // hinttext
+                        false, // isPassword
+                        (val) {
+                          check();
+                          // onChnaged
+                          data["businessName"] = val;
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 30.0,
+                      ),
+
+                      CustomTextField(
+                        "Business Address", "",
+                        false, // isPassword
+                        (val) {
+                          data["currAdd"] = val;
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 30.0,
+                      ),
+
+                      CustomTextField(
+                        "GSTIN", "",
+                        false, // isPassword
+                        (val) {
+                          data["gst"] = val;
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 30.0,
+                      ),
+
+                      CustomTextField(
+                        "Another Number", "",
+                        false, // isPassword
+                        (val) {
+                          data["anotherNumber"] = val;
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 30.0,
+                      ),
+
+                      Row(
+                        children: <Widget>[
+                          Text("You are "),
+                          SizedBox(width: 10),
+                          Dropdown(
+                            ["Reseller", "Manufacturer"],
+                            (val) async {
+                              setState(() {
+                                data["userType"] = val;
+                              });
+                            },
+                            data["userType"],
+                          ),
+                          new SizedBox(
+                            height: 30.0,
+                          ),
+                        ],
+                      ),
+
+                      // Terms and Conditions
+
+                      Agreements(agreementCheck, agreementCheckFunction,
+                          checkboxColor),
+
+                      // navigator
+
+                      new Align(
+                        alignment: Alignment.topRight,
+                        child: new Container(
+                          width: 70,
+                          height: 70,
+                          margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(70)),
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Color(0xFF530000),
+                                Color.fromRGBO(129, 20, 20, 1),
+                              ],
+                            ),
+                          ),
+                          child: new IconButton(
+                            icon: Icon(
+                              Icons.keyboard_arrow_right,
+                              color: Colors.white,
+                            ),
+                            iconSize: 40.0,
+                            onPressed: (validForm()) ? navigatorFuntion : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
   }
 }

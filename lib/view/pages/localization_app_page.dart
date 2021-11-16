@@ -77,10 +77,11 @@ class _LocalizationAppPageState extends State<LocalizationAppPage> {
                         color: Colors.white,
                       ),
                       iconSize: 40.0,
-                      onPressed: () {
-                        Methods().isAuthenticated()
-                            ? (Methods().getUser()["userType"] ==
-                                    "Manufacturer")
+                      onPressed: () async {
+                        var isAuth = await Methods().isAuthenticated();
+                        var user = await Methods().getUser();
+                        isAuth
+                            ? (user["userType"] == "Manufacturer")
                                 ? Navigator.of(context)
                                     .pushNamed("/merchant_home")
                                 : Navigator.of(context)

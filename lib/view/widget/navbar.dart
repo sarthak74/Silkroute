@@ -14,19 +14,24 @@ class _NavbarState extends State<Navbar> {
   bool isAuth, loading = true;
   Icon log;
   String nextRoute;
+  dynamic user;
   String name;
   String userType;
+  String contact;
   LocalStorage storage = LocalStorage('silkroute');
 
   dynamic navBarList;
 
-  void loadVars() {
+  void loadVars() async {
+    user = await Methods().getUser();
     setState(() {
-      userType = Methods().getUser()["userType"];
-      isAuth = Methods().isAuthenticated();
+      isAuth = user != null;
+      userType = user["userType"];
+
       log = isAuth ? Icon(Icons.logout) : Icon(Icons.login);
-      nextRoute = isAuth ? "/localization_page" : "/enter_contact";
-      name = storage.getItem('name');
+      nextRoute = isAuth
+          ? ((userType == "Reseller") ? "/reseller_home" : "/merchant_home")
+          : "/enter_contact";
 
       var profileUrl =
           (userType == "Reseller") ? "/reseller_profile" : "/merchant_profile";
@@ -50,9 +55,8 @@ class _NavbarState extends State<Navbar> {
 
   @override
   Widget build(BuildContext context) {
-    double fw = MediaQuery.of(context).size.width;
-    double fh = MediaQuery.of(context).size.height;
-    print("UT - ${storage.getItem('userType')}");
+    // double fw = MediaQuery.of(context).size.width;
+    // double fh = MediaQuery.of(context).size.height;
     return Drawer(
       elevation: 5,
       child: ListView(
@@ -70,7 +74,7 @@ class _NavbarState extends State<Navbar> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            ProfilePic(storage.getItem("contact")),
+                            ProfilePic(contact),
                             Container(
                               alignment: Alignment.center,
                               height: MediaQuery.of(context).size.height * 0.12,
@@ -81,7 +85,7 @@ class _NavbarState extends State<Navbar> {
                                   Flexible(
                                     child: Text(
                                       (name == null)
-                                          ? "name"
+                                          ? "User"
                                           : name.split(" ")[0],
                                       style: TextStyle(
                                         color: Colors.black87,
@@ -91,10 +95,8 @@ class _NavbarState extends State<Navbar> {
                                   ),
                                   SizedBox(height: 5),
                                   GestureDetector(
-                                    onTap: () => {
-                                      Methods().logout(context),
-                                      Navigator.of(context)
-                                          .pushNamed('/localization_page'),
+                                    onTap: () async {
+                                      await Methods().logout(context);
                                     },
                                     child: Text(
                                       "Log Out",
@@ -122,39 +124,48 @@ class _NavbarState extends State<Navbar> {
             //   ),
             // ),
           ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: ListView.builder(
-                itemCount: navBarList.length,
-                itemBuilder: (context, index) {
-                  Color brc =
-                      index % 2 == 1 ? Color(0xFFDCD7D7) : Color(0xFFFFFFFF);
-                  Color bgc =
-                      index % 2 == 0 ? Color(0xFFEFE9E1) : Color(0xFFFFFFFF);
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed(navBarList[index]["url"]);
+          loading
+              ? Text("Loading")
+              : SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: ListView.builder(
+                    itemCount: navBarList.length,
+                    itemBuilder: (context, index) {
+                      Color brc = index % 2 == 1
+                          ? Color(0xFFDCD7D7)
+                          : Color(0xFFFFFFFF);
+                      Color bgc = index % 2 == 0
+                          ? Color(0xFFEFE9E1)
+                          : Color(0xFFFFFFFF);
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed(navBarList[index]["url"]);
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(25),
+                              bottomRight: Radius.circular(25),
+                            ),
+                            border: Border.all(
+                              color: brc,
+                              width: 3,
+                            ),
+                            color: bgc,
+                          ),
+                          padding: EdgeInsets.fromLTRB(
+                              MediaQuery.of(context).size.width * 0.1,
+                              MediaQuery.of(context).size.height * 0.025,
+                              0,
+                              MediaQuery.of(context).size.height * 0.025),
+                          child: Text(navBarList[index]["name"]),
+                        ),
+                      );
                     },
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(25),
-                          bottomRight: Radius.circular(25),
-                        ),
-                        border: Border.all(
-                          color: brc,
-                          width: 3,
-                        ),
-                        color: bgc,
-                      ),
-                      padding: EdgeInsets.fromLTRB(
-                          fw * 0.1, fh * 0.025, 0, fh * 0.025),
-                      child: Text(navBarList[index]["name"]),
-                    ),
-                  );
-                }),
-          ),
+                  ),
+                ),
         ],
       ),
     );

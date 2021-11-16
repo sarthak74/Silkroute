@@ -32,7 +32,7 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
       var reg = (usr != null) ? usr["registered"] : null;
       var ut = (usr != null) ? usr["userType"] : null;
       print("aut-- $auth $ut $usr");
-
+      Navigator.of(context).pop();
       (auth && (usr != null) && (reg != null) && (reg == true))
           ? (ut == "Manufacturer")
               ? Navigator.of(context).pushNamed("/merchant_home")

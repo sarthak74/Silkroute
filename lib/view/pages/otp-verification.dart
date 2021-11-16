@@ -101,27 +101,27 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                   print("In Otp -- Token is $token");
 
                   AuthService().verifyotp(userOtp, token).then(
-                        (res) => {
-                          setState(() {
-                            user = Methods().getUser();
-                            print("User --  $user");
-                            print("\nOtp result --- $res\n");
-                            if (res[0] == '1') {
-                              if (res[1] == '1') {
-                                nextpage = (user["userType"] == "Reseller")
-                                    ? "/reseller_home"
-                                    : "/merchant_home";
-                                Navigator.of(context).pushNamed(nextpage);
-                                return;
-                              } else {
-                                nextpage = "/register_detail";
-                                Navigator.of(context).pushNamed(nextpage);
-                                return;
-                              }
-                            }
-                          }),
-                        },
-                      );
+                    (res) async {
+                      user = await Methods().getUser();
+                      setState(() {
+                        print("User --  $user");
+                        print("\nOtp result --- $res\n");
+                        if (res[0] == '1') {
+                          if (res[1] == '1') {
+                            nextpage = (user["userType"] == "Reseller")
+                                ? "/reseller_home"
+                                : "/merchant_home";
+                            Navigator.of(context).pushNamed(nextpage);
+                            return;
+                          } else {
+                            nextpage = "/register_detail";
+                            Navigator.of(context).pushNamed(nextpage);
+                            return;
+                          }
+                        }
+                      });
+                    },
+                  );
                 },
               ),
             ],

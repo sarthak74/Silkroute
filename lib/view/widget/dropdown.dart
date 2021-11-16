@@ -4,7 +4,7 @@ class Dropdown extends StatefulWidget {
   Dropdown(this.list, this.onpress, this.dropdownValue);
   final List<String> list;
   final onpress;
-  String dropdownValue;
+  final String dropdownValue;
   _DropdownState createState() => _DropdownState();
 }
 

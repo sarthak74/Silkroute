@@ -613,18 +613,21 @@ class _ProductImageState extends State<ProductImage> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadImages().then((value) {
-        print("images: $images");
+      loadImages().then((value) async {
+        // print("images: $images");
+        var user = await storage.getItem('user');
+        // print("user -- , $user");
         setState(() {
-          var user = storage.getItem('user');
-          List<dynamic> xy = user['wishlist'];
+          List<dynamic> xy = (user != null && user['wishlist'] != null)
+              ? user['wishlist']
+              : [];
 
           for (dynamic x in xy) {
             wishlists.add(x.toString());
           }
           wishlist =
               wishlists.contains(widget.productDetails['_id'].toString());
-          user = storage.getItem('user');
+          // user = storage.getItem('user');
           loading = false;
         });
       });

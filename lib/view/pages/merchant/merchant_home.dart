@@ -49,9 +49,9 @@ class _MerchantHomeState extends State<MerchantHome> {
     });
   }
 
-  @override
-  void initState() {
-    if (!Methods().isAuthenticated()) {
+  void init() async {
+    var isAuth = await Methods().isAuthenticated();
+    if (!isAuth) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         NotRegisteredDialogMethod().check(context);
       });
@@ -60,7 +60,12 @@ class _MerchantHomeState extends State<MerchantHome> {
         loadVars();
       });
     }
+  }
+
+  @override
+  void initState() {
     super.initState();
+    init();
   }
 
   @override
