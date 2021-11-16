@@ -147,9 +147,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
         await storage.setItem('userType', data['userType']);
         // await storage.setItem('gst', data['gst']);
 
-        String nextpage = (data["userType"] == "Reseller")
-            ? "/reseller_home"
-            : "/manufacturer_home";
+        String nextpage = "/enter_contact";
 
         print("object $nextpage");
 

@@ -18,10 +18,11 @@ class Math {
   }
 
   String ip() {
+    var ip_universal = "https://yibrance-backend.herokuapp.com";
     var ip_local = "http://localhost:4000";
     var ip_usb = "http://192.168.200.147:4000";
     var ip_emulator = "http://10.0.2.2:4000";
-    return ip_emulator;
+    return ip_universal;
   }
 
   double aspectRatio(context) {

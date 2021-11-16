@@ -19,6 +19,7 @@ class Methods {
 
   dynamic getUser() async {
     var user = await storage.getItem('user');
+    print("getuser method-$user");
     return user;
   }
 
