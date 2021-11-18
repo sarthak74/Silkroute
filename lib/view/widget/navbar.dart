@@ -40,8 +40,7 @@ class _NavbarState extends State<Navbar> {
         {"name": "Profile", "url": profileUrl},
         {"name": "Orders", "url": orderUrl},
         {"name": "FAQs", "url": "/faqs"},
-        {"name": "Contact Us", "url": "/contact_us"},
-        {"name": "Change Language", "url": "/"}
+        {"name": "Contact Us", "url": "/contact_us"}
       ];
       loading = false;
     });

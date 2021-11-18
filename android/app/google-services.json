@@ -1,27 +1,27 @@
 {
     "project_info": {
-        "project_number": "60807459179",
-        "project_id": "silkroute-e4a7d",
-        "storage_bucket": "silkroute-e4a7d.appspot.com"
+        "project_number": "439526065201",
+        "project_id": "notificationtest-cc9e8",
+        "storage_bucket": "notificationtest-cc9e8.appspot.com"
     },
     "client": [{
         "client_info": {
-            "mobilesdk_app_id": "1:60807459179:android:5cfbc99268447a75515c2e",
+            "mobilesdk_app_id": "1:439526065201:android:4876dfef9294fff8724110",
             "android_client_info": {
-                "package_name": "com.example.silkroute"
+                "package_name": "com.yibrance.app"
             }
         },
         "oauth_client": [{
-            "client_id": "60807459179-b0nmpiibndfpokji41se0g8f9q1lab1l.apps.googleusercontent.com",
+            "client_id": "439526065201-7vv7qov4ico6sdvtsmmh72srv7ir7j1e.apps.googleusercontent.com",
             "client_type": 3
         }],
         "api_key": [{
-            "current_key": "AIzaSyAlU9e3No18mkUPVtD2yXL83jx2EOOgXsU"
+            "current_key": "AIzaSyCXBUkts4CS8k0cs5WqrBG7IZLR1peCquk"
         }],
         "services": {
             "appinvite_service": {
                 "other_platform_oauth_client": [{
-                    "client_id": "60807459179-b0nmpiibndfpokji41se0g8f9q1lab1l.apps.googleusercontent.com",
+                    "client_id": "439526065201-7vv7qov4ico6sdvtsmmh72srv7ir7j1e.apps.googleusercontent.com",
                     "client_type": 3
                 }]
             }

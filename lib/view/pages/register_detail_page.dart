@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:silkroute/methods/registerredirect.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/profile_pic_picker.dart';
 import 'package:localstorage/localstorage.dart';
 
@@ -33,13 +34,15 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     "userType": ""
   };
 
+  String street = "", city = "", pincode = "", state = "";
+
   List<String> reqFields;
 
   ////   SOME METHODS //////////
 
   bool validForm() {
     print("1");
-    if (storage.getItem('contact') == null) {
+    if (contact == null) {
       Fluttertoast.showToast(
         msg: "You have to register your number first",
         toastLength: Toast.LENGTH_SHORT,
@@ -50,7 +53,19 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       );
       return false;
     }
-    reqFields = ["name", "currAdd", "contact", "userType", "gst"];
+    reqFields = [
+      "name",
+      "street",
+      "city",
+      "pincode",
+      "state",
+      "contact",
+      "userType",
+      "gst",
+      "businessName"
+    ];
+
+    data["currAdd"] = street + ", " + city + ", " + state + ", " + pincode;
     for (String x in reqFields) {
       print("$x - ${data[x].toString()}");
       if ((data[x].toString()).length == 0) {
@@ -119,6 +134,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
 
   void navigatorFuntion() async {
     print("\nRD--\n$data\n");
+    var nextpage = "/enter_contact";
     var res;
     if (contact == null) {
       await Fluttertoast.showToast(
@@ -129,17 +145,14 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
         textColor: Colors.red[800],
         fontSize: 10,
       );
-      Navigator.of(context).pushNamed("/enter_contact");
     } else {
+      nextpage = "/register_detail";
       res = await AuthService().register(data);
       if (await storage.getItem('contact') != null) {
         await storage.deleteItem('contact');
       }
 
-      if (res == false) {
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamed("/enter_contact");
-      } else {
+      if (res == true) {
         await storage.setItem('contact', data['contact']);
         await storage.setItem('isregistered', true);
         await storage.setItem('name', data['name']);
@@ -147,15 +160,18 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
         await storage.setItem('userType', data['userType']);
         // await storage.setItem('gst', data['gst']);
 
-        String nextpage = "/enter_contact";
+        // String nextpage = "/enter_contact";
 
-        print("object $nextpage");
+        // print("object $nextpage");
 
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
 
-        Navigator.of(context).pushNamed(nextpage);
+        // Navigator.of(context).pushNamed(nextpage);
+        nextpage = "/manual_verification";
       }
     }
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamed(nextpage);
   }
 
   @override
@@ -225,7 +241,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       ),
 
                       new SizedBox(
-                        height: 30.0,
+                        height: 20.0,
                       ),
 
                       CustomTextField(
@@ -240,14 +256,73 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       ),
 
                       new SizedBox(
-                        height: 30.0,
+                        height: 20.0,
                       ),
 
+                      // Business Address
+
+                      Container(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          "Business Address",
+                          style: textStyle1(15, Colors.black, FontWeight.w500),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+
                       CustomTextField(
-                        "Business Address", "",
+                        "Street*", "",
                         false, // isPassword
                         (val) {
-                          data["currAdd"] = val;
+                          setState(() {
+                            street = val;
+                          });
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 10.0,
+                      ),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.42,
+                            child: CustomTextField(
+                              "City*", "",
+                              false, // isPassword
+                              (val) {
+                                setState(() {
+                                  city = val;
+                                });
+                              },
+                            ),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.42,
+                            child: CustomTextField(
+                              "Pincode*", "",
+                              false, // isPassword
+                              (val) {
+                                setState(() {
+                                  pincode = val;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 10),
+
+                      CustomTextField(
+                        "State*", "",
+                        false, // isPassword
+                        (val) {
+                          setState(() {
+                            state = val;
+                          });
                         },
                       ),
 
@@ -255,8 +330,10 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         height: 30.0,
                       ),
 
+                      ///// GST ////////
+
                       CustomTextField(
-                        "GSTIN", "",
+                        "GSTIN*", "",
                         false, // isPassword
                         (val) {
                           data["gst"] = val;
@@ -264,7 +341,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       ),
 
                       new SizedBox(
-                        height: 30.0,
+                        height: 20.0,
                       ),
 
                       CustomTextField(
@@ -276,7 +353,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       ),
 
                       new SizedBox(
-                        height: 30.0,
+                        height: 20.0,
                       ),
 
                       Row(
@@ -305,36 +382,60 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
 
                       // navigator
 
-                      new Align(
-                        alignment: Alignment.topRight,
-                        child: new Container(
-                          width: 70,
-                          height: 70,
-                          margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(70)),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Color(0xFF530000),
-                                Color.fromRGBO(129, 20, 20, 1),
-                              ],
-                            ),
-                          ),
-                          child: new IconButton(
-                            icon: Icon(
-                              Icons.keyboard_arrow_right,
-                              color: Colors.white,
-                            ),
-                            iconSize: 40.0,
-                            onPressed: (validForm()) ? navigatorFuntion : null,
-                          ),
-                        ),
-                      ),
+                      // new Align(
+                      //   alignment: Alignment.topRight,
+                      //   child: new Container(
+                      //     width: 70,
+                      //     height: 70,
+                      //     margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                      //     decoration: BoxDecoration(
+                      //       borderRadius: BorderRadius.all(Radius.circular(70)),
+                      //       gradient: LinearGradient(
+                      //         begin: Alignment.topCenter,
+                      //         end: Alignment.bottomCenter,
+                      //         colors: [
+                      //           Color(0xFF530000),
+                      //           Color.fromRGBO(129, 20, 20, 1),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //     child: new IconButton(
+                      //       icon: Icon(
+                      //         Icons.keyboard_arrow_right,
+                      //         color: Colors.white,
+                      //       ),
+                      //       iconSize: 40.0,
+                      //       onPressed: (validForm()) ? navigatorFuntion : null,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
+              ),
+            ),
+            floatingActionButton: Container(
+              width: 70,
+              height: 70,
+              margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(70)),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF530000),
+                    Color.fromRGBO(129, 20, 20, 1),
+                  ],
+                ),
+              ),
+              child: new IconButton(
+                icon: Icon(
+                  Icons.keyboard_arrow_right,
+                  color: Colors.white,
+                ),
+                iconSize: 40.0,
+                onPressed: (validForm()) ? navigatorFuntion : null,
               ),
             ),
           );

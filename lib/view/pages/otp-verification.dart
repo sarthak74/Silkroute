@@ -103,19 +103,46 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                   AuthService().verifyotp(userOtp, token).then(
                     (res) async {
                       user = await Methods().getUser();
+
+                      print("User --  $user");
+                      print("\nOtp result --- $res\n");
+                      if (user == null) {
+                        nextpage = "/register_detail";
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushNamed(nextpage);
+                        return;
+                      }
                       setState(() {
-                        print("User --  $user");
-                        print("\nOtp result --- $res\n");
-                        if (res[0] == '1') {
-                          if (res[1] == '1') {
-                            nextpage = (user["userType"] == "Reseller")
-                                ? "/reseller_home"
-                                : "/merchant_home";
-                            Navigator.of(context).pushNamed(nextpage);
+                        if (user["success"] == true) {
+                          if (user["registered"] == true) {
+                            String ut = user["userType"];
+                            if (ut == "Manufacturer") {
+                              if (user["verified"] == true) {
+                                if (user["bankAccountNo"] != null &&
+                                    user["bankAccountNo"].length > 0) {
+                                  nextpage =
+                                      "/coming_soon"; // todo: merchant home
+                                } else {
+                                  nextpage = "/merchant_acc_details";
+                                }
+                              } else {
+                                nextpage = "/manual_verification";
+                              }
+                            } else {
+                              if (user["verified"] == true) {
+                                nextpage =
+                                    "/coming_soon"; // todo: reseller home
+                              } else {
+                                nextpage = "/manual_verification";
+                              }
+                            }
+                            // Navigator.of(context).pop();
+                            Navigator.of(context).popAndPushNamed(nextpage);
                             return;
                           } else {
                             nextpage = "/register_detail";
-                            Navigator.of(context).pushNamed(nextpage);
+                            // Navigator.of(context).pop();
+                            Navigator.of(context).popAndPushNamed(nextpage);
                             return;
                           }
                         }

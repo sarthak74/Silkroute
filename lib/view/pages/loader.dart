@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 
 class MainLoader extends StatefulWidget {
@@ -27,17 +28,39 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
     });
     controller.repeat();
     Future.delayed(const Duration(seconds: 2), () async {
+      // LocalStorage storage = LocalStorage('silkroute');
+      // await storage.clear();
       var auth = await Methods().isAuthenticated();
       var usr = await Methods().getUser();
       var reg = (usr != null) ? usr["registered"] : null;
       var ut = (usr != null) ? usr["userType"] : null;
       print("aut-- $auth $ut $usr");
-      Navigator.of(context).pop();
-      (auth && (usr != null) && (reg != null) && (reg == true))
-          ? (ut == "Manufacturer")
-              ? Navigator.of(context).pushNamed("/merchant_home")
-              : Navigator.of(context).pushNamed("/reseller_home")
-          : Navigator.of(context).pushNamed("/enter_contact");
+      dynamic nextpage = "";
+      if (auth && (usr != null) && (reg != null) && (reg == true)) {
+        if (ut == "Manufacturer") {
+          if (usr["verified"] == true) {
+            if (usr["bankAccountNo"] != null &&
+                usr["bankAccountNo"].length > 0) {
+              nextpage = "/coming_soon"; // todo: merchant home
+            } else {
+              nextpage = "/merchant_acc_details";
+            }
+          } else {
+            nextpage = "/manual_verification";
+          }
+        } else {
+          if (usr["verified"] == true) {
+            nextpage = "/coming_soon"; // todo: reseller home
+          } else {
+            nextpage = "/manual_verification";
+          }
+        }
+      } else {
+        nextpage = "/enter_contact";
+      }
+
+      // Navigator.of(context).pop();
+      Navigator.of(context).popAndPushNamed(nextpage);
     });
   }
 

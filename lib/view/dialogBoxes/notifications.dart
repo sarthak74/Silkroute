@@ -8,21 +8,34 @@ class NotificationDialogBox extends StatefulWidget {
 class NotificationDialogBoxState extends State<NotificationDialogBox> {
   @override
   Widget build(BuildContext context) {
-    return new Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          child: Text(
-            AppLocalizations.of(context).notifications,
-            style: TextStyle(
-              color: Colors.teal,
-              fontSize: 18,
-            ),
-            textAlign: TextAlign.center,
+    return FractionallySizedBox(
+      widthFactor: 1,
+      heightFactor: 1,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Color(0xFF5B0D1B),
+            width: 5,
           ),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
-      ],
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              child: Text(
+                AppLocalizations.of(context).notifications,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

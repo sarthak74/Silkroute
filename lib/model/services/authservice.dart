@@ -67,21 +67,14 @@ class AuthService {
 
       var data = await jsonDecode(res.body);
       print("Otp response - \ndata -- $data\nUser--${data['contact']}");
-      // var data = {
-      //   "success": true,
-      //   "msg": 'You are authorized',
-      //   "isregistered": true,
-      //   "contact": "7408159898",
-      //   "name": "Shashwat",
-      //   "userType": "Reseller"
-      // };
-      LocalStorage storage = LocalStorage('silkroute');
+
+      LocalStorage storage = await LocalStorage('silkroute');
 
       String send = "";
-      print("print");
+
       print("print ${data['success']}");
       if (data["success"]) {
-        print("suces");
+        print("success");
         send += "1";
         Fluttertoast.showToast(
           msg: data['msg'],
@@ -95,12 +88,13 @@ class AuthService {
 
         await storage.setItem('contact', data['contact']);
         if (data['registered']) {
-          print("red");
+          print("reg");
           send += "1";
           await storage.setItem('userType', data['userType']);
           await storage.setItem('name', data['name']);
           await storage.setItem('user', data);
-          print("Storage User -- ${storage.getItem('user')}");
+          var usr = await storage.getItem('user');
+          print("Storage User -- $usr");
         } else {
           send += "0";
         }
@@ -210,6 +204,93 @@ class AuthService {
         textColor: Colors.red,
         fontSize: 10,
       );
+    }
+  }
+
+  dynamic updateUser(contact, userData) async {
+    try {
+      var url = Uri.parse(uri + '/updateUser');
+      var tosend = await json.encode({"contact": contact, "data": userData});
+
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"}, body: tosend);
+      print("updateUser res --  $res");
+      var data = await jsonDecode(res.body);
+
+      print("updateUser data --  $data, user: ${data['user']}");
+      if (data["success"]) {
+        Fluttertoast.showToast(
+          msg: "User Updated Successfully",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 12,
+        );
+        return data["user"];
+      } else {
+        Fluttertoast.showToast(
+          msg: "Some error occurred",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 12,
+        );
+        return null;
+      }
+    } on DioError catch (err) {
+      // Fluttertoast.showToast(
+      //   msg: err.response.data['msg'],
+      // );
+      Fluttertoast.showToast(
+        msg: err.response.data['msg'],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red,
+        fontSize: 10,
+      );
+      return null;
+    }
+  }
+
+  Future<bool> checkVerificationStatus() async {
+    try {
+      LocalStorage storage = LocalStorage('silkroute');
+      var contact = storage.getItem('contact');
+      var url = Uri.parse(uri + '/checkVerificationStatus');
+      var tosend = await json.encode({"contact": contact});
+
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"}, body: tosend);
+      print("updateUser res --  $res");
+      var data = await jsonDecode(res.body);
+
+      if (data["success"] == false) {
+        Fluttertoast.showToast(
+          msg: "Some Server error occurred",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 10,
+        );
+        return false;
+      }
+
+      return data["verified"];
+    } on DioError catch (err) {
+      // Fluttertoast.showToast(
+      //   msg: err.response.data['msg'],
+      // );
+      Fluttertoast.showToast(
+        msg: err.response.data['msg'],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey[100],
+        textColor: Colors.red,
+        fontSize: 10,
+      );
+      return false;
     }
   }
 }
