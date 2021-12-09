@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:im_stepper/stepper.dart';
 
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/methods/payment_methods.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
 import 'package:silkroute/view/widget/footer.dart';
 import 'package:silkroute/view/widget/navbar.dart';
@@ -149,6 +151,7 @@ class _OrderPageState extends State<OrderPage> {
                                         price: price,
                                         savings: savings,
                                         totalCost: totalCost),
+                                    CancelOrder(order: widget.order),
                                   ],
                                 ),
                               ),
@@ -170,6 +173,56 @@ class _OrderPageState extends State<OrderPage> {
           ),
         ),
         // bottomNavigationBar: Footer(),
+      ),
+    );
+  }
+}
+
+class CancelOrder extends StatefulWidget {
+  const CancelOrder({Key key, this.order}) : super(key: key);
+
+  final dynamic order;
+
+  @override
+  _CancelOrderState createState() => _CancelOrderState();
+}
+
+class _CancelOrderState extends State<CancelOrder> {
+  bool cancelling = false;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        setState(() {
+          cancelling = true;
+        });
+        // print("cancel order -- ${widget.order}");
+        await PaymentMethods().cancelPayment(widget.order, true);
+        setState(() {
+          cancelling = false;
+        });
+        // Navigator.of(context).pop();
+      },
+      child: Container(
+        margin: EdgeInsets.all(10),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 9),
+        decoration: BoxDecoration(
+          color: Color(0xFF5B0D1B),
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+        ),
+        child: cancelling
+            ? SizedBox(
+                height: 25,
+                width: 25,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
+                ),
+              )
+            : Text(
+                "Cancel Order",
+                style: textStyle1(13, Colors.white, FontWeight.normal),
+              ),
       ),
     );
   }
@@ -385,7 +438,7 @@ class OrderStatus extends StatefulWidget {
 }
 
 class _OrderStatusState extends State<OrderStatus> {
-  bool isProfileExpanded = false, loading = true;
+  bool isProfileExpanded = false, loading = true, cancelled = false;
   int index = 0;
   List<Icon> icons = [];
 
@@ -399,14 +452,19 @@ class _OrderStatusState extends State<OrderStatus> {
   void loadVars() {
     setState(() {
       orderDetails = widget.orderDetails;
-      index = statuses.indexOf(orderDetails['status']);
-      for (int i = 0; i < index; i++) {
-        icons.add(Icon(Icons.check));
+      if (orderDetails['status'] == "Cancelled") {
+        cancelled = true;
+      } else {
+        index = statuses.indexOf(orderDetails['status']);
+        for (int i = 0; i < index; i++) {
+          icons.add(Icon(Icons.check));
+        }
+        icons.add(Icon(Icons.radio_button_checked, color: Colors.white));
+        for (int i = index + 1; i < 4; i++) {
+          icons.add(Icon(Icons.radio_button_checked));
+        }
       }
-      icons.add(Icon(Icons.radio_button_checked, color: Colors.white));
-      for (int i = index + 1; i < 4; i++) {
-        icons.add(Icon(Icons.radio_button_checked));
-      }
+
       loading = false;
     });
   }
@@ -445,7 +503,7 @@ class _OrderStatusState extends State<OrderStatus> {
               child: ExpansionPanelList(
                 expansionCallback: (int index, bool isExpanded) {
                   setState(() {
-                    isProfileExpanded = !isExpanded;
+                    isProfileExpanded = cancelled ? false : !isExpanded;
                   });
                 },
                 expandedHeaderPadding: EdgeInsets.all(0),
@@ -461,7 +519,7 @@ class _OrderStatusState extends State<OrderStatus> {
                                 size: 20, color: Colors.black54),
                             SizedBox(width: 10),
                             Text(
-                              orderDetails['status'],
+                              cancelled ? "Cancelled" : orderDetails['status'],
                               style: textStyle(15, Colors.grey[700]),
                             ),
                           ],
@@ -634,8 +692,10 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(10)),
                                           image: DecorationImage(
-                                            image: NetworkImage(Math().ip() +
-                                                "/images/616ff5ab029b95081c237c89-color-0"),
+                                            // image: NetworkImage(Math().ip() +
+                                            //     "/images/616ff5ab029b95081c237c89-color-0"),
+                                            image: NetworkImage(
+                                                "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
                                             fit: BoxFit.fill,
                                           )),
                                     );

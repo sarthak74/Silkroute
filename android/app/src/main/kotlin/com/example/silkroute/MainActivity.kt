@@ -1,4 +1,4 @@
-package com.example.silkroute
+package com.yibrance.app
 
 import io.flutter.embedding.android.FlutterActivity
 

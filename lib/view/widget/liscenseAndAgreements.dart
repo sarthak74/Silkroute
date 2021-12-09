@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:silkroute/view/dialogBoxes/agreementsDialogBox.dart';
+import 'package:silkroute/view/dialogBoxes/sortDialogBox.dart';
+import 'package:silkroute/view/widget/show_dialog.dart';
 
 class Agreements extends StatefulWidget {
   Agreements(
@@ -12,6 +15,24 @@ class Agreements extends StatefulWidget {
 }
 
 class _AgreementsState extends State<Agreements> {
+  void showTermsAndConditions() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 800),
+      pageBuilder: (context, a1, a2) {
+        return ShowDialog(AgreementsDialogBox(), 0);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Row(
@@ -25,11 +46,16 @@ class _AgreementsState extends State<Agreements> {
         new Padding(
           padding: EdgeInsets.only(right: 10.0),
         ),
-        new Text(
-          "Terms and Conditions",
-          style: TextStyle(
-            fontSize: 15.0,
-            color: Color(0xFF530000),
+        GestureDetector(
+          onTap: () {
+            showTermsAndConditions();
+          },
+          child: new Text(
+            "Terms and Conditions",
+            style: TextStyle(
+              fontSize: 15.0,
+              color: Color(0xFF530000),
+            ),
           ),
         ),
       ],

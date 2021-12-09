@@ -27,6 +27,7 @@ class _NavbarState extends State<Navbar> {
     setState(() {
       isAuth = user != null;
       userType = user["userType"];
+      name = user["name"];
 
       log = isAuth ? Icon(Icons.logout) : Icon(Icons.login);
       nextRoute = isAuth

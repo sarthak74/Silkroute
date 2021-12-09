@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
@@ -25,26 +26,25 @@ class _ProductTileState extends State<ProductTile> {
   void wishlistFunction() async {
     String pid = widget.product.id;
     if (!wishlists.contains(pid)) {
+      await wishlists.add(pid);
       setState(() {
-        wishlists.add(pid);
         user['wishlist'] = wishlists;
-        storage.setItem('user', user);
       });
+      await storage.setItem('user', user);
     } else {
+      await wishlists.remove(pid);
       setState(() {
-        wishlists.remove(pid);
         user['wishlist'] = wishlists;
-        storage.setItem('user', user);
       });
+      await storage.setItem('user', user);
     }
 
     await WishlistApi().setWishlist();
   }
 
-  void loadVars() {
-    setState(() {
-      user = storage.getItem('user');
-    });
+  void loadVars() async {
+    user = await storage.getItem('user');
+
     print("id: ${widget.product.id}");
     List<dynamic> xy = user['wishlist'];
     if (xy == null) xy = [];
@@ -108,7 +108,9 @@ class _ProductTileState extends State<ProductTile> {
                 ],
                 color: Color.fromARGB(0, 0, 0, 0),
                 image: DecorationImage(
-                  image: AssetImage("assets/images/1.png"),
+                  image: CachedNetworkImageProvider(
+                    "https://images.pexels.com/photos/2246476/pexels-photo-2246476.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+                  ),
                   fit: BoxFit.fill,
                 ),
               ),

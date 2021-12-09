@@ -1,14 +1,20 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
+import 'package:silkroute/model/services/aws.dart';
 import 'package:silkroute/model/services/uploadImageApi.dart';
 import 'package:silkroute/provider/NewProductProvider.dart';
 import 'package:silkroute/view/pages/merchant/merchant_home.dart';
@@ -123,14 +129,17 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
+                                    // Temp(),
+                                    // SizedBox(height: 20),
+
                                     // MAIN IMAGES SECTION
                                     UploadProductImages(),
-                                    SizedBox(height: 20),
+                                    SizedBox(height: 5),
 
                                     //////// PRODUCT INFO
 
                                     ProductInfo(),
-                                    SizedBox(height: 20),
+                                    SizedBox(height: 15),
 
                                     ///// Different Color images of PRODUCT
 
@@ -139,7 +148,7 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
                                         ? DifferentColorImage()
                                         : Container(),
 
-                                    SizedBox(height: 20),
+                                    SizedBox(height: 5),
 
                                     //// MIN ORDER AMOUNT and PRICE
 
@@ -148,13 +157,13 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
                                         (NewProductProvider.setSize <= 24))
                                       MinOrderAmountAndPrice(),
 
-                                    SizedBox(height: 20),
+                                    SizedBox(height: 5),
 
                                     //// Specifications
 
                                     Specifications(),
 
-                                    SizedBox(height: 20),
+                                    SizedBox(height: 5),
 
                                     //// Final Price
 
@@ -198,11 +207,22 @@ class UploadButton extends StatefulWidget {
 
 class _UploadButtonState extends State<UploadButton> {
   LocalStorage storage = LocalStorage('silkroute');
-  List s = ["Fabric", "Length", "Breadth", "Weight", "Min Order Quotient"];
+  List s = [];
   bool _agree1 = false, _agree2 = false;
   int _imageCounter = 0;
   bool _uploadingImage = false;
-  bool validateSpecs() {
+
+  loadparameters() async {
+    for (dynamic x in MerchantHome.categoriess) {
+      if (x == NewProductProvider.category) {
+        s = x["parameters"];
+        break;
+      }
+    }
+  }
+
+  Future<bool> validateSpecs() async {
+    await loadparameters();
     for (int i = 0; i < s.length; i++) {
       if (NewProductProvider.specifications[i]["value"].length == 0) {
         Toast().notifyErr("Invalid ${s[i]} in Specifications");
@@ -389,13 +409,16 @@ class _UploadButtonState extends State<UploadButton> {
 
     print("texts and images validated");
 
-    return validateSpecs();
+    return await validateSpecs();
   }
 
   void uploadHandler() async {
     var isValid = await validateForm();
     if (isValid) {
       if (_agree1 && _agree2) {
+        var contact = await storage.getItem('contact');
+        List<String> imageUrls = [], colorUrls = [];
+
         Map<String, dynamic> data = {
           "title": NewProductProvider.title,
           "category": NewProductProvider.category,
@@ -403,7 +426,7 @@ class _UploadButtonState extends State<UploadButton> {
           "mrp": NewProductProvider.fullSetPrice,
           'discount': false,
           'discountValue': 0,
-          'userContact': storage.getItem("contact"),
+          'userContact': contact,
           'description': NewProductProvider.description,
           'setSize': NewProductProvider.setSize,
           'min': NewProductProvider.min,
@@ -418,8 +441,15 @@ class _UploadButtonState extends State<UploadButton> {
           'specifications': NewProductProvider.specifications.sublist(1, 5),
         };
         print("newP-> $data");
-        var id = await MerchantApi().addNewProduct(data);
-        id = id.toString();
+        var addProductRes = await MerchantApi().addNewProduct(data);
+        addProductRes = await jsonDecode(addProductRes);
+        print("addProductRes: ${addProductRes}");
+        if (addProductRes['success'] == false) {
+          Toast().notifyErr(
+              addProductRes['msg'] + "\nPlease retry or contact owner");
+          return;
+        }
+        String id = addProductRes['id'].toString();
         print("uploaded: $id");
 
         setState(() {
@@ -428,18 +458,46 @@ class _UploadButtonState extends State<UploadButton> {
         });
         for (int i = 0; i < NewProductProvider.images.length; i++) {
           print("uploading main image ${NewProductProvider.images[i]}");
-          String name = (id + "-main-" + i.toString()).toString();
-          await UploadImageApi()
-              .uploadImage(NewProductProvider.images[i], name);
+          String ex = NewProductProvider.images[i].absolute
+              .toString()
+              .split('.')
+              .last
+              .split("'")[0];
+          String name = (id + "-main-" + i.toString() + "." + ex).toString();
+
+          var urls =
+              await AWS().uploadImage(NewProductProvider.images[i], name);
+          if (urls['success'] == false) {
+            Toast().notifyErr("Error in uploading images.\nUpload again");
+            await MerchantApi().deleteProduct({'_id': id});
+            _uploadingImage = false;
+            _imageCounter = 0;
+            return;
+          }
+          imageUrls.add(urls['downloadUrl']);
           setState(() {
             _imageCounter = _imageCounter + 1;
           });
         }
         for (int i = 0; i < NewProductProvider.colors.length; i++) {
-          String name = (id + "-color-" + i.toString()).toString();
+          String ex = NewProductProvider.images[i].absolute
+              .toString()
+              .split('.')
+              .last
+              .split("'")[0];
+          String name = (id + "-color-" + i.toString() + "." + ex).toString();
           print("uploading color image ${NewProductProvider.colors[i]}");
-          await UploadImageApi()
-              .uploadImage(NewProductProvider.colors[i], name);
+          var urls =
+              await AWS().uploadImage(NewProductProvider.colors[i], name);
+          if (urls['success'] == false) {
+            Toast().notifyErr("Error in uploading images.\nUpload again");
+            await MerchantApi().deleteProduct({'_id': id});
+            _uploadingImage = false;
+            _imageCounter = 0;
+            return;
+          }
+          colorUrls.add(urls['downloadUrl']);
+
           setState(() {
             _imageCounter = _imageCounter + 1;
           });
@@ -447,6 +505,11 @@ class _UploadButtonState extends State<UploadButton> {
         setState(() {
           _uploadingImage = false;
         });
+        var body = {
+          'qry': {"_id": id},
+          'updates': {'images': imageUrls, 'colors': colorUrls}
+        };
+        await MerchantApi().updateProduct(body);
         print("\nupdated\n");
       } else {
         Toast().notifyErr("Check Agreement");
@@ -633,6 +696,7 @@ class _SpecificationsState extends State<Specifications>
     with SingleTickerProviderStateMixin {
   bool loading = true;
   List _specs = [];
+  List _parameters = [];
   List<String> _typeData = [], _categories = [];
   String _category;
   List<TextEditingController> _textControllers = new List();
@@ -641,20 +705,37 @@ class _SpecificationsState extends State<Specifications>
 
   List<FocusNode> _focusNodes = new List();
 
+  bool hasSpecs = true;
+
   void loadVars() {
     setState(() {
       _category = NewProductProvider.category;
       Set<String> _data = {};
-      for (var x in MerchantHome.categoriess) {
+      List mechantHomeCategories =
+          (MerchantHome.categoriess != null) ? MerchantHome.categoriess : [];
+      if (MerchantHome.categoriess.length == null) {
+        hasSpecs = false;
+        return;
+      }
+      if (MerchantHome.categoriess.length == 0) {
+        hasSpecs = false;
+        return;
+      }
+      for (var x in mechantHomeCategories) {
         _categories.add(x["title"]);
         for (var y in x["subCat"]) {
           _data.add(y["title"]);
+        }
+        if (x["title"] == _category) {
+          _parameters = x["parameters"];
         }
       }
       if (_category.length == 0) {
         _category = _categories[0];
         NewProductProvider.category = _category;
+        _parameters = mechantHomeCategories[0]["parameters"];
       }
+
       for (var x in _data) {
         _typeData.add(x);
       }
@@ -663,31 +744,12 @@ class _SpecificationsState extends State<Specifications>
         _specs.add(x);
       }
 
-      print("specs: $_specs ${NewProductProvider.specifications}");
-
       if (_specs.length == 0) {
-        _specs = [
-          {
-            "title": "Fabric",
-            "value": "",
-          },
-          {
-            "title": "Length",
-            "value": "",
-          },
-          {
-            "title": "xyz",
-            "value": "",
-          },
-          {
-            "title": "Weight",
-            "value": "",
-          },
-          {
-            "title": "Min Order Quotient",
-            "value": "",
-          }
-        ];
+        _specs = _parameters
+            .map(
+              (parameter) => {"title": parameter, "value": ""},
+            )
+            .toList();
 
         NewProductProvider.specifications.add({"title": "Type", "value": []});
         for (var x in _specs) {
@@ -719,6 +781,40 @@ class _SpecificationsState extends State<Specifications>
       }
 
       loading = false;
+    });
+  }
+
+  var loadingSpecs = false;
+
+  void buildSpecs() async {
+    setState(() {
+      loadingSpecs = true;
+    });
+    for (var x in MerchantHome.categoriess) {
+      if (x["title"] == _category) {
+        setState(() {
+          _parameters = x["parameters"];
+        });
+
+        break;
+      }
+    }
+
+    setState(() {
+      _specs = _parameters
+          .map(
+            (parameter) => {"title": parameter, "value": ""},
+          )
+          .toList();
+      NewProductProvider.specifications = [];
+      NewProductProvider.specifications.add({"title": "Type", "value": []});
+      for (var x in _specs) {
+        NewProductProvider.specifications.add(x);
+      }
+    });
+
+    setState(() {
+      loadingSpecs = false;
     });
   }
 
@@ -762,140 +858,161 @@ class _SpecificationsState extends State<Specifications>
                   style: textStyle(18, Color(0xFF5B0D1B)),
                 ),
                 SizedBox(height: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
-                    color: Colors.grey[200],
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  padding: EdgeInsets.symmetric(
-                      vertical: _animation.value,
-                      horizontal: MediaQuery.of(context).size.width * 0.05),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            "Category",
-                            style: textStyle(13, Colors.black),
-                          ),
-                          DropdownButton<String>(
-                            style: TextStyle(color: Colors.black),
-                            underline: Container(
-                              height: 2,
-                              color: Colors.black,
-                            ),
-                            items: _categories.map((String e) {
-                              return DropdownMenuItem<String>(
-                                value: e,
-                                child: Text(e),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                print("object $val");
-                                _category = val;
-                                NewProductProvider.category = _category;
-                              });
-                            },
-                            value: _category,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Type",
-                          style: textStyle(13, Colors.black),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      MultiSelectDialogField(
-                        selectedItemsTextStyle: textStyle(13, Colors.white),
-                        searchTextStyle: textStyle(13, Colors.black),
-                        items: _typeData
-                            .map((e) => MultiSelectItem(e, e))
-                            .toList(),
-                        listType: MultiSelectListType.CHIP,
-                        selectedColor: Color(0xFF5B0D1B),
-                        searchable: true,
+                hasSpecs
+                    ? Container(
                         decoration: BoxDecoration(
-                          color: Color(0xFF5B0D1B).withOpacity(0.1),
-                          borderRadius: BorderRadius.all(Radius.circular(40)),
-                          border: Border.all(
-                            color: Color(0xFF5B0D1B),
-                            width: 2,
-                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                          color: Colors.grey[200],
                         ),
-                        onConfirm: (values) {
-                          setState(() {
-                            print("values $values");
-                            NewProductProvider.specifications[0]["value"] =
-                                values;
-                          });
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: _specs.length,
-                        itemBuilder: (BuildContext context, int i) {
-                          _textControllers.add(new TextEditingController());
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                _specs[i]["title"],
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.symmetric(
+                            vertical: _animation.value,
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.05),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  "Category",
+                                  style: textStyle(13, Colors.black),
+                                ),
+                                DropdownButton<String>(
+                                  style: TextStyle(color: Colors.black),
+                                  underline: Container(
+                                    height: 2,
+                                    color: Colors.black,
+                                  ),
+                                  items: _categories.map((String e) {
+                                    return DropdownMenuItem<String>(
+                                      value: e,
+                                      child: Text(e),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) async {
+                                    setState(() {
+                                      print("object $val");
+                                      _category = val;
+                                      NewProductProvider.category = _category;
+                                    });
+                                    await buildSpecs();
+                                  },
+                                  value: _category,
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "Type",
                                 style: textStyle(13, Colors.black),
                               ),
-                              Container(
-                                margin: EdgeInsets.only(bottom: 10),
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  onTap: () {
-                                    FocusScope.of(context)
-                                        .requestFocus(FocusNode());
-                                  },
-                                  child: Theme(
-                                    data: new ThemeData(
-                                      primaryColor: Colors.black87,
-                                    ),
-                                    child: new TextFormField(
-                                      controller: _textControllers[i],
-                                      focusNode: _focusNodes[i],
-                                      style: textStyle1(
-                                          13, Colors.black, FontWeight.w500),
-                                      onChanged: (val) {
-                                        setState(() {
-                                          _specs[i]["value"] =
-                                              _textControllers[i].text;
-                                          NewProductProvider
-                                                      .specifications[i + 1]
-                                                  ["value"] =
-                                              _textControllers[i].text;
-                                          print(
-                                              "nrep: ${NewProductProvider.specifications}");
-                                        });
-                                      },
-                                      decoration: textFormFieldInputDecorator(
-                                          "Text Here", "Enter Text Here"),
-                                    ),
-                                  ),
+                            ),
+                            SizedBox(height: 10),
+                            MultiSelectDialogField(
+                              selectedItemsTextStyle:
+                                  textStyle(13, Colors.white),
+                              searchTextStyle: textStyle(13, Colors.black),
+                              items: _typeData
+                                  .map((e) => MultiSelectItem(e, e))
+                                  .toList(),
+                              listType: MultiSelectListType.CHIP,
+                              selectedColor: Color(0xFF5B0D1B),
+                              searchable: true,
+                              decoration: BoxDecoration(
+                                color: Color(0xFF5B0D1B).withOpacity(0.1),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(40)),
+                                border: Border.all(
+                                  color: Color(0xFF5B0D1B),
+                                  width: 2,
                                 ),
                               ),
-                            ],
-                          );
-                        },
-                      ),
-                      SizedBox(height: 10),
-                    ],
-                  ),
-                ),
+                              onConfirm: (values) {
+                                setState(() {
+                                  print("values $values");
+                                  NewProductProvider.specifications[0]
+                                      ["value"] = values;
+                                });
+                              },
+                            ),
+                            SizedBox(height: 10),
+                            loadingSpecs
+                                ? Text("Loading")
+                                : ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: _specs.length,
+                                    itemBuilder: (BuildContext context, int i) {
+                                      _textControllers
+                                          .add(new TextEditingController());
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text(
+                                            _specs[i]["title"],
+                                            style: textStyle(13, Colors.black),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.only(bottom: 10),
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.4,
+                                            child: InkWell(
+                                              splashColor: Colors.transparent,
+                                              onTap: () {
+                                                FocusScope.of(context)
+                                                    .requestFocus(FocusNode());
+                                              },
+                                              child: Theme(
+                                                data: new ThemeData(
+                                                  primaryColor: Colors.black87,
+                                                ),
+                                                child: new TextFormField(
+                                                  controller:
+                                                      _textControllers[i],
+                                                  focusNode: _focusNodes[i],
+                                                  style: textStyle1(
+                                                      13,
+                                                      Colors.black,
+                                                      FontWeight.w500),
+                                                  onChanged: (val) {
+                                                    setState(() {
+                                                      _specs[i]["value"] =
+                                                          _textControllers[i]
+                                                              .text;
+                                                      NewProductProvider
+                                                                  .specifications[
+                                                              i + 1]["value"] =
+                                                          _textControllers[i]
+                                                              .text;
+                                                      print(
+                                                          "nrep: ${NewProductProvider.specifications}");
+                                                    });
+                                                  },
+                                                  decoration:
+                                                      textFormFieldInputDecorator(
+                                                          "Text Here",
+                                                          "Enter Text Here"),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                            SizedBox(height: 10),
+                          ],
+                        ),
+                      )
+                    : Text("No Specifications",
+                        style: textStyle(15, Colors.grey)),
               ],
             ),
           );
@@ -992,7 +1109,7 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
                         : Container(),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
                 Column(
                   children: <Widget>[
                     if (less)
@@ -1022,7 +1139,7 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
                                     });
                                   }
                                 },
-                                controller: _fullController,
+                                controller: _halfController,
                                 decoration: textFormFieldInputDecorator(
                                     "Half set price", "Rupee (₹)"),
                               ),
@@ -1128,7 +1245,7 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
                           ),
                         ],
                       ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
@@ -1455,7 +1572,7 @@ class _ProductInfoState extends State<ProductInfo> {
                 ),
               ),
 
-              SizedBox(height: 20),
+              SizedBox(height: 10),
 
               // DESCRIPTION
 
@@ -1510,7 +1627,7 @@ class _ProductInfoState extends State<ProductInfo> {
                 ),
               ),
 
-              SizedBox(height: 20),
+              SizedBox(height: 10),
 
               // SET SIZE
 
@@ -1668,18 +1785,39 @@ class _UploadProductImagesState extends State<UploadProductImages> {
   pickImage(index) async {
     final image = await _picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 50,
+      // imageQuality: 50,
     );
 
-    final bytes = await image.length();
+    File croppedFile = await ImageCropper.cropImage(
+      sourcePath: image.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      maxHeight: 3076,
+      maxWidth: 3076,
+    );
+
+    var resultImage = await FlutterImageCompress.compressAndGetFile(
+        croppedFile.path, image.path,
+        quality: 50);
+
+    final bytes = await resultImage.length();
     final kb = bytes / 1024;
     print("kb: $kb");
     // final mb = kb / 1024;
 
     setState(() {
-      _image[index] = File(image.path);
+      _image[index] = File(resultImage.path);
       _selected = index;
       NewProductProvider.images = _image;
+    });
+  }
+
+  int imagePageIndex = 0;
+  PageController imagePageController = new PageController();
+
+  void onImagePageChanged(int page) {
+    print("page: $page");
+    setState(() {
+      imagePageIndex = page;
     });
   }
 
@@ -1692,14 +1830,20 @@ class _UploadProductImagesState extends State<UploadProductImages> {
   Widget build(BuildContext context) {
     return new Container(
       margin: EdgeInsets.symmetric(vertical: 8),
-      height: 300,
+      height: MediaQuery.of(context).size.width -
+          75 -
+          MediaQuery.of(context).size.width * 0.05,
       alignment: Alignment.topCenter,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            width: MediaQuery.of(context).size.width * 0.2,
+            width: 70,
+            height: MediaQuery.of(context).size.width -
+                100 -
+                MediaQuery.of(context).size.width * 0.05,
+            // alignment: Alignment.center,
             child: ListView.builder(
               // shrinkWrap: true,
               // physics: NeverScrollableScrollPhysics(),
@@ -1712,62 +1856,241 @@ class _UploadProductImagesState extends State<UploadProductImages> {
                       onTap: () {
                         pickImage(index);
                       },
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.2,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: Colors.black,
-                              width: (_selected == index) ? 2 : 0),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: (_image[index] == null)
-                            ? FittedBox(
-                                child: Icon(
+                      child: ClipRRect(
+                        // heightFactor: 1,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: Colors.black,
+                                width: (_selected == index) ? 2 : 0),
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: (_image[index] == null)
+                              ? Icon(
                                   Icons.file_upload,
+                                  size: 40,
                                   color: Colors.black38,
-                                ),
-                              )
-                            : Container(
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: FileImage(File(_image[index].path)),
+                                )
+                              : Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image:
+                                          FileImage(File(_image[index].path)),
+                                    ),
                                   ),
                                 ),
-                              ),
+                        ),
                       ),
                     ),
-                    if (index < 3) SizedBox(height: 13)
+                    if (index < 3)
+                      SizedBox(
+                          height: (MediaQuery.of(context).size.width -
+                                  100 -
+                                  MediaQuery.of(context).size.width * 0.05 -
+                                  240) /
+                              3)
                   ],
                 );
               },
             ),
           ),
-          SizedBox(width: 10),
-          GestureDetector(
-            onTap: null, // todo: zoom
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.6,
-              height: 280,
-              decoration: BoxDecoration(
-                border: Border.all(width: 2, color: Colors.black54),
+          // SizedBox(width: 10),
+          Column(
+            children: <Widget>[
+              GestureDetector(
+                onTap: null, // todo: zoom
+                child: Container(
+                  width: MediaQuery.of(context).size.width -
+                      100 -
+                      MediaQuery.of(context).size.width * 0.05,
+                  height: MediaQuery.of(context).size.width -
+                      100 -
+                      MediaQuery.of(context).size.width * 0.05,
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.black54),
+                  ),
+                  child: (_image[_selected] == null)
+                      ? Icon(
+                          Icons.image,
+                          color: Colors.black38,
+                          size: 100, //aata hu 5 min
+                        )
+                      : PhotoViewGallery.builder(
+                          scrollPhysics: const BouncingScrollPhysics(),
+                          builder: (BuildContext context, int index) {
+                            return PhotoViewGalleryPageOptions(
+                              imageProvider: _image[index] == null
+                                  ? AssetImage("assets/images/noimage.jpg")
+                                  : FileImage(File(_image[index].path)),
+                              initialScale: PhotoViewComputedScale.contained,
+                              // heroAttributes: PhotoViewHeroAttributes(tag: galleryItems[index].id),
+                            );
+                          },
+                          itemCount: _image.length,
+                          loadingBuilder: (context, event) => Center(
+                            child: Container(
+                              width: 20.0,
+                              height: 20.0,
+                              child: CircularProgressIndicator(
+                                value: event == null
+                                    ? 0
+                                    : event.cumulativeBytesLoaded /
+                                        event.expectedTotalBytes,
+                              ),
+                            ),
+                          ),
+                          backgroundDecoration:
+                              BoxDecoration(color: Colors.white),
+                          pageController: imagePageController,
+                          onPageChanged: onImagePageChanged,
+                        ),
+                ),
               ),
-              child: (_image[_selected] == null)
+              Container(
+                height: 21,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: 4,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      margin: EdgeInsets.symmetric(horizontal: 5),
+                      child: Icon(
+                        Icons.circle,
+                        size: (imagePageIndex == index) ? 15 : 10,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Temp extends StatefulWidget {
+  const Temp({Key key}) : super(key: key);
+
+  @override
+  _TempState createState() => _TempState();
+}
+
+class _TempState extends State<Temp> {
+  File _image = null;
+  dynamic im;
+  final _picker = ImagePicker();
+
+  pickImage() async {
+    final image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      // imageQuality: 50,
+    );
+    var bytes = await image.length();
+    var kb = bytes / 1024;
+    print("kb: $kb");
+    File croppedFile = await ImageCropper.cropImage(
+      sourcePath: image.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      maxHeight: 3076,
+      maxWidth: 3076,
+    );
+
+    // var path = croppedFile.path
+
+    var resultImage = await FlutterImageCompress.compressAndGetFile(
+        croppedFile.path, image.path,
+        quality: 50);
+
+    print("done compressing ${croppedFile.path}");
+
+    bytes = await croppedFile.length();
+    kb = bytes / 1024;
+    print("after kb: $kb");
+    bytes = await resultImage.length();
+    kb = bytes / 1024;
+    print("after kb: $kb");
+
+    // final mb = kb / 1024;
+
+    setState(() {
+      // im = image;
+      _image = resultImage;
+
+      // im = image;
+      // NewProductProvider.images = _image;
+    });
+  }
+
+  void upload() async {
+    String name = _image.absolute.toString().split('/').last.split("'")[0];
+    print("name: $name");
+    // await AWS().uploadImage(_image, name);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          GestureDetector(
+            onTap: () async {
+              print("pick");
+              await pickImage();
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.2,
+              height: 60,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black,
+
+                  // borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+              ),
+              child: (_image == null)
                   ? FittedBox(
                       child: Icon(
-                        Icons.image,
+                        Icons.file_upload,
                         color: Colors.black38,
                       ),
                     )
                   : Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: FileImage(File(_image[_selected].path)),
+                          image: FileImage(File(_image.path)),
                         ),
                       ),
                     ),
             ),
           ),
+          (_image == null)
+              ? Container()
+              : Container(
+                  width: 300,
+                  height: 300,
+                  child: PhotoViewGallery.builder(
+                    scrollPhysics: const BouncingScrollPhysics(),
+                    itemCount: 1,
+                    builder: (BuildContext context, int index) {
+                      return PhotoViewGalleryPageOptions(
+                        imageProvider: FileImage(File(_image.path)),
+                        initialScale: PhotoViewComputedScale.contained * 0.8,
+                      );
+                    },
+                  )),
+          ElevatedButton(
+              onPressed: () async {
+                upload();
+              },
+              child: Text("Submit")),
         ],
       ),
     );

@@ -41,7 +41,7 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
           if (usr["verified"] == true) {
             if (usr["bankAccountNo"] != null &&
                 usr["bankAccountNo"].length > 0) {
-              nextpage = "/coming_soon"; // todo: merchant home
+              nextpage = "/merchant_home"; // todo: merchant home
             } else {
               nextpage = "/merchant_acc_details";
             }
@@ -50,7 +50,7 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
           }
         } else {
           if (usr["verified"] == true) {
-            nextpage = "/coming_soon"; // todo: reseller home
+            nextpage = "/reseller_home"; // todo: reseller home
           } else {
             nextpage = "/manual_verification";
           }

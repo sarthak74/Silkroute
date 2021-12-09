@@ -188,11 +188,13 @@ class _ProductListPageState extends State<ProductListPage> {
                                 CategoryHead(title: widget.subCat),
 
                                 Container(
-                                  margin: EdgeInsets.symmetric(
-                                      vertical: 10,
-                                      horizontal:
-                                          MediaQuery.of(context).size.width *
-                                              0.07),
+                                  margin: EdgeInsets.only(
+                                    top: 8,
+                                    left: MediaQuery.of(context).size.width *
+                                        0.07,
+                                    right: MediaQuery.of(context).size.width *
+                                        0.07,
+                                  ),
                                   height: 40,
                                   width: MediaQuery.of(context).size.width,
                                   child: Row(
@@ -239,17 +241,15 @@ class _ProductListPageState extends State<ProductListPage> {
                                 ///                        ///
                                 //////////////////////////////
 
-                                SizedBox(height: 20),
-
                                 Container(
                                   margin: EdgeInsets.symmetric(
                                     horizontal:
                                         MediaQuery.of(context).size.width *
                                             0.05,
                                   ),
-                                  child: SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.5,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.5,
+                                  child: SingleChildScrollView(
                                     child: StreamBuilder<List<ProductList>>(
                                       stream: _searchProvider.productListStream,
                                       builder: (context, snapshot) {
@@ -270,7 +270,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                                 : false;
 
                                             return Column(
-                                              children: <Widget>[
+                                              children: [
                                                 GridView.count(
                                                   shrinkWrap: true,
                                                   physics:
@@ -299,7 +299,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                                           FontWeight.w500,
                                                         ),
                                                       ))
-                                                    : Container(),
+                                                    : Container()
                                               ],
                                             );
                                           } else {
@@ -312,6 +312,8 @@ class _ProductListPageState extends State<ProductListPage> {
                                 ),
 
                                 //////// LOAD MORE BUTTON
+
+                                SizedBox(height: 5),
 
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,

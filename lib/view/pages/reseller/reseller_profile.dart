@@ -290,9 +290,9 @@ class _ProfileDetailsListState extends State<ProfileDetailsList> {
   List fields = ['name', 'contact', 'address', 'anotherNumber'];
   List alts = ['name', 'contact', 'currAdd', 'anotherNumber'];
 
-  void loadPerson() {
+  void loadPerson() async {
+    personDetail = await storage.getItem('user');
     setState(() {
-      personDetail = storage.getItem('user');
       loading = false;
     });
   }
@@ -343,9 +343,14 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
     }
     title = fields[alts.indexOf(widget.title)];
     data = _controller.text;
-    setState(() {
+    if (widget.title == "currAdd") {
+      user[title]["address"] = data;
+    } else {
       user[title] = data;
-      storage.setItem('user', user);
+    }
+
+    await storage.setItem('user', user);
+    setState(() {
       _controller.text = "";
       _enabled = false;
     });
@@ -354,11 +359,17 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
     await ResellerProfileApi().setProfile(body);
   }
 
-  void loadVars() {
+  void loadVars() async {
+    user = await storage.getItem('user');
     setState(() {
-      user = storage.getItem('user');
       title = widget.title;
-      data = user[alts[fields.indexOf(title)]];
+      // data = user[alts[fields.indexOf(title)]];
+
+      if (title == "address") {
+        data = user[alts[fields.indexOf(title)]]["address"];
+      } else {
+        data = user[alts[fields.indexOf(title)]];
+      }
       print("$title $data");
       isContact = ('contact' == widget.title ? true : false);
       loading = false;

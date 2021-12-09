@@ -61,6 +61,7 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                     children: <Widget>[
                       Container(
                         height: 75,
+                        width: 75,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.black54, width: 2),

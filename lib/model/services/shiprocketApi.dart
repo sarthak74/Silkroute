@@ -69,7 +69,35 @@ class ShiprocketApi {
 
   Future<dynamic> createOrder(order) async {
     try {
-      print("Create ShhipRocket Order");
+      print("Create ShhipRocket Order $order");
+      var _body = json.encode(order);
+
+      var shiprocket_auth = await storage.getItem('shiprocket_auth');
+      var _token = shiprocket_auth['token'];
+      print("shiprocket_auth: $shiprocket_auth");
+      var _headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $_token"
+      };
+
+      var _uri = dotenv.env['shiprocket_create_order_api'];
+      var _url = Uri.parse(_uri);
+      print("_url: $_url");
+
+      final res = await http.post(_url, headers: _headers, body: _body);
+      print("res $res");
+      var decoded = await jsonDecode(res.body);
+      print("decoded $decoded");
+
+      return decoded;
+    } catch (err) {
+      print("create order err -- $err");
+    }
+  }
+
+  Future<dynamic> cancelOrder(order) async {
+    try {
+      print("Cancel ShhipRocket Order");
       var _body = json.encode(order);
 
       var shiprocket_auth = await storage.getItem('shiprocket_auth');
@@ -79,7 +107,7 @@ class ShiprocketApi {
         "Authorization": "Bearer $_token"
       };
 
-      var _uri = dotenv.env['shiprocket_create_order_api'];
+      var _uri = dotenv.env['shiprocket_cancel_order_api'];
       var _url = Uri.parse(_uri);
 
       final res = await http.post(_url, headers: _headers, body: _body);

@@ -21,13 +21,13 @@ class MerchantOrderProvider extends ChangeNotifier {
     if (_filter == null) {
       _filter = {
         "paymentStatus": {
-          "\u0024in": ["Completed", "Incomplete"]
+          "\u0024in": ["Completed", "Incomplete", "Pending Refund"]
         },
         "createdDate": {
           "\u0024lte": DateFormat('yyyy-MM-dd hh:mm')
               .format(DateTime.now().add(Duration(days: 1))),
           "\u0024gte": DateFormat('yyyy-MM-dd hh:mm')
-              .format(DateTime.now().subtract(Duration(days: 5)))
+              .format(DateTime.now().subtract(Duration(days: 500)))
         }
       };
     }

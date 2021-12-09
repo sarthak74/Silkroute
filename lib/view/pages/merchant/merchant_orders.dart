@@ -229,14 +229,22 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                                                         style: textStyle(
                                                             12, Colors.black),
                                                       ),
-                                                      Text(
-                                                        "Dispatch Date: " +
-                                                            _orders[i]
-                                                                .dispatchDate
-                                                                .toString(),
-                                                        style: textStyle(
-                                                            12, Colors.black45),
-                                                      ),
+                                                      (_orders[i].dispatchDate !=
+                                                              null)
+                                                          ? Text(
+                                                              "Dispatch Date: " +
+                                                                  _orders[i]
+                                                                      .dispatchDate
+                                                                      .toString(),
+                                                              style: textStyle(
+                                                                  12,
+                                                                  Colors
+                                                                      .black45),
+                                                            )
+                                                          : SizedBox(
+                                                              height: 0,
+                                                              width: 0,
+                                                            ),
                                                       Text(
                                                         "Invoice No.: " +
                                                             _orders[i]

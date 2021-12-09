@@ -162,6 +162,12 @@ class _ResellerHomeState extends State<ResellerHome> {
                       ///                        ///
                       //////////////////////////////
 
+                      // SizedBox(height: 20),
+
+                      // Temp(),
+
+                      // SizedBox(height: 20),
+
                       TopPicks(),
                     ]),
                   ),

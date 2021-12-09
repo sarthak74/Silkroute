@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -188,7 +189,10 @@ class _ProductCounterState extends State<ProductCounter> {
   num counter, min, max, gap;
   bool loading = true, addingtoCrate = false;
   List proColors = [];
-  String url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0",
+  String
+      // url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0",
+      url =
+          "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png",
       _qty = "";
   LocalStorage storage = LocalStorage('silkroute');
   TextEditingController _qtyController = TextEditingController();
@@ -581,7 +585,10 @@ class _ProductImageState extends State<ProductImage> {
   int selected = 0;
   List images = [];
   List<String> wishlists = [];
-  String url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0";
+  // String url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0";
+  // String url = Math().ip() + "/images/" + widget.productDetails.id + "-main-" + 0;
+  String url =
+      "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png";
   LocalStorage storage = LocalStorage('silkroute');
   dynamic user;
 
@@ -628,6 +635,7 @@ class _ProductImageState extends State<ProductImage> {
           wishlist =
               wishlists.contains(widget.productDetails['_id'].toString());
           // user = storage.getItem('user');
+          print("images: $images");
           loading = false;
         });
       });
@@ -655,6 +663,7 @@ class _ProductImageState extends State<ProductImage> {
                   child: ListView.builder(
                     itemCount: images.length,
                     itemBuilder: (BuildContext context, int index) {
+                      // String url = Math().ip() + "/images/" + widget.productDetails.id + "-main-" + index.toString();
                       return Column(
                         children: <Widget>[
                           GestureDetector(
@@ -686,7 +695,7 @@ class _ProductImageState extends State<ProductImage> {
                                         ),
                                 ],
                                 image: DecorationImage(
-                                  image: NetworkImage(url),
+                                  image: CachedNetworkImageProvider(url),
                                   fit: BoxFit.fill,
                                 ),
                               ),

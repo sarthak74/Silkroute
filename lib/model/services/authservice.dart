@@ -166,6 +166,9 @@ class AuthService {
         },
       );
       var data = jsonDecode(res.toString());
+
+      LocalStorage storage = await LocalStorage('silkroute');
+      print("register resp $data");
       // var data = {
       //   "success": true,
       //   "msg": "Invalid user Data",
@@ -180,6 +183,16 @@ class AuthService {
           textColor: Colors.grey[500],
           fontSize: 10,
         );
+        await storage.clear();
+        data = data["user"];
+        print("bef user --  $data");
+        await storage.setItem('contact', data['contact']);
+
+        await storage.setItem('userType', data['userType']);
+        await storage.setItem('name', data['name']);
+        await storage.setItem('user', data);
+        var usr = await storage.getItem('user');
+        print("Storage User -- $usr");
         return true;
       } else {
         Fluttertoast.showToast(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 
 import 'package:silkroute/model/core/Bill.dart';
@@ -20,6 +21,7 @@ class OrderListItem {
   final String paymentStatus;
   final String shipment_id;
   final String shiprocket_order_id;
+  final dynamic dispatchDate;
   OrderListItem({
     this.id,
     this.items,
@@ -35,7 +37,44 @@ class OrderListItem {
     this.paymentStatus,
     this.shipment_id,
     this.shiprocket_order_id,
+    this.dispatchDate,
   });
+
+  OrderListItem copyWith({
+    String id,
+    List<dynamic> items,
+    String latestStatus,
+    dynamic address,
+    Map<String, dynamic> status,
+    num ratingGiven,
+    dynamic reviewGiven,
+    Bill bill,
+    String title,
+    dynamic createdDate,
+    String invoiceNumber,
+    String paymentStatus,
+    String shipment_id,
+    String shiprocket_order_id,
+    dynamic dispatchDate,
+  }) {
+    return OrderListItem(
+      id: id ?? this.id,
+      items: items ?? this.items,
+      latestStatus: latestStatus ?? this.latestStatus,
+      address: address ?? this.address,
+      status: status ?? this.status,
+      ratingGiven: ratingGiven ?? this.ratingGiven,
+      reviewGiven: reviewGiven ?? this.reviewGiven,
+      bill: bill ?? this.bill,
+      title: title ?? this.title,
+      createdDate: createdDate ?? this.createdDate,
+      invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      shipment_id: shipment_id ?? this.shipment_id,
+      shiprocket_order_id: shiprocket_order_id ?? this.shiprocket_order_id,
+      dispatchDate: dispatchDate ?? this.dispatchDate,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -53,6 +92,7 @@ class OrderListItem {
       'paymentStatus': paymentStatus,
       'shipment_id': shipment_id,
       'shiprocket_order_id': shiprocket_order_id,
+      'dispatchDate': dispatchDate,
     };
   }
 
@@ -62,7 +102,7 @@ class OrderListItem {
       items: List<dynamic>.from(map['items']),
       latestStatus: map['latestStatus'],
       address: map['address'],
-      status: map['status'],
+      status: Map<String, dynamic>.from(map['status']),
       ratingGiven: map['ratingGiven'],
       reviewGiven: map['reviewGiven'],
       bill: Bill.fromMap(map['bill']),
@@ -72,6 +112,7 @@ class OrderListItem {
       paymentStatus: map['paymentStatus'],
       shipment_id: map['shipment_id'],
       shiprocket_order_id: map['shiprocket_order_id'],
+      dispatchDate: map['dispatchDate'],
     );
   }
 
@@ -82,6 +123,48 @@ class OrderListItem {
 
   @override
   String toString() {
-    return 'OrderListItem(id: $id, items: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, createdDate: $createdDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus, shipment_id: $shipment_id, shiprocket_order_id: $shiprocket_order_id)';
+    return 'OrderListItem(id: $id, items: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, createdDate: $createdDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus, shipment_id: $shipment_id, shiprocket_order_id: $shiprocket_order_id, dispatchDate: $dispatchDate)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    final collectionEquals = const DeepCollectionEquality().equals;
+
+    return other is OrderListItem &&
+        other.id == id &&
+        collectionEquals(other.items, items) &&
+        other.latestStatus == latestStatus &&
+        other.address == address &&
+        collectionEquals(other.status, status) &&
+        other.ratingGiven == ratingGiven &&
+        other.reviewGiven == reviewGiven &&
+        other.bill == bill &&
+        other.title == title &&
+        other.createdDate == createdDate &&
+        other.invoiceNumber == invoiceNumber &&
+        other.paymentStatus == paymentStatus &&
+        other.shipment_id == shipment_id &&
+        other.shiprocket_order_id == shiprocket_order_id &&
+        other.dispatchDate == dispatchDate;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        items.hashCode ^
+        latestStatus.hashCode ^
+        address.hashCode ^
+        status.hashCode ^
+        ratingGiven.hashCode ^
+        reviewGiven.hashCode ^
+        bill.hashCode ^
+        title.hashCode ^
+        createdDate.hashCode ^
+        invoiceNumber.hashCode ^
+        paymentStatus.hashCode ^
+        shipment_id.hashCode ^
+        shiprocket_order_id.hashCode ^
+        dispatchDate.hashCode;
   }
 }

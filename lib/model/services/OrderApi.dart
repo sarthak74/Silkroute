@@ -9,7 +9,8 @@ class OrderApi {
 
   Future<List<OrderListItem>> getOrders() async {
     try {
-      var reqBody = {"contact": storage.getItem("contact")};
+      var contact = await storage.getItem('contact');
+      var reqBody = {"contact": contact};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/getOrders');
       final res = await http.post(url, body: reqBody);
@@ -17,7 +18,7 @@ class OrderApi {
       List<OrderListItem> resp = [];
       print("decodedRes2 $decodedRes2");
       for (var i in decodedRes2) {
-        print("items: ${i['items']}");
+        // print("items: ${i['items']}");
         OrderListItem r = OrderListItem.fromMap(i);
         resp.add(r);
       }

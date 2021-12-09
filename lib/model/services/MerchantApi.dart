@@ -17,10 +17,10 @@ class MerchantApi {
       final res = await http.post(url,
           headers: {"Content-Type": "application/json"},
           body: json.encode(data));
-      var id = res.body.toString();
-      print("resp: $id");
+      // var id = res.body.toString();
+      print("resp: ${res.body}");
       // print("resp: ${decodedRes2[0].id}");
-      return id;
+      return res.body;
     } catch (e) {
       print("error - $e");
       return e;
@@ -76,6 +76,44 @@ class MerchantApi {
       return resp;
     } catch (e) {
       print("get pending orders error - $e");
+      return e;
+    }
+  }
+
+  Future<dynamic> updateProduct(Map<String, dynamic> body) async {
+    try {
+      print("update product");
+      var data = body;
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/manufacturerApi/updateProduct');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      var decodedRes2 = jsonDecode(res.body);
+
+      print("update product result: $decodedRes2");
+      return decodedRes2;
+    } catch (e) {
+      print("update product err: $e");
+      return e;
+    }
+  }
+
+  Future<dynamic> deleteProduct(Map<String, dynamic> body) async {
+    try {
+      print("delete product");
+      var data = body;
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/manufacturerApi/deleteProduct');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      var decodedRes2 = jsonDecode(res.body);
+
+      print("update product result: $decodedRes2");
+      return decodedRes2;
+    } catch (e) {
+      print("update product err: $e");
       return e;
     }
   }

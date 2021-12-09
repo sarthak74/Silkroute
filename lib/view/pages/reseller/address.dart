@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/toast/gf_toast.dart';
 import 'package:getwidget/getwidget.dart';
@@ -140,6 +142,7 @@ class _AddressPageState extends State<AddressPage> {
     setState(() {
       _addressSave = false;
     });
+    print("address saved");
     return true;
   }
 
@@ -164,6 +167,7 @@ class _AddressPageState extends State<AddressPage> {
     setState(() {
       if (preAdd != null) {
         for (var x in fields) {
+          print("pre-- $x");
           if (preAdd[x] != null) {
             data[x] = preAdd[x];
           }
@@ -451,11 +455,14 @@ class _AddressPageState extends State<AddressPage> {
                     onTap: canBeDelivered
                         ? () async {
                             var res = await addressSaveHandler();
+                            print("_proceeding $res");
                             if (res) {
                               setState(() {
                                 _proceeding = true;
                               });
                               await initOrder();
+                              // dynamic res = await createtShiprocketOrder();
+                              // print("created orfer red : $res");
                             }
                           }
                         : () {
@@ -508,7 +515,7 @@ class _AddressPageState extends State<AddressPage> {
 
   String _id, _dbid, _date;
   dynamic _merchant;
-  var key = "rzp_test_XGLJQQbg9CfbPJ", secret = 'wzwPMXY3An2S8SPrmrnwrikM';
+  var key = "rzp_test_zbF9BwMKHoWRR6", secret = 'a4lLo5H9zbTY3PNU3ADvSWQt';
 
   Future<dynamic> getPickup() async {
     var allPickupLocations = await ShiprocketApi().getAllPickupLocations(),
@@ -522,7 +529,7 @@ class _AddressPageState extends State<AddressPage> {
     setState(() {
       _merchant = merchant;
     });
-    if (!merchant) {
+    if (merchant == null) {
       Toast().notifyErr("Some error occurred");
       // refund
       return "";
@@ -550,10 +557,23 @@ class _AddressPageState extends State<AddressPage> {
     return {"new_loc": new_loc, "pickup_location": pickup_location};
   }
 
-  Future<void> createtShiprocketOrder() async {
+  Map<String, dynamic> toShiprocketItem(Map<String, dynamic> item) {
+    Map<String, dynamic> newitem = item;
+    newitem['sku'] = item['id'];
+    newitem['selling_price'] = item['mrp'];
+    newitem['units'] = item['quantity'];
+    newitem['discount'] = item['discount'] ? item['discountValue'] : 0.00;
+    return newitem;
+  }
+
+  Future<dynamic> createtShiprocketOrder(String order_id) async {
+    print("order_id: $order_id");
     var pickup_location = await getPickup();
+    print("pickup: $pickup_location");
     var channels = await ShiprocketApi().getChannels();
+
     var channel_id = channels[0]["id"];
+    print("channel: $channel_id");
 
     // Billing - from
     // Shipping - to
@@ -568,13 +588,15 @@ class _AddressPageState extends State<AddressPage> {
     "addLine2": ""
   };
     */
+    print("_merchant: $_merchant");
     var ship_order = {
-      "order_id": _dbid,
+      "order_id": order_id,
       "order_date": _date,
       "channel_id": channel_id,
       "pickup_location": pickup_location['pickup_location'], // manuf id\
       "billing_customer_name": _merchant['name'], // manuf name
-
+      "billing_last_name": "",
+      "billing_address": _merchant["currAdd"]["address"],
       "billing_city": _merchant['currAdd']['city'], // manuf city
       "billing_pincode": _merchant['currAdd']['pincode'],
       "billing_state": _merchant['currAdd']['state'],
@@ -593,14 +615,14 @@ class _AddressPageState extends State<AddressPage> {
       "shipping_state": data['state'],
       "shipping_email": data['contact'] + "@gmail.com",
       "shipping_phone": data['contact'],
-      "order_items": _crateListM,
+      "order_items": _crateListM.map((item) => toShiprocketItem(item)).toList(),
       "payment_method": "Prepaid",
 
       "sub_total": widget.bill['totalCost'],
-      "length": "",
-      "breadth": "",
-      "height": "",
-      "weight": "",
+      "length": "30",
+      "breadth": "30",
+      "height": "30",
+      "weight": "2",
     };
 
     if (pickup_location["new_loc"] == true) {
@@ -617,29 +639,38 @@ class _AddressPageState extends State<AddressPage> {
       };
     }
 
+    print("ship_order: $ship_order");
+
     final dynamic res = await ShiprocketApi().createOrder(ship_order);
+    print("create_roder: $res");
+    dynamic status = null;
     if ((res == null) || (res['status'] != 1)) {
       Toast().notifyErr(
           "Some error occurred, refund is in process.\nDon't worry, we are working on it.");
       return;
       // TODO: implement refund
     } else {
+      status = {
+        "pickup_scheduled_date": res['payload']['pickup_scheduled_date'],
+        "awb_code": res['payload']['awb_code'],
+        "assigned_date_time": res['payload']["assigned_date_time"],
+        "applied_weight": res['payload']["applied_weight"],
+        "label_url": res['payload']["label_url"],
+        "manifest_url": res['payload']["manifest_url"],
+        "routing_code": res['payload']["routing_code"]
+      };
       var qry = {
         'shipment_id': res['payload']['shipment_id'],
         'shiprocket_order_id': res['payload']['order_id'],
         'merchant': _merchant['contact'],
-        'status': {
-          "pickup_scheduled_date": res['payload']['pickup_scheduled_date'],
-          "awb_code": res['payload']['awb_code'],
-          "assigned_date_time": res['payload']["assigned_date_time"],
-          "applied_weight": res['payload']["applied_weight"],
-          "label_url": res['payload']["label_url"],
-          "manifest_url": res['payload']["manifest_url"],
-          "routing_code": res['payload']["routing_code"]
-        }
+        'status': status
       };
       await OrderApi().updateOrder(_id, qry);
     }
+
+    print("status : $status");
+
+    return status;
   }
 
   // Payment Methods
@@ -650,19 +681,20 @@ class _AddressPageState extends State<AddressPage> {
         key, secret, int.parse(amtForRazor.toString().split('.')[0]));
 
     print("\norder_id: $_id\n");
+    var addr = await storage.getItem('address');
     setState(() {
-      _bill['totlaCost'] = double.parse(amt);
+      _bill['totalCost'] = double.parse(amt);
       _bill['logistic'] = double.parse(_deliveryServiceabilityStatus['rate']);
       print("cratelist M in orders\n$_crateListM");
       _order = {
         "contact": data['contact'],
         "items": _crateListM,
         "paymentStatus": "Initiated",
-        "address": storage.getItem('address'),
+        "address": addr,
         "ratingGiven": 0.0,
         "reviewGiven": 0.0,
         "bill": _bill,
-        "title": _title + ", ...",
+        "title": _title + ((_crateListM.length > 0) ? ", ..." : ""),
         "dispatchDate": "",
         "invoiceNumber": _id
       };
@@ -670,11 +702,13 @@ class _AddressPageState extends State<AddressPage> {
     var res = await OrderApi().setOrder(_order);
     print("in payement, ${res['success']}");
 
+    print("in payement, ${res['cd']}");
+
     if (res['success']) {
       setState(() {
         final f = new DateFormat('yyyy-MM-dd hh:mm');
 
-        _date = f.format(res['cd']).toString();
+        _date = f.format(DateTime.parse(res['cd'].toString())).toString();
         print("date-qq: $_date");
         _dbid = res['id'];
       });
@@ -706,10 +740,27 @@ class _AddressPageState extends State<AddressPage> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse res) async {
-    // await createtShiprocketOrder();
+    dynamic status = await createtShiprocketOrder(res.orderId);
+    // Map<String, dynamic> status = {
+    //   "pickup_scheduled_date": "res['payload']['pickup_scheduled_date']",
+    //   "awb_code": "res['payload']['awb_code']",
+    //   "assigned_date_time": "res['payload']['assigned_date_time']",
+    //   "applied_weight": "res['payload']['applied_weight']",
+    //   "label_url": "res['payload']['label_url']",
+    //   "manifest_url": "res['payload']['manifest_url']",
+    //   "routing_code": "res['payload']['routing_code']"
+    // };
 
-    await OrderApi().updateOrder(
-        _id, {"paymentStatus": "Completed", "latestStatus": "Order Placed"});
+    print("razorpay_payment_id ${res.paymentId}");
+
+    status["razorpay_paymentId"] = res.paymentId;
+    status["razorpay_signature"] = res.signature;
+    status["razorpay_orderId"] = res.orderId;
+    await OrderApi().updateOrder(_id, {
+      "paymentStatus": "Completed",
+      "latestStatus": "Order Placed",
+      "status": status
+    });
     setState(() {
       _proceeding = false;
     });
@@ -721,13 +772,13 @@ class _AddressPageState extends State<AddressPage> {
     setState(() {
       _proceeding = false;
     });
-    Toast().notifySuccess("Payment Failed");
+    Toast().notifyErr("Payment Failed");
   }
 
   void _handleExternalWallet(PaymentSuccessResponse res) {
     setState(() {
       _proceeding = false;
     });
-    Toast().notifySuccess("External");
+    Toast().notifyInfo("External");
   }
 }

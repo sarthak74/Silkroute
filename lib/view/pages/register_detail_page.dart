@@ -24,9 +24,9 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
 
   Widget nullContact;
 
-  var data = {
+  Map<String, dynamic> data = {
     "name": "",
-    "currAdd": "",
+    "currAdd": {"address": "", "city": "", "state": "", "pincode": ""},
     "businessName": "",
     "anotherNumber": "",
     "contact": "",
@@ -65,7 +65,14 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       "businessName"
     ];
 
-    data["currAdd"] = street + ", " + city + ", " + state + ", " + pincode;
+    data["currAdd"] = {
+      "address": street + ", " + city + ", " + state + ", " + pincode,
+      "city": city,
+      "state": state,
+      "pincode": pincode,
+      "country": "India"
+    };
+
     for (String x in reqFields) {
       print("$x - ${data[x].toString()}");
       if ((data[x].toString()).length == 0) {

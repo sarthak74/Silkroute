@@ -33,6 +33,11 @@ import 'package:silkroute/provider/locale_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:silkroute/methods/notification_service.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+
+Future<void> secureScreen() async {
+  await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,7 +67,9 @@ Future<void> main() async {
     )
   ]);
 
-  LocalStorage storage = LocalStorage('silkroute');
+  LocalStorage storage = await LocalStorage('silkroute');
+
+  secureScreen();
 
   void runapp() {
     storage.ready.then((res) {
@@ -104,40 +111,40 @@ class MyApp extends StatelessWidget {
                   OtpVerificationPage(),
               "/register_detail": (BuildContext context) =>
                   RegisterDetailPage(),
-              // "/reseller_home": (BuildContext context) => ResellerHome(),
-              // "/reseller_profile": (BuildContext context) => ResellerProfile(),
-              // "/merchant_home": (BuildContext context) => MerchantHome(),
-              // "/categories": (BuildContext context) =>
-              //     CategoryPage(category: "saree"),
-              // "/search": (BuildContext context) => SearchPage(),
-              // "/wishlist": (BuildContext context) => WishlistPage(),
-              // "/crate": (BuildContext context) => CratePage(),
-              // "/orders": (BuildContext context) => Orders(),
-              // "/faqs": (BuildContext context) => Faqs(),
-              // "/merchant_dashboard": (BuildContext context) =>
-              //     MerchantDashboard(),
-              // "/merchant_profile": (BuildContext context) => MerchantProfile(),
-              // "/add_new_product_page": (BuildContext context) =>
-              //     AddNewProductPage(),
-              // "/merchant_orders": (BuildContext context) => MerchantOrders(),
+              "/reseller_home": (BuildContext context) => ResellerHome(),
+              "/reseller_profile": (BuildContext context) => ResellerProfile(),
+              "/merchant_home": (BuildContext context) => MerchantHome(),
+              "/categories": (BuildContext context) =>
+                  CategoryPage(category: "saree"),
+              "/search": (BuildContext context) => SearchPage(),
+              "/wishlist": (BuildContext context) => WishlistPage(),
+              "/crate": (BuildContext context) => CratePage(),
+              "/orders": (BuildContext context) => Orders(),
+              "/faqs": (BuildContext context) => Faqs(),
+              "/merchant_dashboard": (BuildContext context) =>
+                  MerchantDashboard(),
+              "/merchant_profile": (BuildContext context) => MerchantProfile(),
+              "/add_new_product_page": (BuildContext context) =>
+                  AddNewProductPage(),
+              "/merchant_orders": (BuildContext context) => MerchantOrders(),
               "/manual_verification": (BuildContext context) =>
                   ManualVerification(),
               "/merchant_acc_details": (BuildContext context) =>
                   MechantAccountDetails(),
               "/coming_soon": (BuildContext context) => ComingSoon(),
-              "/reseller_home": (BuildContext context) => ComingSoon(),
-              "/reseller_profile": (BuildContext context) => ComingSoon(),
-              "/merchant_home": (BuildContext context) => ComingSoon(),
-              "/categories": (BuildContext context) => ComingSoon(),
-              "/search": (BuildContext context) => ComingSoon(),
-              "/wishlist": (BuildContext context) => ComingSoon(),
-              "/crate": (BuildContext context) => ComingSoon(),
-              "/orders": (BuildContext context) => ComingSoon(),
-              "/faqs": (BuildContext context) => ComingSoon(),
-              "/merchant_dashboard": (BuildContext context) => ComingSoon(),
-              "/merchant_profile": (BuildContext context) => ComingSoon(),
-              "/add_new_product_page": (BuildContext context) => ComingSoon(),
-              "/merchant_orders": (BuildContext context) => ComingSoon(),
+              // "/reseller_home": (BuildContext context) => ComingSoon(),
+              // "/reseller_profile": (BuildContext context) => ComingSoon(),
+              // "/merchant_home": (BuildContext context) => ComingSoon(),
+              // "/categories": (BuildContext context) => ComingSoon(),
+              // "/search": (BuildContext context) => ComingSoon(),
+              // "/wishlist": (BuildContext context) => ComingSoon(),
+              // "/crate": (BuildContext context) => ComingSoon(),
+              // "/orders": (BuildContext context) => ComingSoon(),
+              // "/faqs": (BuildContext context) => ComingSoon(),
+              // "/merchant_dashboard": (BuildContext context) => ComingSoon(),
+              // "/merchant_profile": (BuildContext context) => ComingSoon(),
+              // "/add_new_product_page": (BuildContext context) => ComingSoon(),
+              // "/merchant_orders": (BuildContext context) => ComingSoon(),
               // "/merchant_acc_details":
             },
           );

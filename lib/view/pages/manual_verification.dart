@@ -3,6 +3,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/model/services/authservice.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
+import 'package:silkroute/view/widget/custom_network_image.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 
@@ -29,7 +30,7 @@ class _ManualVerificationState extends State<ManualVerification> {
     if (verified == true) {
       String ut = storage.getItem('userType');
       String nextpage =
-          (ut == "Reseller") ? "/coming_soon" : "/merchant_acc_details";
+          (ut == "Reseller") ? "/reseller_home" : "/merchant_acc_details";
       // Navigator.of(context).pop();
       Navigator.of(context).popAndPushNamed(nextpage);
     }
@@ -158,8 +159,9 @@ class _ManualVerificationState extends State<ManualVerification> {
                                                   Helpers()
                                                       .launchURLBrowser(url);
                                                 },
-                                                child: Image.network(
-                                                  "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/whatsapp.png?raw=true",
+                                                child: CustomNetworkImage(
+                                                  url:
+                                                      "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/whatsapp.png?raw=true",
                                                   height: 70,
                                                   width: 70,
                                                 ),
@@ -171,8 +173,9 @@ class _ManualVerificationState extends State<ManualVerification> {
                                                   Helpers()
                                                       .launchURLBrowser(url);
                                                 },
-                                                child: Image.network(
-                                                  "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_insta.png?raw=true",
+                                                child: CustomNetworkImage(
+                                                  url:
+                                                      "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_insta.png?raw=true",
                                                   height: 80,
                                                   width: 80,
                                                 ),
@@ -184,8 +187,9 @@ class _ManualVerificationState extends State<ManualVerification> {
                                                   Helpers()
                                                       .launchURLBrowser(url);
                                                 },
-                                                child: Image.network(
-                                                  "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_fb.png?raw=true",
+                                                child: CustomNetworkImage(
+                                                  url:
+                                                      "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_fb.png?raw=true",
                                                   height: 70,
                                                   width: 70,
                                                 ),

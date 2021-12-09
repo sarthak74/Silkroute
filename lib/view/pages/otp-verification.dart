@@ -16,14 +16,22 @@ class OtpVerificationPage extends StatefulWidget {
 
 class OtpVerificationPageState extends State<OtpVerificationPage> {
   LocalStorage storage = new LocalStorage('silkroute');
-
+  bool loading = true;
   String token;
+
+  void loadVars() async {
+    token = await storage.getItem('token');
+    setState(() {
+      loading = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    loadVars();
     // token =
     // "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfaWQiOiI2MGJhNjkyODIyYTE0MzNhZTQ4MWM4NDAiLCJjb250YWN0IjoiKzkxNzQwODE1OTg5OCIsIm5hbWUiOiJhYmNkIiwicmVnaXN0ZXJlZCI6ZmFsc2UsIl9fdiI6MCwib3RwIjoiNTE4OTY2NjcifQ.P_M-6v2VcZe5Vw-eui6E8CRguzMtanCZtUPxUCAoOys";
-    token = storage.getItem('token');
   }
 
   String userOtp, nextpage;
@@ -43,38 +51,55 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
 
               SizedBox(height: 50),
 
-              Container(
-                margin: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.05),
-                child: new Theme(
-                  data: new ThemeData(
-                    primaryColor: Colors.black87,
-                  ),
-                  child: new TextField(
-                    obscureText: false,
-                    decoration: new InputDecoration(
-                      border: OutlineInputBorder(
-                        borderSide: new BorderSide(
-                          color: Colors.black,
+              loading
+                  ? Container(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF5B0D1B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      margin: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05),
+                      child: new Theme(
+                        data: new ThemeData(
+                          primaryColor: Colors.black87,
+                        ),
+                        child: new TextField(
+                          obscureText: false,
+                          decoration: new InputDecoration(
+                            border: OutlineInputBorder(
+                              borderSide: new BorderSide(
+                                color: Colors.black,
+                              ),
+                            ),
+                            contentPadding: new EdgeInsets.symmetric(
+                              horizontal: 10.0,
+                            ),
+                            labelText: AppLocalizations.of(context).otp,
+                            prefixStyle: new TextStyle(
+                              color: Colors.black,
+                            ),
+                            hintText: AppLocalizations.of(context).enterOtp,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              userOtp = value;
+                            });
+                          },
                         ),
                       ),
-                      contentPadding: new EdgeInsets.symmetric(
-                        horizontal: 10.0,
-                      ),
-                      labelText: AppLocalizations.of(context).otp,
-                      prefixStyle: new TextStyle(
-                        color: Colors.black,
-                      ),
-                      hintText: AppLocalizations.of(context).enterOtp,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        userOtp = value;
-                      });
-                    },
-                  ),
-                ),
-              ),
 
               SizedBox(height: 40),
 
@@ -121,7 +146,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                                 if (user["bankAccountNo"] != null &&
                                     user["bankAccountNo"].length > 0) {
                                   nextpage =
-                                      "/coming_soon"; // todo: merchant home
+                                      "/merchant_home"; // todo: merchant home
                                 } else {
                                   nextpage = "/merchant_acc_details";
                                 }
@@ -131,7 +156,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                             } else {
                               if (user["verified"] == true) {
                                 nextpage =
-                                    "/coming_soon"; // todo: reseller home
+                                    "/reseller_home"; // todo: reseller home
                               } else {
                                 nextpage = "/manual_verification";
                               }

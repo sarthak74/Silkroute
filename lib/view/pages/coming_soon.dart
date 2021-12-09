@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
+import 'package:silkroute/view/widget/custom_network_image.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 
@@ -78,8 +79,9 @@ class _ComingSoonState extends State<ComingSoon> {
                                                 'https://wa.me/+917007135430';
                                             Helpers().launchURLBrowser(url);
                                           },
-                                          child: Image.network(
-                                            "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/whatsapp.png?raw=true",
+                                          child: CustomNetworkImage(
+                                            url:
+                                                "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/whatsapp.png?raw=true",
                                             height: 70,
                                             width: 70,
                                           ),
@@ -90,8 +92,9 @@ class _ComingSoonState extends State<ComingSoon> {
                                                 "https://www.instagram.com/yibrance";
                                             Helpers().launchURLBrowser(url);
                                           },
-                                          child: Image.network(
-                                            "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_insta.png?raw=true",
+                                          child: CustomNetworkImage(
+                                            url:
+                                                "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_insta.png?raw=true",
                                             height: 80,
                                             width: 80,
                                           ),
@@ -102,8 +105,9 @@ class _ComingSoonState extends State<ComingSoon> {
                                                 "https://www.facebook.com/yibrance";
                                             Helpers().launchURLBrowser(url);
                                           },
-                                          child: Image.network(
-                                            "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_fb.png?raw=true",
+                                          child: CustomNetworkImage(
+                                            url:
+                                                "https://github.com/yibrance/yibrance.github.io/blob/master/assets/images/contact_fb.png?raw=true",
                                             height: 70,
                                             width: 70,
                                           ),

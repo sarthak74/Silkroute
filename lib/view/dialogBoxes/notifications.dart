@@ -25,7 +25,7 @@ class NotificationDialogBoxState extends State<NotificationDialogBox> {
           children: <Widget>[
             Container(
               child: Text(
-                AppLocalizations.of(context).notifications,
+                "Notifications",
                 style: TextStyle(
                   color: Colors.black54,
                   fontSize: 20,

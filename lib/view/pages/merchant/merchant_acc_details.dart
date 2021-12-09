@@ -84,7 +84,7 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
   void loadVars() async {
     var user = await storage.getItem('user');
     var ct = user["contact"];
-    businessAdd = user["currAdd"];
+    businessAdd = user["currAdd"]["address"];
     if (ct == null) {
       contact = null;
       check();
@@ -125,7 +125,8 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
         // user["verified"] = true;
         await storage.setItem('user', res);
         Navigator.of(context).pop();
-        Navigator.of(context).pushNamed("/coming_soon"); // todo: merchant_home
+        Navigator.of(context)
+            .pushNamed("/merchant_home"); // todo: merchant_home
       } else {
         await Fluttertoast.showToast(
           msg:
