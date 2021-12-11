@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/model/core/OrderListItem.dart';
 
@@ -10,9 +11,12 @@ class OrderApi {
   Future<List<OrderListItem>> getOrders() async {
     try {
       var contact = await storage.getItem('contact');
+      var userType = await storage.getItem('userType');
+      var apiRoute =
+          (userType == "Reseller") ? "resellerApi" : "manufacturerApi";
       var reqBody = {"contact": contact};
       var uri = Math().ip();
-      var url = Uri.parse(uri + '/resellerApi/getOrders');
+      var url = Uri.parse(uri + '/' + apiRoute + '/getOrders');
       final res = await http.post(url, body: reqBody);
       var decodedRes2 = jsonDecode(res.body);
       List<OrderListItem> resp = [];
@@ -61,7 +65,52 @@ class OrderApi {
       print("Update order res -  ${res.body}");
       var decodedRes2 = jsonDecode(res.body);
       print("Update order res -  $decodedRes2");
-      print("Update order res -  ${decodedRes2['success']}");
+
+      return decodedRes2;
+    } catch (e) {
+      print("Update Order error - $e");
+      return e;
+    }
+  }
+
+  Future<void> addOrderItem(String orderId, dynamic body) async {
+    try {
+      var data = {"orderId": orderId, "body": body};
+      print("add order item data -  $data");
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/resellerApi/addOrderItem');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      print("add order res -  ${res.body}");
+      var decodedRes2 = jsonDecode(res.body);
+      print("add order res -  $decodedRes2");
+
+      // return decodedRes2;
+    } catch (e) {
+      print("add Order error - $e");
+      // return e;
+    }
+  }
+
+  Future<dynamic> updateOrderItem(
+      String orderId, String productId, dynamic body) async {
+    try {
+      // irderId: invoiceNumber
+      var data = {"orderId": orderId, "productId": productId, "body": body};
+      print("Update order item data -  $data");
+      var uri = Math().ip();
+      LocalStorage storage = LocalStorage('silkroute');
+      var ut = await storage.getItem('userType');
+      var route = (ut == 'Reseller') ? 'resellerApi' : 'manufacturerApi';
+      var url = Uri.parse(uri + '/' + route + '/updateOrderItem');
+      final res = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(data));
+      print("Update order res -  ${res.body}");
+      var decodedRes2 = jsonDecode(res.body);
+      print("Update order res -  $decodedRes2");
+
       return decodedRes2;
     } catch (e) {
       print("Update Order error - $e");

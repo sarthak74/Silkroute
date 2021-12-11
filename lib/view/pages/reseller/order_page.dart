@@ -62,7 +62,7 @@ class _OrderPageState extends State<OrderPage> {
   void loadOrder() {
     print("order: ${widget.order}");
     setState(() {
-      orderDetails = widget.order["items"];
+      orderDetails = widget.order;
     });
     loadPrice();
   }
@@ -141,17 +141,17 @@ class _OrderPageState extends State<OrderPage> {
                                   children: <Widget>[
                                     // OrderPageTitle
                                     OrderPageTitle(orderDetails: orderDetails),
-                                    OrderStatus(orderDetails: {
-                                      "status": widget.order["latestStatus"]
-                                    }),
-                                    StarRating(orderDetails: {
-                                      "rating": widget.order["ratingGiven"]
-                                    }),
+                                    // OrderStatus(orderDetails: {
+                                    //   "status": widget.order["status"]
+                                    // }),
+
+                                    SizedBox(height: 10),
+
                                     OrderPriceDetails(
                                         price: price,
                                         savings: savings,
                                         totalCost: totalCost),
-                                    CancelOrder(order: widget.order),
+                                    // CancelOrder(order: widget.order),
                                   ],
                                 ),
                               ),
@@ -430,8 +430,8 @@ class _StarRatingState extends State<StarRating> {
 }
 
 class OrderStatus extends StatefulWidget {
-  const OrderStatus({this.orderDetails});
-  final dynamic orderDetails;
+  const OrderStatus({this.itemDetails});
+  final dynamic itemDetails;
 
   @override
   _OrderStatusState createState() => _OrderStatusState();
@@ -442,20 +442,20 @@ class _OrderStatusState extends State<OrderStatus> {
   int index = 0;
   List<Icon> icons = [];
 
-  dynamic orderDetails;
+  dynamic itemDetails;
   var statuses = [
     "Order Placed",
-    "Dispatched from Source",
+    "Dispatched",
     "Out for Delivery",
     "Delivered"
   ];
   void loadVars() {
     setState(() {
-      orderDetails = widget.orderDetails;
-      if (orderDetails['status'] == "Cancelled") {
+      itemDetails = widget.itemDetails;
+      if (itemDetails['customerStatus'] == "Cancelled") {
         cancelled = true;
       } else {
-        index = statuses.indexOf(orderDetails['status']);
+        index = statuses.indexOf(itemDetails['customerStatus']);
         for (int i = 0; i < index; i++) {
           icons.add(Icon(Icons.check));
         }
@@ -499,7 +499,10 @@ class _OrderStatusState extends State<OrderStatus> {
                 horizontal: MediaQuery.of(context).size.width * 0.03),
             decoration: BoxDecoration(),
             child: ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(15)),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(15),
+                bottomRight: Radius.circular(15),
+              ),
               child: ExpansionPanelList(
                 expansionCallback: (int index, bool isExpanded) {
                   setState(() {
@@ -519,7 +522,9 @@ class _OrderStatusState extends State<OrderStatus> {
                                 size: 20, color: Colors.black54),
                             SizedBox(width: 10),
                             Text(
-                              cancelled ? "Cancelled" : orderDetails['status'],
+                              cancelled
+                                  ? "Cancelled"
+                                  : itemDetails['customerStatus'],
                               style: textStyle(15, Colors.grey[700]),
                             ),
                           ],
@@ -528,11 +533,12 @@ class _OrderStatusState extends State<OrderStatus> {
                     },
                     body: ListTile(
                       title: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Container(
                             width: 70,
                             margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                            height: 240,
+                            height: 165,
                             child: IconStepper(
                               enableNextPreviousButtons: false,
                               enableStepTapping: false,
@@ -541,33 +547,33 @@ class _OrderStatusState extends State<OrderStatus> {
                               activeStepBorderColor: Colors.green,
                               activeStepBorderWidth: 1,
                               activeStepBorderPadding: 2.0,
-                              lineLength: 35,
+                              lineLength: 20,
                               activeStep: index,
                               lineDotRadius: 2,
                               activeStepColor: Colors.green,
                               stepPadding: 0.0,
                               lineColor: Colors.grey[400],
-                              stepRadius: 13,
+                              stepRadius: 10,
                               icons: icons,
                             ),
                           ),
                           Container(
                             margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                            height: 240,
+                            height: 165,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                SizedBox(height: 10),
+                                SizedBox(height: 12),
                                 Text("Order Placed",
                                     style: textStyle(12, Colors.black54)),
-                                SizedBox(height: 45),
-                                Text("Dispatched from Source",
+                                SizedBox(height: 28),
+                                Text("Dispatched",
                                     style: textStyle(12, Colors.black54)),
-                                SizedBox(height: 45),
+                                SizedBox(height: 25),
                                 Text("Out for Delivery",
                                     style: textStyle(12, Colors.black54)),
-                                SizedBox(height: 45),
+                                SizedBox(height: 23),
                                 Text("Delivered",
                                     style: textStyle(12, Colors.black54)),
                               ],
@@ -631,106 +637,112 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
         : ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: orderDetails.length,
+            itemCount: orderDetails['items'].length,
             itemBuilder: (BuildContext context, int i) {
-              return Container(
-                margin: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.03,
-                  vertical: 5,
-                ),
-                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.25,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage("assets/images/1.png"),
-                          fit: BoxFit.fill,
-                        ),
+              return Column(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.03,
+                      right: MediaQuery.of(context).size.width * 0.03,
+                      top: 5,
+                    ),
+                    padding: EdgeInsets.fromLTRB(20, 10, 20, 1),
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
                     ),
-                    SizedBox(width: 20),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            orderDetails[i]['title'],
-                            style: textStyle(12, Colors.black),
-                          ),
-                          Text(
-                            ("Quantity: " +
-                                    orderDetails[i]['quantity'].toString())
-                                .toString(),
-                            style: textStyle(12, Colors.black),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        // Container(
+                        //   width: MediaQuery.of(context).size.width * 0.25,
+                        Image.asset(
+                          "assets/images/1.png",
+                          fit: BoxFit.fill,
+                          width: MediaQuery.of(context).size.width * 0.25,
+                          height: 110,
+                        ),
+                        SizedBox(width: 20),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              SizedBox(
-                                width: 130,
-                                height: 20,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: Math()
-                                      .min(orderDetails[i]['colors'].length, 5),
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return Container(
-                                      width: 20,
-                                      height: 20,
-                                      margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          image: DecorationImage(
-                                            // image: NetworkImage(Math().ip() +
-                                            //     "/images/616ff5ab029b95081c237c89-color-0"),
-                                            image: NetworkImage(
-                                                "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
-                                            fit: BoxFit.fill,
-                                          )),
-                                    );
-                                  },
+                              Text(
+                                orderDetails['items'][i]['title'],
+                                style: textStyle1(
+                                  13,
+                                  Colors.black,
+                                  FontWeight.w500,
                                 ),
                               ),
-                              // moreColor
-                              //     ?
-                              Container(
-                                width: 25,
-                                height: 25,
-                                margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12.5)),
-                                  border: Border.all(
-                                      width: 2, color: Colors.grey[500]),
-                                  color: Colors.white,
+                              Text(
+                                ("Quantity: " +
+                                        orderDetails['items'][i]['quantity']
+                                            .toString())
+                                    .toString(),
+                                style: textStyle1(
+                                  13,
+                                  Colors.black,
+                                  FontWeight.w500,
                                 ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "+" +
-                                      (orderDetails[i]['colors'].length - 5)
-                                          .toString(),
-                                  style: textStyle(10, Colors.grey[500]),
+                              ),
+                              Text(
+                                "MRP: ${orderDetails['items'][i]['mrp']}",
+                                style: textStyle1(
+                                  13,
+                                  Colors.black,
+                                  FontWeight.w500,
                                 ),
-                              )
-                              // : SizedBox(width: 1),
+                              ),
+                              Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 130,
+                                    height: 20,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: orderDetails['items'][i]
+                                              ['colors']
+                                          .length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return Container(
+                                          width: 20,
+                                          height: 20,
+                                          margin:
+                                              EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10)),
+                                              image: DecorationImage(
+                                                // image: NetworkImage(Math().ip() +
+                                                //     "/images/616ff5ab029b95081c237c89-color-0"),
+                                                image: NetworkImage(
+                                                    "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
+                                                fit: BoxFit.fill,
+                                              )),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 5),
                             ],
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  OrderStatus(itemDetails: orderDetails['items'][i]),
+                ],
               );
             });
   }

@@ -1,48 +1,50 @@
 import 'dart:convert';
 
 class Bill {
-  final num totalValue;
-  final num implicitDiscount;
-  final num priceAfterDiscount;
-  final num couponDiscount;
-  final num gst;
-  final num logistic;
-  final num totalCost;
   Bill({
     this.totalValue,
     this.implicitDiscount,
     this.priceAfterDiscount,
+    this.couponsApplied,
     this.couponDiscount,
     this.gst,
     this.logistic,
     this.totalCost,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'totalValue': totalValue,
-      'implicitDiscount': implicitDiscount,
-      'priceAfterDiscount': priceAfterDiscount,
-      'couponDiscount': couponDiscount,
-      'gst': gst,
-      'logistic': logistic,
-      'totalCost': totalCost,
-    };
-  }
+  final num totalValue;
+  final num implicitDiscount;
+  final num priceAfterDiscount;
+  final List<dynamic> couponsApplied;
+  final num couponDiscount;
+  final num gst;
+  final num logistic;
+  final num totalCost;
 
-  factory Bill.fromMap(Map<String, dynamic> map) {
-    return Bill(
-      totalValue: map['totalValue'],
-      implicitDiscount: map['implicitDiscount'],
-      priceAfterDiscount: map['priceAfterDiscount'],
-      couponDiscount: map['couponDiscount'],
-      gst: map['gst'],
-      logistic: map['logistic'],
-      totalCost: map['totalCost'],
-    );
-  }
+  factory Bill.fromJson(String str) => Bill.fromMap(json.decode(str));
 
   String toJson() => json.encode(toMap());
 
-  factory Bill.fromJson(String source) => Bill.fromMap(json.decode(source));
+  factory Bill.fromMap(Map<String, dynamic> json) => Bill(
+        totalValue: json["totalValue"],
+        implicitDiscount: json["implicitDiscount"],
+        priceAfterDiscount: json["priceAfterDiscount"],
+        couponsApplied:
+            List<dynamic>.from(json["couponsApplied"].map((x) => x)),
+        couponDiscount: json["couponDiscount"],
+        gst: json["gst"],
+        logistic: json["logistic"],
+        totalCost: json["totalCost"],
+      );
+
+  Map<String, dynamic> toMap() => {
+        "totalValue": totalValue,
+        "implicitDiscount": implicitDiscount,
+        "priceAfterDiscount": priceAfterDiscount,
+        "couponsApplied": List<dynamic>.from(couponsApplied.map((x) => x)),
+        "couponDiscount": couponDiscount,
+        "gst": gst,
+        "logistic": logistic,
+        "totalCost": totalCost,
+      };
 }

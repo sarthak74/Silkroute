@@ -7,8 +7,8 @@ class CrateListItem {
   final num mrp;
   final num discountValue;
   final num quantity;
+  final String merchantContact;
   final List<dynamic> colors;
-  final num stock;
 
   CrateListItem({
     this.id,
@@ -18,7 +18,7 @@ class CrateListItem {
     this.discountValue,
     this.quantity,
     this.colors,
-    this.stock,
+    this.merchantContact,
   });
 
   Map<String, dynamic> toMap() {
@@ -30,7 +30,7 @@ class CrateListItem {
       'discountValue': discountValue,
       'quantity': quantity,
       'colors': colors,
-      'stock': stock,
+      'merchantContact': merchantContact,
     };
   }
 
@@ -43,7 +43,7 @@ class CrateListItem {
       discountValue: map['discountValue'],
       quantity: map['quantity'],
       colors: map['colors'],
-      stock: map['stock'],
+      merchantContact: map['merchantContact'],
     );
   }
 

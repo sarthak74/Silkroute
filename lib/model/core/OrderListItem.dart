@@ -7,112 +7,60 @@ import 'package:silkroute/model/core/Bill.dart';
 import 'package:silkroute/model/core/CrateListItem.dart';
 
 class OrderListItem {
-  final String id;
-  final List<dynamic> items;
-  final String latestStatus;
-  final dynamic address;
-  final Map<String, dynamic> status;
-  final num ratingGiven;
-  final dynamic reviewGiven;
+  final String contact;
   final Bill bill;
-  final String title;
-  final dynamic createdDate;
+  final String status;
+  final dynamic address;
+  final String uniqueId;
   final String invoiceNumber;
-  final String paymentStatus;
-  final String shipment_id;
-  final String shiprocket_order_id;
-  final dynamic dispatchDate;
+  final String customerPaymentStatus;
+  final dynamic createdDate;
+  final String razorpay;
+  final List<dynamic> items;
+  final String title;
   OrderListItem({
-    this.id,
-    this.items,
-    this.latestStatus,
-    this.address,
-    this.status,
-    this.ratingGiven,
-    this.reviewGiven,
+    this.contact,
     this.bill,
-    this.title,
-    this.createdDate,
+    this.status,
+    this.address,
+    this.uniqueId,
     this.invoiceNumber,
-    this.paymentStatus,
-    this.shipment_id,
-    this.shiprocket_order_id,
-    this.dispatchDate,
+    this.customerPaymentStatus,
+    this.createdDate,
+    this.razorpay,
+    this.items,
+    this.title,
   });
-
-  OrderListItem copyWith({
-    String id,
-    List<dynamic> items,
-    String latestStatus,
-    dynamic address,
-    Map<String, dynamic> status,
-    num ratingGiven,
-    dynamic reviewGiven,
-    Bill bill,
-    String title,
-    dynamic createdDate,
-    String invoiceNumber,
-    String paymentStatus,
-    String shipment_id,
-    String shiprocket_order_id,
-    dynamic dispatchDate,
-  }) {
-    return OrderListItem(
-      id: id ?? this.id,
-      items: items ?? this.items,
-      latestStatus: latestStatus ?? this.latestStatus,
-      address: address ?? this.address,
-      status: status ?? this.status,
-      ratingGiven: ratingGiven ?? this.ratingGiven,
-      reviewGiven: reviewGiven ?? this.reviewGiven,
-      bill: bill ?? this.bill,
-      title: title ?? this.title,
-      createdDate: createdDate ?? this.createdDate,
-      invoiceNumber: invoiceNumber ?? this.invoiceNumber,
-      paymentStatus: paymentStatus ?? this.paymentStatus,
-      shipment_id: shipment_id ?? this.shipment_id,
-      shiprocket_order_id: shiprocket_order_id ?? this.shiprocket_order_id,
-      dispatchDate: dispatchDate ?? this.dispatchDate,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'items': items,
-      'latestStatus': latestStatus,
-      'address': address,
-      'status': status,
-      'ratingGiven': ratingGiven,
-      'reviewGiven': reviewGiven,
+      'contact': contact,
       'bill': bill.toMap(),
-      'title': title,
-      'createdDate': createdDate,
+      'status': status,
+      'address': address,
+      'uniqueId': uniqueId,
       'invoiceNumber': invoiceNumber,
-      'paymentStatus': paymentStatus,
-      'shipment_id': shipment_id,
-      'shiprocket_order_id': shiprocket_order_id,
-      'dispatchDate': dispatchDate,
+      'customerPaymentStatus': customerPaymentStatus,
+      'createdDate': createdDate,
+      'razorpay': razorpay,
+      'items': items,
+      'title': title,
     };
   }
 
   factory OrderListItem.fromMap(Map<String, dynamic> map) {
     return OrderListItem(
-      id: map['id'],
-      items: List<dynamic>.from(map['items']),
-      latestStatus: map['latestStatus'],
-      address: map['address'],
-      status: Map<String, dynamic>.from(map['status']),
-      ratingGiven: map['ratingGiven'],
-      reviewGiven: map['reviewGiven'],
+      contact: map['contact'] ?? '',
       bill: Bill.fromMap(map['bill']),
-      title: map['title'],
-      createdDate: map['createdDate'],
-      invoiceNumber: map['invoiceNumber'],
-      paymentStatus: map['paymentStatus'],
-      shipment_id: map['shipment_id'],
-      shiprocket_order_id: map['shiprocket_order_id'],
-      dispatchDate: map['dispatchDate'],
+      status: map['status'] ?? '',
+      address: map['address'] ?? null,
+      uniqueId: map['uniqueId'] ?? '',
+      invoiceNumber: map['invoiceNumber'] ?? '',
+      customerPaymentStatus: map['customerPaymentStatus'] ?? '',
+      createdDate: map['createdDate'] ?? null,
+      razorpay: map['razorpay'] ?? '',
+      items: List<dynamic>.from(map['items']),
+      title: map['title'] ?? '',
     );
   }
 
@@ -123,48 +71,40 @@ class OrderListItem {
 
   @override
   String toString() {
-    return 'OrderListItem(id: $id, items: $items, latestStatus: $latestStatus, address: $address, status: $status, ratingGiven: $ratingGiven, reviewGiven: $reviewGiven, bill: $bill, title: $title, createdDate: $createdDate, invoiceNumber: $invoiceNumber, paymentStatus: $paymentStatus, shipment_id: $shipment_id, shiprocket_order_id: $shiprocket_order_id, dispatchDate: $dispatchDate)';
+    return 'OrderListItem(contact: $contact, bill: $bill, status: $status, address: $address, uniqueId: $uniqueId, invoiceNumber: $invoiceNumber, customerPaymentStatus: $customerPaymentStatus, createdDate: $createdDate, razorpay: $razorpay, items: $items, title: $title)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    final collectionEquals = const DeepCollectionEquality().equals;
+    final listEquals = const DeepCollectionEquality().equals;
 
     return other is OrderListItem &&
-        other.id == id &&
-        collectionEquals(other.items, items) &&
-        other.latestStatus == latestStatus &&
-        other.address == address &&
-        collectionEquals(other.status, status) &&
-        other.ratingGiven == ratingGiven &&
-        other.reviewGiven == reviewGiven &&
+        other.contact == contact &&
         other.bill == bill &&
-        other.title == title &&
-        other.createdDate == createdDate &&
+        other.status == status &&
+        other.address == address &&
+        other.uniqueId == uniqueId &&
         other.invoiceNumber == invoiceNumber &&
-        other.paymentStatus == paymentStatus &&
-        other.shipment_id == shipment_id &&
-        other.shiprocket_order_id == shiprocket_order_id &&
-        other.dispatchDate == dispatchDate;
+        other.customerPaymentStatus == customerPaymentStatus &&
+        other.createdDate == createdDate &&
+        other.razorpay == razorpay &&
+        listEquals(other.items, items) &&
+        other.title == title;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        items.hashCode ^
-        latestStatus.hashCode ^
-        address.hashCode ^
-        status.hashCode ^
-        ratingGiven.hashCode ^
-        reviewGiven.hashCode ^
+    return contact.hashCode ^
         bill.hashCode ^
-        title.hashCode ^
-        createdDate.hashCode ^
+        status.hashCode ^
+        address.hashCode ^
+        uniqueId.hashCode ^
         invoiceNumber.hashCode ^
-        paymentStatus.hashCode ^
-        shipment_id.hashCode ^
-        shiprocket_order_id.hashCode ^
-        dispatchDate.hashCode;
+        customerPaymentStatus.hashCode ^
+        createdDate.hashCode ^
+        razorpay.hashCode ^
+        items.hashCode ^
+        title.hashCode;
   }
 }

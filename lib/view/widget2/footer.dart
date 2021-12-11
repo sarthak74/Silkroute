@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
@@ -34,7 +35,7 @@ class _FooterState extends State<Footer> {
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             child: (ut == "Manufacturer")
                 ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       GestureDetector(
                         onTap: () {
@@ -56,20 +57,20 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.widgets),
+                            Icon(Icons.add_box_outlined),
                             Text("Add New"),
                           ],
                         ),
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context).pushNamed("/calculate");
+                          Navigator.of(context).pushNamed("/orders");
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.search),
-                            Text("Calculate"),
+                            Icon(Icons.receipt_long_rounded),
+                            Text("Orders"),
                           ],
                         ),
                       ),
@@ -81,8 +82,8 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.widgets),
-                            Text("dashboard"),
+                            Icon(Icons.dashboard),
+                            Text("Dashboard"),
                           ],
                         ),
                       ),

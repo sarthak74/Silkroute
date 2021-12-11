@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/model/core/MerchantOrderItem.dart';
 import 'package:silkroute/model/core/OrderListItem.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 
@@ -27,7 +28,7 @@ class MerchantApi {
     }
   }
 
-  Future<List<OrderListItem>> getMerchantOrders(sortBy, filter) async {
+  Future<List<MerchantOrderItem>> getMerchantOrders(sortBy, filter) async {
     try {
       var data = {
         "contact": storage.getItem("contact"),
@@ -40,11 +41,11 @@ class MerchantApi {
           headers: {"Content-Type": "application/json"},
           body: json.encode(data));
       var decodedRes2 = jsonDecode(res.body);
-      print("mer orders: $decodedRes2");
-      List<OrderListItem> resp = [];
+      // print("mer orders: $decodedRes2");
+      List<MerchantOrderItem> resp = [];
       for (var i in decodedRes2) {
-        print("mer order: $i");
-        OrderListItem r = OrderListItem.fromMap(i);
+        // print("mer order: $i");
+        MerchantOrderItem r = MerchantOrderItem.fromMap(i);
         resp.add(r);
       }
       print("mer orders: $resp");
@@ -66,10 +67,10 @@ class MerchantApi {
           body: json.encode(data));
       var decodedRes2 = jsonDecode(res.body);
       print("mer orders: $decodedRes2");
-      List<OrderListItem> resp = [];
+      List<MerchantOrderItem> resp = [];
       for (var i in decodedRes2) {
         print("mer order: $i");
-        OrderListItem r = OrderListItem.fromMap(i);
+        MerchantOrderItem r = MerchantOrderItem.fromMap(i);
         resp.add(r);
       }
       print("mer orders: $resp");

@@ -8,7 +8,7 @@ class Toast {
       gravity: ToastGravity.BOTTOM,
       backgroundColor: Colors.red,
       textColor: Colors.white,
-      fontSize: 12,
+      fontSize: 13,
     );
   }
 
@@ -18,7 +18,7 @@ class Toast {
       gravity: ToastGravity.BOTTOM,
       backgroundColor: Colors.green,
       textColor: Colors.white,
-      fontSize: 12,
+      fontSize: 13,
     );
   }
 
@@ -26,9 +26,9 @@ class Toast {
     return Fluttertoast.showToast(
       msg: msg,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.grey[100],
-      textColor: Colors.black,
-      fontSize: 12,
+      backgroundColor: Colors.black,
+      textColor: Colors.grey[100],
+      fontSize: 13,
     );
   }
 }

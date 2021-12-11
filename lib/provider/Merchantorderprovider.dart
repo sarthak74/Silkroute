@@ -2,27 +2,25 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:silkroute/methods/math.dart';
-import 'package:silkroute/model/core/OrderListItem.dart';
+import 'package:silkroute/model/core/MerchantOrderItem.dart';
+
 import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
 import 'package:silkroute/model/services/ProductListApi.dart';
 
 class MerchantOrderProvider extends ChangeNotifier {
   final _apicaller = MerchantApi();
-  dynamic _streamController = StreamController<List<OrderListItem>>();
+  dynamic _streamController = StreamController<List<MerchantOrderItem>>();
   int i = 0, len, _maxLen = 5;
-  List<OrderListItem> _merchantApiResult = [];
-  List<OrderListItem> orders = [];
+  List<MerchantOrderItem> _merchantApiResult = [];
+  List<MerchantOrderItem> orders = [];
   // var dateTime = DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now());
-  static dynamic _sortBy = {"dispatchDate": 1};
+  static dynamic _sortBy = {"createdDate": 1};
   static dynamic _filter;
 
   dynamic getfilter() {
     if (_filter == null) {
       _filter = {
-        "paymentStatus": {
-          "\u0024in": ["Completed", "Incomplete", "Pending Refund"]
-        },
         "createdDate": {
           "\u0024lte": DateFormat('yyyy-MM-dd hh:mm')
               .format(DateTime.now().add(Duration(days: 1))),
@@ -42,12 +40,12 @@ class MerchantOrderProvider extends ChangeNotifier {
     _merchantApiResult = value;
   }
 
-  Stream<List<OrderListItem>> get productListStream {
+  Stream<List<MerchantOrderItem>> get productListStream {
     return _streamController.stream;
   }
 
   void setProductListStream(value) {
-    _streamController = StreamController<List<OrderListItem>>();
+    _streamController = StreamController<List<MerchantOrderItem>>();
   }
 
   void setSortBy(title, value) {

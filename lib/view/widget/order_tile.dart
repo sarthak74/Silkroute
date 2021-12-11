@@ -46,7 +46,7 @@ class _OrderTileState extends State<OrderTile> {
                   style: textStyle(12, Colors.black),
                 ),
                 Text(
-                  widget.order['latestStatus'],
+                  widget.order['status'],
                   style: textStyle(12, Colors.grey[500]),
                 ),
                 SizedBox(height: 5),

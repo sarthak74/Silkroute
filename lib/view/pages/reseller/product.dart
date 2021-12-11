@@ -109,8 +109,6 @@ class _ProductPageState extends State<ProductPage> {
                                       ProductDescription(
                                           product: productDetails),
                                       ProductCounter(product: productDetails),
-                                      ProductAvailability(
-                                          product: productDetails),
                                     ],
                                   ),
                                 ),
@@ -133,45 +131,6 @@ class _ProductPageState extends State<ProductPage> {
           ),
         ),
         // bottomNavigationBar: Footer(),
-      ),
-    );
-  }
-}
-
-class ProductAvailability extends StatefulWidget {
-  const ProductAvailability({this.product});
-  final dynamic product;
-
-  @override
-  _ProductAvailabilityState createState() => _ProductAvailabilityState();
-}
-
-class _ProductAvailabilityState extends State<ProductAvailability> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      margin: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.05,
-        vertical: 10,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            ("Available in stock: " +
-                    widget.product['stockAvailability'].toString())
-                .toString(),
-            style: textStyle(12, Colors.black),
-          ),
-          Text(
-            ("Currently in crates of: " +
-                    widget.product['resellerCrateAvailability'].toString() +
-                    " Resellers")
-                .toString(),
-            style: textStyle(12, Colors.black),
-          ),
-        ],
       ),
     );
   }
@@ -248,6 +207,7 @@ class _ProductCounterState extends State<ProductCounter> {
       'quantity': _qty,
       'colors': proColors.sublist(0, counter),
       'mrp': widget.product['mrp'].toString(),
+      'merchantContact': widget.product['userContact'].toString(),
       'disValue': widget.product['discountValue'].toString(),
       'discount': widget.product['discount'].toString(),
       'title': widget.product['title'].toString(),
@@ -259,7 +219,9 @@ class _ProductCounterState extends State<ProductCounter> {
     await CrateApi().setCrateItems(data);
 
     setState(() {
+      widget.product['stockAvailability'] -= int.parse(_qtyController.text);
       _qtyController.text = "";
+
       addingtoCrate = false;
       Toast().notifySuccess("Added to Crate");
     });
@@ -436,6 +398,13 @@ class _ProductCounterState extends State<ProductCounter> {
                 ),
               ),
             ],
+          ),
+          SizedBox(height: 20),
+          Text(
+            ("Available in stock: " +
+                    widget.product['stockAvailability'].toString())
+                .toString(),
+            style: textStyle(12, Colors.black),
           ),
         ],
       ),

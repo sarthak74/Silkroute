@@ -149,6 +149,7 @@ class _AddressPageState extends State<AddressPage> {
   void loadVars() async {
     print("totalCost: ${widget.bill['totalCost']}");
     if (widget.productlength == false) {
+      print("false");
       widget.pageController.animateToPage(
         0,
         duration: Duration(milliseconds: 500),
@@ -163,13 +164,18 @@ class _AddressPageState extends State<AddressPage> {
       });
       return;
     }
-    var preAdd = await storage.getItem('address');
+    print("preadding");
+    var user = await storage.getItem('user');
+    var preAdd = user['currAdd'];
+    print("preadding $preAdd");
     setState(() {
       if (preAdd != null) {
         for (var x in fields) {
           print("pre-- $x");
           if (preAdd[x] != null) {
             data[x] = preAdd[x];
+          } else if (user[x] != null) {
+            data[x] = user[x];
           }
         }
         if (data["pincode"].length == 6) {
@@ -177,10 +183,12 @@ class _AddressPageState extends State<AddressPage> {
         }
       }
       _crateList = widget.crateList;
+
       _crateListM = [];
 
       for (var i in _crateList) {
         var r = i.toMap();
+        print("rr------ \n $r");
         _crateListM.add(r);
       }
 
@@ -461,6 +469,9 @@ class _AddressPageState extends State<AddressPage> {
                                 _proceeding = true;
                               });
                               await initOrder();
+                              setState(() {
+                                _proceeding = false;
+                              });
                               // dynamic res = await createtShiprocketOrder();
                               // print("created orfer red : $res");
                             }
@@ -566,7 +577,7 @@ class _AddressPageState extends State<AddressPage> {
     return newitem;
   }
 
-  Future<dynamic> createtShiprocketOrder(String order_id) async {
+  Future<dynamic> createtShiprocketOrder(String order_id, dynamic item) async {
     print("order_id: $order_id");
     var pickup_location = await getPickup();
     print("pickup: $pickup_location");
@@ -615,7 +626,7 @@ class _AddressPageState extends State<AddressPage> {
       "shipping_state": data['state'],
       "shipping_email": data['contact'] + "@gmail.com",
       "shipping_phone": data['contact'],
-      "order_items": _crateListM.map((item) => toShiprocketItem(item)).toList(),
+      "order_items": [toShiprocketItem(item)],
       "payment_method": "Prepaid",
 
       "sub_total": widget.bill['totalCost'],
@@ -643,14 +654,14 @@ class _AddressPageState extends State<AddressPage> {
 
     final dynamic res = await ShiprocketApi().createOrder(ship_order);
     print("create_roder: $res");
-    dynamic status = null;
+    dynamic shiprocket_status = null;
     if ((res == null) || (res['status'] != 1)) {
       Toast().notifyErr(
           "Some error occurred, refund is in process.\nDon't worry, we are working on it.");
       return;
       // TODO: implement refund
     } else {
-      status = {
+      shiprocket_status = {
         "pickup_scheduled_date": res['payload']['pickup_scheduled_date'],
         "awb_code": res['payload']['awb_code'],
         "assigned_date_time": res['payload']["assigned_date_time"],
@@ -659,18 +670,14 @@ class _AddressPageState extends State<AddressPage> {
         "manifest_url": res['payload']["manifest_url"],
         "routing_code": res['payload']["routing_code"]
       };
-      var qry = {
+      var data = {
         'shipment_id': res['payload']['shipment_id'],
         'shiprocket_order_id': res['payload']['order_id'],
-        'merchant': _merchant['contact'],
-        'status': status
+        'shiprocket': shiprocket_status
       };
-      await OrderApi().updateOrder(_id, qry);
     }
 
-    print("status : $status");
-
-    return status;
+    return data;
   }
 
   // Payment Methods
@@ -688,13 +695,12 @@ class _AddressPageState extends State<AddressPage> {
       print("cratelist M in orders\n$_crateListM");
       _order = {
         "contact": data['contact'],
-        "items": _crateListM,
-        "paymentStatus": "Initiated",
+        // "items": _crateListM,
+        "title":
+            _crateListM[0]["title"] + (_crateListM.length > 0 ? ", ..." : ""),
+        "customerPaymentStatus": "Initiated",
         "address": addr,
-        "ratingGiven": 0.0,
-        "reviewGiven": 0.0,
         "bill": _bill,
-        "title": _title + ((_crateListM.length > 0) ? ", ..." : ""),
         "dispatchDate": "",
         "invoiceNumber": _id
       };
@@ -740,7 +746,34 @@ class _AddressPageState extends State<AddressPage> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse res) async {
-    dynamic status = await createtShiprocketOrder(res.orderId);
+    var ship_order_id = res.orderId.split("_")[1];
+    int i = 0;
+    for (dynamic item in _crateListM) {
+      // dynamic data = await createtShiprocketOrder(
+      //     (ship_order_id + "_" + i.toString()).toString(), item);
+      // dynamic data = {
+      //   'shiprocket': {
+      //     "pickup_scheduled_date": "res['payload']['pickup_scheduled_date']",
+      //     "awb_code": "res['payload']['awb_code']",
+      //     "assigned_date_time": "res['payload']['assigned_date_time']",
+      //     "applied_weight": "res['payload']['applied_weight']",
+      //     "label_url": "res['payload']['label_url']",
+      //     "manifest_url": "res['payload']['manifest_url']",
+      //     "routing_code": "res['payload']['routing_code']"
+      //   },
+      //   'shipment_id': ship_order_id + "_" + i.toString(),
+      //   'shiprocket_order_id': ship_order_id + "_" + i.toString()
+      // };
+      // item['shiprocket'] = data['shiprocket'];
+      // item['shipment_id'] = data['shipment_id'];
+      // item['shiprocket_order_id'] = data['shiprocket_order_id'];
+      item['customerStatus'] = "Order Placed";
+      item['merchantStatus'] = 'Not Seen';
+      item['merchantPaymentStatus'] = "Incomplete";
+      await OrderApi().addOrderItem(_id, item);
+      print("item ${i.toString()} shiprocket status:\n$item");
+    }
+
     // Map<String, dynamic> status = {
     //   "pickup_scheduled_date": "res['payload']['pickup_scheduled_date']",
     //   "awb_code": "res['payload']['awb_code']",
@@ -752,19 +785,20 @@ class _AddressPageState extends State<AddressPage> {
     // };
 
     print("razorpay_payment_id ${res.paymentId}");
+    Map<String, String> raz = {};
+    raz["razorpay_paymentId"] = res.paymentId;
+    raz["razorpay_signature"] = res.signature;
+    raz["razorpay_orderId"] = res.orderId;
 
-    status["razorpay_paymentId"] = res.paymentId;
-    status["razorpay_signature"] = res.signature;
-    status["razorpay_orderId"] = res.orderId;
     await OrderApi().updateOrder(_id, {
-      "paymentStatus": "Completed",
-      "latestStatus": "Order Placed",
-      "status": status
+      "customerPaymentStatus": "Completed",
+      "status": "Order Placed",
+      "razorpay": raz
     });
     setState(() {
       _proceeding = false;
     });
-    Toast().notifySuccess("Payment Successful");
+    Toast().notifySuccess("Shipment Successful");
     Navigator.popAndPushNamed(context, "/crate");
   }
 

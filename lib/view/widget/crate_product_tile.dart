@@ -42,11 +42,7 @@ class _CrateProductTileState extends State<CrateProductTile> {
     if (widget.product['discount']) {
       sp = Math.getSp(mrp, discountValue);
     }
-    bool stockAlert = false;
-    if (widget.product['stock'] <= 10) {
-      stockAlert = true;
-    }
-    String stock = widget.product['stock'].toString();
+
     return Container(
       padding: EdgeInsets.all(10),
       margin: EdgeInsets.all(10),
@@ -145,24 +141,6 @@ class _CrateProductTileState extends State<CrateProductTile> {
                           ),
                         ],
                       ),
-                stockAlert
-                    ? Row(
-                        children: <Widget>[
-                          Icon(Icons.alarm, color: Colors.red, size: 15),
-                          Text(
-                            ("  Hurry! only " + stock + " left in stock")
-                                .toString(),
-                            style: GoogleFonts.poppins(
-                              textStyle: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : null,
                 SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
