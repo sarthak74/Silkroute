@@ -15,6 +15,7 @@ class MerchantOrderItem {
   final String merchantStatus;
   final String merchantPaymentStatus;
   final num quantity;
+  final dynamic refund;
   final List<dynamic> colors;
   MerchantOrderItem({
     this.productId,
@@ -25,6 +26,7 @@ class MerchantOrderItem {
     this.merchantStatus,
     this.merchantPaymentStatus,
     this.quantity,
+    this.refund,
     this.colors,
   });
 
@@ -38,6 +40,7 @@ class MerchantOrderItem {
       'merchantStatus': merchantStatus,
       'merchantPaymentStatus': merchantPaymentStatus,
       'quantity': quantity,
+      'refund': refund,
       'colors': colors,
     };
   }
@@ -52,6 +55,7 @@ class MerchantOrderItem {
       merchantStatus: map['merchantStatus'] ?? '',
       merchantPaymentStatus: map['merchantPaymentStatus'] ?? '',
       quantity: map['quantity'] ?? 0,
+      refund: map['return'] ?? null,
       colors: List<dynamic>.from(map['colors']),
     );
   }
@@ -63,7 +67,7 @@ class MerchantOrderItem {
 
   @override
   String toString() {
-    return 'MerchantOrderItem(productId: $productId, orderId: $orderId, contact: $contact, createdDate: $createdDate, title: $title, merchantStatus: $merchantStatus, merchantPaymentStatus: $merchantPaymentStatus, quantity: $quantity, colors: $colors)';
+    return 'MerchantOrderItem(productId: $productId, orderId: $orderId, contact: $contact, createdDate: $createdDate, title: $title, merchantStatus: $merchantStatus, merchantPaymentStatus: $merchantPaymentStatus, quantity: $quantity, refund: $refund, colors: $colors)';
   }
 
   @override
@@ -80,6 +84,7 @@ class MerchantOrderItem {
         other.merchantStatus == merchantStatus &&
         other.merchantPaymentStatus == merchantPaymentStatus &&
         other.quantity == quantity &&
+        other.refund == refund &&
         listEquals(other.colors, colors);
   }
 
@@ -93,6 +98,7 @@ class MerchantOrderItem {
         merchantStatus.hashCode ^
         merchantPaymentStatus.hashCode ^
         quantity.hashCode ^
+        refund.hashCode ^
         colors.hashCode;
   }
 }

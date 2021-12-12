@@ -28,12 +28,14 @@ class MerchantApi {
     }
   }
 
-  Future<List<MerchantOrderItem>> getMerchantOrders(sortBy, filter) async {
+  Future<List<MerchantOrderItem>> getMerchantOrders(
+      sortBy, filter, orderType) async {
     try {
       var data = {
         "contact": storage.getItem("contact"),
         "sortBy": sortBy,
-        "filter": filter
+        "filter": filter,
+        "orderType": orderType
       };
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getMerchantOrders');

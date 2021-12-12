@@ -4,9 +4,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:im_stepper/stepper.dart';
+import 'package:intl/intl.dart';
+import 'package:silkroute/constants/statusCodes.dart';
 
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/payment_methods.dart';
+import 'package:silkroute/methods/toast.dart';
+import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
 import 'package:silkroute/view/widget/footer.dart';
@@ -173,56 +177,6 @@ class _OrderPageState extends State<OrderPage> {
           ),
         ),
         // bottomNavigationBar: Footer(),
-      ),
-    );
-  }
-}
-
-class CancelOrder extends StatefulWidget {
-  const CancelOrder({Key key, this.order}) : super(key: key);
-
-  final dynamic order;
-
-  @override
-  _CancelOrderState createState() => _CancelOrderState();
-}
-
-class _CancelOrderState extends State<CancelOrder> {
-  bool cancelling = false;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        setState(() {
-          cancelling = true;
-        });
-        // print("cancel order -- ${widget.order}");
-        await PaymentMethods().cancelPayment(widget.order, true);
-        setState(() {
-          cancelling = false;
-        });
-        // Navigator.of(context).pop();
-      },
-      child: Container(
-        margin: EdgeInsets.all(10),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 9),
-        decoration: BoxDecoration(
-          color: Color(0xFF5B0D1B),
-          borderRadius: BorderRadius.all(Radius.circular(15)),
-        ),
-        child: cancelling
-            ? SizedBox(
-                height: 25,
-                width: 25,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 3,
-                ),
-              )
-            : Text(
-                "Cancel Order",
-                style: textStyle1(13, Colors.white, FontWeight.normal),
-              ),
       ),
     );
   }
@@ -599,13 +553,64 @@ class OrderPageTitle extends StatefulWidget {
 }
 
 class _OrderPageTitleState extends State<OrderPageTitle> {
-  dynamic orderDetails, moreColor = true, loading = true;
+  dynamic orderDetails, moreColor = true, loading = true, showReturn = false;
 
   void loadVars() {
     setState(() {
       orderDetails = widget.orderDetails;
       loading = false;
     });
+  }
+
+  Future<void> checkRequestReturn(int i) async {
+    dynamic item = orderDetails['items'][i];
+    if (Codes().statusDescription.indexOf(item['customerStatus']) <
+        Codes().statusDescription.indexOf("Delivered")) {
+      Toast().notifyErr("Your order has not been delivered yet");
+      return;
+    }
+    if (Codes().statusDescription.indexOf(item['customerStatus']) >
+        Codes().statusDescription.indexOf("Delivered")) {
+      Toast().notifyErr("Return has already been requested");
+      return;
+    }
+    await requestReturn(i);
+  }
+
+  num calculateRefundAmount(int i) {
+    num amt = orderDetails['items'][i]['mrp'];
+    return amt;
+  }
+
+  Future<void> requestReturn(int i) async {
+    // return requested: 1 & merchantStatus to return requested
+    var orderId = orderDetails['invoiceNumber'];
+    var productId = orderDetails['items'][i]['id'];
+    var refundAmount = calculateRefundAmount(i);
+    var requestedDate = DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now());
+    var body = {
+      'merchantStatus': 'Return Requested',
+      'customerStatus': 'Return Requested',
+      'return': {
+        'requested': 1,
+        'requestedDate': requestedDate,
+        'refundAmount': refundAmount
+      }
+    };
+    dynamic updateRes =
+        await OrderApi().updateOrderItem(orderId, productId, body);
+    if (updateRes['success'] == false) {
+      Toast().notifyErr("Some error occurred, please try again");
+      return;
+    }
+    // Done
+
+    // refundAmount: schedule refund on razorpay
+
+    var payment_id = orderDetails['razorpay']['razorpay_paymentId'];
+    // await PaymentMethods().requestReturn(payment_id, refundAmount);
+
+    // create shiprocket order(return order)
   }
 
   void initState() {
@@ -639,6 +644,12 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
             shrinkWrap: true,
             itemCount: orderDetails['items'].length,
             itemBuilder: (BuildContext context, int i) {
+              showReturn = Codes()
+                      .statusDescription
+                      .indexOf(orderDetails['items'][i]['customerStatus']) ==
+                  Codes().statusDescription.indexOf("Delivered");
+              // if(orderDetails['items'][i]['returnPeriod'])
+              // implement add period to delivery return
               return Column(
                 children: <Widget>[
                   Container(
@@ -667,9 +678,9 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                           width: MediaQuery.of(context).size.width * 0.25,
                           height: 110,
                         ),
-                        SizedBox(width: 20),
+                        // SizedBox(width: 20),
                         Container(
-                          width: MediaQuery.of(context).size.width * 0.5,
+                          width: MediaQuery.of(context).size.width * 0.35,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -704,7 +715,8 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                               Row(
                                 children: <Widget>[
                                   SizedBox(
-                                    width: 130,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
                                     height: 20,
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
@@ -738,6 +750,16 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                             ],
                           ),
                         ),
+                        Codes().statusDescription.indexOf(orderDetails['items']
+                                    [i]['customerStatus']) ==
+                                Codes().statusDescription.indexOf("Delivered")
+                            ? ElevatedButton(
+                                onPressed: () async {
+                                  checkRequestReturn(i);
+                                },
+                                child: Text("Request\nReturn"),
+                              )
+                            : SizedBox(height: 0),
                       ],
                     ),
                   ),

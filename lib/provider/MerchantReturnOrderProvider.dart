@@ -8,7 +8,7 @@ import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
 import 'package:silkroute/model/services/ProductListApi.dart';
 
-class MerchantOrderProvider extends ChangeNotifier {
+class MerchantReturnOrderProvider extends ChangeNotifier {
   final _apicaller = MerchantApi();
   dynamic _streamController = StreamController<List<MerchantOrderItem>>();
   int i = 0, len, _maxLen = 5;
@@ -58,7 +58,7 @@ class MerchantOrderProvider extends ChangeNotifier {
   }
 
   Future<dynamic> getOrderHelper() async {
-    _merchantApiResult = await _apicaller.getMerchantOrders(_sortBy, filter, 0);
+    _merchantApiResult = await _apicaller.getMerchantOrders(_sortBy, filter, 1);
   }
 
   Future<void> getTwentyOrders() async {

@@ -15,7 +15,7 @@ class OrderListItem {
   final String invoiceNumber;
   final String customerPaymentStatus;
   final dynamic createdDate;
-  final String razorpay;
+  final dynamic razorpay;
   final List<dynamic> items;
   final String title;
   OrderListItem({
@@ -58,7 +58,7 @@ class OrderListItem {
       invoiceNumber: map['invoiceNumber'] ?? '',
       customerPaymentStatus: map['customerPaymentStatus'] ?? '',
       createdDate: map['createdDate'] ?? null,
-      razorpay: map['razorpay'] ?? '',
+      razorpay: map['razorpay'] ?? null,
       items: List<dynamic>.from(map['items']),
       title: map['title'] ?? '',
     );
