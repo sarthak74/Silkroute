@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:silkroute/methods/payment_methods.dart';
@@ -178,23 +179,15 @@ class _MerchantOrderTileState extends State<MerchantReturnOrderTile> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      onPressed: () async {
-                        if (orders[i]['merchantStatus'] == "Not Seen") {
-                          await showConfirmationAlert(
-                              i, {'merchantStatus': 'Not Ready'}, 0);
-                        } else if (orders[i]['merchantStatus'] == "Not Ready") {
-                          await showConfirmationAlert(
-                              i, {'merchantStatus': 'Ready'}, 1);
-                        } else {
-                          Toast().notifyInfo("Order already Confirmed");
-                        }
-                      },
-                      icon: Icon((orders[i]['merchantStatus'] == "Not Seen")
-                          ? Icons.check
-                          : ((orders[i]['merchantStatus'] == "Not Ready")
-                              ? Icons.check_box_outlined
-                              : Icons.check_box)),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        IconButton(
+                          onPressed: () async {},
+                          icon: Icon(CupertinoIcons.money_dollar),
+                        ),
+                        Text("Pay")
+                      ],
                     ),
                   ],
                 ),

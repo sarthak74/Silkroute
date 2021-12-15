@@ -397,11 +397,13 @@ class _UploadButtonState extends State<UploadButton> {
     }
 
     for (var d in ['L', 'B', 'H']) {
+      bool isHalfSet =
+          (NewProductProvider.min == (NewProductProvider.setSize / 2).floor());
       if (NewProductProvider.fullSetSize[d] < 0.5) {
         Toast().notifyErr("Invalid Full Set $d");
         return false;
       }
-      if (NewProductProvider.halfSetSize[d] < 0.5) {
+      if ((NewProductProvider.halfSetSize[d] < 0.5) && isHalfSet) {
         Toast().notifyErr("Invalid Half Set $d");
         return false;
       }
@@ -428,7 +430,7 @@ class _UploadButtonState extends State<UploadButton> {
           'discountValue': 0,
           'userContact': contact,
           'description': NewProductProvider.description,
-          'setSize': NewProductProvider.setSize,
+          'totalSet': NewProductProvider.setSize,
           'min': NewProductProvider.min,
           'stockAvailability': NewProductProvider.stockAvailability,
           'resellerCrateAvailability': 0,

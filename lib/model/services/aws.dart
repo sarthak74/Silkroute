@@ -38,12 +38,17 @@ class AWS {
     try {
       var params = {"filename": name, "path": image.path};
       print(params);
-      var res = await getUrl(params);
+      var res = {"success": true, "uploadUrl": "test", "downloadUrl": "test"};
+      // var res = await getUrl(params);
       if (res['success'] == true) {
-        var uploadRes = await uploadToS3(res['uploadUrl'], image);
+        var uploadRes = {"success": true};
+        // var uploadRes = await uploadToS3(res['uploadUrl'], image);
         if (uploadRes['success'] == true) {
-          // update image download url in db
-          return {"success": true, "msg": "Image uploaded successfully"};
+          return {
+            "success": true,
+            "msg": "Image uploaded successfully",
+            "downloadUrl": res['downloadUrl']
+          };
         } else {
           throw new Error();
         }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:silkroute/model/services/DashboardApi.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
@@ -11,6 +12,24 @@ class MerchantDashboard extends StatefulWidget {
 }
 
 class _MerchantDashboardState extends State<MerchantDashboard> {
+  bool loading = true;
+  dynamic data;
+
+  void loadVars() async {
+    var temp = await DashboardApi().getData();
+    setState(() {
+      data = temp;
+      loading = false;
+    });
+    print("data: $data");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadVars();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -57,6 +76,7 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
                       delegate: SliverChildListDelegate([
                         SingleChildScrollView(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Icon(
                                 Icons.speed,
@@ -67,13 +87,41 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
 
                               //////// THIS MONTH
 
-                              DashboardThisMonth(),
+                              loading
+                                  ? SizedBox(
+                                      height: 30,
+                                      width: 30,
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF5B0D1B),
+                                      ),
+                                    )
+                                  : DashboardThisMonth(data: data),
 
                               SizedBox(height: 20),
 
                               //////// THIS WEEK
 
-                              DashboardThisWeek(),
+                              loading
+                                  ? SizedBox(
+                                      height: 30,
+                                      width: 30,
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF5B0D1B),
+                                      ),
+                                    )
+                                  : DashboardThisWeek(data: data),
+
+                              SizedBox(height: 20),
+
+                              loading
+                                  ? SizedBox(
+                                      height: 30,
+                                      width: 30,
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF5B0D1B),
+                                      ),
+                                    )
+                                  : AllOrdersData(data: data),
                             ],
                           ),
                         ),
@@ -100,15 +148,107 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
   }
 }
 
-class DashboardThisWeek extends StatelessWidget {
-  const DashboardThisWeek({
-    Key key,
-  }) : super(key: key);
+class AllOrdersData extends StatefulWidget {
+  const AllOrdersData({Key key, this.data}) : super(key: key);
+  final dynamic data;
 
+  @override
+  _AllOrdersDataState createState() => _AllOrdersDataState();
+}
+
+class _AllOrdersDataState extends State<AllOrdersData> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.32,
+      height: MediaQuery.of(context).size.height * 0.2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              "Your Orders",
+              style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.05,
+              vertical: MediaQuery.of(context).size.height * 0.02,
+            ),
+            height: MediaQuery.of(context).size.height * 0.13,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.all(Radius.circular(30)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "${widget.data['ordersPending']} Orders Pending",
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
+                Divider(
+                  color: Colors.grey[500],
+                ),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "${widget.data['ordersCompleted']} Orders Completed",
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DashboardThisWeek extends StatefulWidget {
+  const DashboardThisWeek({
+    Key key,
+    this.data,
+  }) : super(key: key);
+
+  final dynamic data;
+
+  @override
+  State<DashboardThisWeek> createState() => _DashboardThisWeekState();
+}
+
+class _DashboardThisWeekState extends State<DashboardThisWeek> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -131,7 +271,7 @@ class DashboardThisWeek extends StatelessWidget {
               horizontal: MediaQuery.of(context).size.width * 0.05,
               vertical: MediaQuery.of(context).size.height * 0.02,
             ),
-            height: MediaQuery.of(context).size.height * 0.25,
+            height: MediaQuery.of(context).size.height * 0.12,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               color: Colors.grey[200],
@@ -165,53 +305,19 @@ class DashboardThisWeek extends StatelessWidget {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.37,
                       child: Text(
-                        "₹30999.9",
+                        "₹${widget.data['totalSalesWeek']}",
                         style: textStyle(18, Colors.black54),
                       ),
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.37,
                       child: Text(
-                        "₹3099.9",
+                        "₹${widget.data['paymentPendingWeek']}",
                         style: textStyle(18, Colors.black54),
                       ),
                     ),
                   ],
                 ),
-                Divider(
-                  color: Colors.grey[500],
-                ),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "07 Orders Pending",
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: Colors.grey[500],
-                ),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "18 Orders Completed",
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                )
               ],
             ),
           ),
@@ -221,11 +327,19 @@ class DashboardThisWeek extends StatelessWidget {
   }
 }
 
-class DashboardThisMonth extends StatelessWidget {
+class DashboardThisMonth extends StatefulWidget {
   const DashboardThisMonth({
     Key key,
+    this.data,
   }) : super(key: key);
 
+  final dynamic data;
+
+  @override
+  State<DashboardThisMonth> createState() => _DashboardThisMonthState();
+}
+
+class _DashboardThisMonthState extends State<DashboardThisMonth> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -267,7 +381,7 @@ class DashboardThisMonth extends StatelessWidget {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.37,
                       child: Text(
-                        "Total Earnings",
+                        "Total Sales",
                         style: textStyle(12, Colors.black54),
                       ),
                     ),
@@ -286,14 +400,14 @@ class DashboardThisMonth extends StatelessWidget {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.37,
                       child: Text(
-                        "₹5999.9",
+                        "₹${widget.data["totalSalesMonth"].toString()}",
                         style: textStyle(18, Colors.black54),
                       ),
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.37,
                       child: Text(
-                        "₹599.9",
+                        "₹${widget.data['paymentPendingMonth']}",
                         style: textStyle(18, Colors.black54),
                       ),
                     ),

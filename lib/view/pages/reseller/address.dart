@@ -43,7 +43,8 @@ class _AddressPageState extends State<AddressPage> {
       _title,
       amt,
       amtForRazor,
-      courierData;
+      courierData,
+      user;
   Map<String, String> _deliveryServiceabilityStatus = {
     "title": "Enter a valid pincode to check status",
     "etd": "",
@@ -64,7 +65,8 @@ class _AddressPageState extends State<AddressPage> {
     "pincode": "Pin Code",
     "state": "State",
     "city": "City",
-    "addLine1": "Address Line 1"
+    "addLine1": "Address Line 1",
+    "addLine2": "Address Line 2"
   };
   var fields = [
     "fullName",
@@ -82,7 +84,7 @@ class _AddressPageState extends State<AddressPage> {
     });
 
     print("pincode: ${data['pincode']}");
-    // first argument has to be merchant pickup pincode and third is weight, 4th of cod and it has to be 0
+    // todo: first argument has to be merchant pickup pincode and third is weight, 4th of cod and it has to be 0
     final res = await ShiprocketApi()
         .getDeliveryServiceStatus(210201, data['pincode'], 3, 0);
     if (res != null) {
@@ -128,7 +130,14 @@ class _AddressPageState extends State<AddressPage> {
     setState(() {
       _addressSave = true;
     });
-    var req = ["fullName", "contact", "pincode", "state", "city", "addLine1"];
+    var req = [
+      "fullName",
+      "contact",
+      "pincode",
+      "state",
+      "city",
+      "addLine1",
+    ];
     for (String x in req) {
       if (data[x].length < 1) {
         Toast().notifyErr(titleOf[x] + " is required");
@@ -138,7 +147,7 @@ class _AddressPageState extends State<AddressPage> {
         return false;
       }
     }
-    await storage.setItem('address', data);
+    await storage.setItem('paymentAddress', data);
     setState(() {
       _addressSave = false;
     });
@@ -165,23 +174,30 @@ class _AddressPageState extends State<AddressPage> {
       return;
     }
     print("preadding");
-    var user = await storage.getItem('user');
-    var preAdd = user['currAdd'];
+    var preAdd = await storage.getItem('paymentAddress');
+    user = await storage.getItem('user');
     print("preadding $preAdd");
     setState(() {
-      if (preAdd != null) {
-        for (var x in fields) {
-          print("pre-- $x");
+      for (var x in fields) {
+        print("pre-- $x");
+        if (preAdd != null) {
           if (preAdd[x] != null) {
+            print("supe-- ${preAdd[x]}");
             data[x] = preAdd[x];
           } else if (user[x] != null) {
             data[x] = user[x];
           }
-        }
-        if (data["pincode"].length == 6) {
-          checkDeliveryServiceabilityStatus();
+        } else {
+          if (user[x] != null) {
+            data[x] = user[x];
+          }
         }
       }
+
+      if (data["pincode"].length == 6) {
+        checkDeliveryServiceabilityStatus();
+      }
+
       _crateList = widget.crateList;
 
       _crateListM = [];
@@ -590,15 +606,15 @@ class _AddressPageState extends State<AddressPage> {
     // Shipping - to
     /*
     var data = {
-    "fullName": "",
-    "contact": "",
-    "pincode": "",
-    "state": "",
-    "city": "",
-    "addLine1": "",
-    "addLine2": ""
-  };
-    */
+      "fullName": "",
+      "contact": "",
+      "pincode": "",
+      "state": "",
+      "city": "",
+      "addLine1": "",
+      "addLine2": ""
+    };
+      */
     print("_merchant: $_merchant");
     var ship_order = {
       "order_id": order_id,
@@ -730,17 +746,23 @@ class _AddressPageState extends State<AddressPage> {
     var options = {
       "key": key,
       "amount": amtForRazor,
-      "name": "7408159898",
-      "description": "Payment to 7408159898",
-      "prefill": {"contact": "7408159898", "email": ''},
-      "external": {
-        "wallets": ["paytm"]
+      "name": user["name"],
+      "description": "Payment to Yibrance",
+      "prefill": {"contact": user['contact'], "email": ''},
+      "options": {
+        "checkout": {
+          "method": {"netbanking": "1", "card": "1", "upi": "1", "wallet": "1"}
+        }
       },
       "order_id": _id,
     };
     try {
       _razorpay.open(options);
     } catch (err) {
+      setState(() {
+        _proceeding = false;
+      });
+      Toast().notifyErr("Payment Failed");
       print("checkout err -  $err");
     }
   }

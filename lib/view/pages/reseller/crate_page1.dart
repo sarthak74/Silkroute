@@ -79,12 +79,13 @@ class _CratePage1State extends State<CratePage1> {
               Container(
                 padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                 decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                    border: Border.all(
-                      color: Color(0xFF5B0D1B),
-                      width: 2,
-                    )),
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  border: Border.all(
+                    color: Color(0xFF5B0D1B),
+                    width: 2,
+                  ),
+                ),
                 child: Row(
                   children: <Widget>[
                     Text(

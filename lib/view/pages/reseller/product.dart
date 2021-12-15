@@ -319,10 +319,13 @@ class _ProductCounterState extends State<ProductCounter> {
                           width: 25,
                           margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
                           decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12.5)),
-                              image: DecorationImage(
-                                  image: NetworkImage(url), fit: BoxFit.fill)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12.5)),
+                            image: DecorationImage(
+                              image: NetworkImage(url),
+                              fit: BoxFit.fill,
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -528,7 +531,11 @@ class _ProductDescriptionState extends State<ProductDescription> {
                       ),
                       padding: EdgeInsets.all(5),
                       child: Text(
-                        ("Set of " + widget.product['totalSet'].toString())
+                        ("Set of " +
+                                ((widget.product['totalSet'] == null)
+                                        ? widget.product['min']
+                                        : widget.product['totalSet'])
+                                    .toString())
                             .toString(),
                         style: textStyle(10, Colors.black),
                       ),
