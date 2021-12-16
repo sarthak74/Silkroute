@@ -103,6 +103,16 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                                           duration: Duration(milliseconds: 500),
                                           curve: Curves.easeOut);
                                     },
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Color(0xFFF0E7DA),
+                                      side: BorderSide(
+                                        width: 2,
+                                        color: Color(0xFF811111),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
                                     child: Text(
                                       "Incoming Orders",
                                       style: (page == 0)
@@ -116,6 +126,16 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                                           duration: Duration(milliseconds: 500),
                                           curve: Curves.easeOut);
                                     },
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Color(0xFFF0E7DA),
+                                      side: BorderSide(
+                                        width: 2,
+                                        color: Color(0xFF811111),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
                                     child: Text(
                                       "Return Orders",
                                       style: (page == 1)

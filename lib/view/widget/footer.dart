@@ -63,7 +63,7 @@ class _FooterState extends State<Footer> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context).pushNamed("/orders");
+                          Navigator.of(context).pushNamed("/merchant_orders");
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,

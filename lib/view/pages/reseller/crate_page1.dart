@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
+import 'package:silkroute/model/services/couponApi.dart';
 import 'package:silkroute/provider/CrateProvider.dart';
+import 'package:silkroute/view/dialogBoxes/CouponDialogBox.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/crate_product_tile.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
+import 'package:silkroute/view/widget/show_dialog.dart';
 
 class CratePage1 extends StatefulWidget {
   CratePage1({this.pageController, this.products, this.bill});
@@ -18,23 +23,104 @@ class CratePage1 extends StatefulWidget {
 
 class _CratePage1State extends State<CratePage1> {
   List products = [];
-  bool loading = true;
-  dynamic bill;
+  bool loading = true, loadingBill = true;
+  dynamic bill,
+      _coupons,
+      orderAmount,
+      price,
+      priceData = {
+        'logisticsSaving': 0,
+        'finalLogistic': 0,
+        'totalCost': 0,
+        'savings': 0,
+      };
+  String contact;
+  LocalStorage storage = LocalStorage('silkroute');
+  num logisticsSaving = 0, finalLogistic = 0;
 
   void loadProducts() async {
-    // dynamic res = await CrateApi().getCrateItems();
-    // var cratePr = res.item1;
-    // for (var x in cratePr) {
-    //   var data = x.toMap();
-    //   setState(() {
-    //     products.add(data);
-    //   });
-    // }
+    contact = await storage.getItem('contact');
+
     setState(() {
       products = widget.products;
       bill = widget.bill;
+      orderAmount = bill["totalValue"] - bill["implicitDiscount"];
+      price = [
+        {"title": "Total Value", "value": bill['totalValue']},
+        {"title": "Discount", "value": bill['implicitDiscount']},
+        {"title": "Coupon Discount", "value": bill['couponDiscount']},
+        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
+        {"title": "GST", "value": bill['gst']},
+        {"title": "Logistics Cost", "value": bill['logistic']},
+      ];
+      priceData['totalCost'] = bill['totalCost'];
+      priceData['savings'] = bill['totalValue'] - bill['totalCost'];
       loading = false;
     });
+  }
+
+  Future recalculateBill() async {
+    if (_coupons == null) {
+      return;
+    }
+    if (_coupons.length == 0) {
+      return;
+    }
+
+    setState(() {
+      loadingBill = true;
+      logisticsSaving = 0;
+      bill["couponsApplied"] = [];
+      bill["couponDiscount"] = 0;
+      for (dynamic coupon in _coupons) {
+        bill["couponsApplied"].add(coupon["code"]);
+        bill["couponDiscount"] += coupon["amount"];
+
+        if (coupon["type"].contains("Logistics")) {
+          logisticsSaving += coupon["amount"];
+        }
+      }
+      bill["priceAfterDiscount"] -= bill["couponDiscount"];
+      bill["totalCost"] -= bill["couponDiscount"];
+      priceData['finalLogistic'] = bill['logistic'] - logisticsSaving;
+      priceData['totalCost'] = bill['totalCost'];
+      priceData['logisticsSaving'] = logisticsSaving;
+      price = [
+        {"title": "Total Value", "value": bill['totalValue']},
+        {"title": "Discount", "value": bill['implicitDiscount']},
+        {"title": "Coupon Discount", "value": bill['couponDiscount']},
+        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
+        {"title": "GST", "value": bill['gst']},
+        {"title": "Logistics Cost", "value": bill['logistic']},
+      ];
+      priceData['savings'] = bill['totalValue'] - bill['totalCost'];
+      loadingBill = false;
+    });
+  }
+
+  Future applyCoupons() async {
+    var coupons = await CouponApi().getCoupons(contact, orderAmount);
+    print("coupons $coupons");
+    setState(() {
+      _coupons = coupons;
+    });
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return CouponsDialog(coupons: _coupons);
+      },
+    );
+    setState(() {
+      loadingBill = true;
+    });
+    await recalculateBill();
   }
 
   void initState() {
@@ -73,40 +159,39 @@ class _CratePage1State extends State<CratePage1> {
 
           ////  ApplyCoupon
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                  border: Border.all(
-                    color: Color(0xFF5B0D1B),
-                    width: 2,
-                  ),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Text(
-                      "Apply Coupons",
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                          color: Colors.black,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 15,
-                      color: Colors.black,
-                    ),
-                  ],
+          ElevatedButton(
+            onPressed: applyCoupons,
+            style: ElevatedButton.styleFrom(
+              primary: Colors.grey[200],
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  width: 2,
+                  color: Color(0xFF811111),
                 ),
               ),
-            ],
+              padding: EdgeInsets.fromLTRB(20, 10, 15, 7),
+            ),
+            child: Wrap(
+              children: <Widget>[
+                Text(
+                  "Apply Coupons",
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Icon(
+                  Icons.arrow_forward,
+                  color: Colors.black,
+                )
+              ],
+            ),
           ),
 
           SizedBox(height: 20),
@@ -139,7 +224,12 @@ class _CratePage1State extends State<CratePage1> {
                   ),
                 ),
                 SizedBox(height: 20),
-                loading ? Text("Loading bill") : DetailPriceList(bill: bill),
+                (loading && loadingBill)
+                    ? Text("Loading bill")
+                    : DetailPriceList(
+                        bill: price,
+                        priceData: priceData,
+                      ),
               ],
             ),
           ),
@@ -194,36 +284,18 @@ class _CratePage1State extends State<CratePage1> {
 }
 
 class DetailPriceList extends StatefulWidget {
-  const DetailPriceList({this.bill});
-  final dynamic bill;
+  const DetailPriceList({this.bill, this.priceData});
+  final dynamic bill, priceData;
+
   @override
   _DetailPriceListState createState() => _DetailPriceListState();
 }
 
 class _DetailPriceListState extends State<DetailPriceList> {
   bool loading = true;
-  dynamic price, bill;
-  num savings = 0;
 
   void loadPrice() {
     setState(() {
-      bill = widget.bill;
-      price = [
-        {"title": "Total Value", "value": bill['totalValue']},
-        {"title": "Discount", "value": bill['implicitDiscount']},
-        {"title": "Coupon Discount", "value": bill['couponDiscount']},
-        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
-        {"title": "GST", "value": bill['gst']},
-        {"title": "Logistics Cost", "value": bill['logistic']},
-      ];
-
-      for (int i = 0; i < price.length; i++) {
-        var x = price[i]['title'].split(' ');
-        if (x[0] == 'Discount' || x[0] == 'Coupon') {
-          savings += price[i]['value'];
-        }
-      }
-
       loading = false;
     });
   }
@@ -244,13 +316,15 @@ class _DetailPriceListState extends State<DetailPriceList> {
               ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: 6,
+                itemCount: widget.bill.length,
                 padding: EdgeInsets.all(10),
                 itemBuilder: (BuildContext context, int index) {
                   return PriceRow(
-                    title: price[index]['title'],
-                    value:
-                        ("₹" + (price[index]['value']).toString()).toString(),
+                    title: widget.bill[index]['title'],
+                    value: ("₹" + (widget.bill[index]['value']).toString())
+                        .toString(),
+                    logisticsSaving: widget.priceData['logisticsSaving'],
+                    finalLogistic: widget.priceData['finalLogistic'],
                   );
                 },
               ),
@@ -264,7 +338,9 @@ class _DetailPriceListState extends State<DetailPriceList> {
                   title: "Total Cost",
                   value: loading
                       ? "Calculating..."
-                      : widget.bill['totalCost'].toString(),
+                      : widget.priceData['totalCost'].toString(),
+                  logisticsSaving: widget.priceData['logisticsSaving'],
+                  finalLogistic: widget.priceData['finalLogistic'],
                 ),
               ),
               Dash(
@@ -273,7 +349,9 @@ class _DetailPriceListState extends State<DetailPriceList> {
               ),
               SizedBox(height: 10),
               Text(
-                ("You saved ₹" + savings.toString() + " on this order")
+                ("You saved ₹" +
+                        widget.priceData['savings'].toString() +
+                        " on this order")
                     .toString(),
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(
@@ -289,8 +367,10 @@ class _DetailPriceListState extends State<DetailPriceList> {
 }
 
 class PriceRow extends StatefulWidget {
-  const PriceRow({this.title, this.value});
+  const PriceRow(
+      {this.title, this.value, this.logisticsSaving, this.finalLogistic});
   final String title, value;
+  final num logisticsSaving, finalLogistic;
   @override
   _PriceRowState createState() => _PriceRowState();
 }
@@ -301,26 +381,67 @@ class _PriceRowState extends State<PriceRow> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Text(
-          widget.title,
-          style: GoogleFonts.poppins(
-            textStyle: TextStyle(
-              color: Colors.black87,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            widget.title,
+            style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                color: Colors.black87,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
-        Text(
-          widget.value,
-          style: GoogleFonts.poppins(
-            textStyle: TextStyle(
-              color: Color(0xFF5B0D1B),
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        (widget.title == "Logistics Cost")
+            ? ((widget.logisticsSaving > 0)
+                ? Row(
+                    children: <Widget>[
+                      Text(
+                        "₹" + widget.value,
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            color: Color(0xFF5B0D1B),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.lineThrough,
+                            decorationThickness: 3,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 3),
+                      Text(
+                        "₹" + widget.finalLogistic.toString(),
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            color: Color(0xFF5B0D1B),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    "₹" + widget.finalLogistic.toString(),
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Color(0xFF5B0D1B),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ))
+            : Text(
+                widget.value,
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    color: Color(0xFF5B0D1B),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
       ],
     );
   }

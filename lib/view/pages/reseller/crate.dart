@@ -163,22 +163,21 @@ class _CratePageState extends State<CratePage> {
                 fit: BoxFit.fill,
               ),
             ),
-            child: loading
-                ? Text("Loading")
-                : Column(
-                    children: <Widget>[
-                      //////////////////////////////
-                      ///                        ///
-                      ///         TopBar         ///
-                      ///                        ///
-                      //////////////////////////////
+            child: Column(
+              children: <Widget>[
+                //////////////////////////////
+                ///                        ///
+                ///         TopBar         ///
+                ///                        ///
+                //////////////////////////////
 
-                      TopBar(),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.15),
+                TopBar(),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.15),
 
-                      Expanded(
-                        child: CustomScrollView(slivers: [
+                Expanded(
+                  child: loading
+                      ? Text("Loading")
+                      : CustomScrollView(slivers: [
                           SliverList(
                             delegate: SliverChildListDelegate([
                               ////////////////////////
@@ -332,16 +331,16 @@ class _CratePageState extends State<CratePage> {
                           SliverFillRemaining(
                               hasScrollBody: false, child: Container()),
                         ]),
-                      ),
+                ),
 
-                      //////////////////////////////
-                      ///                        ///
-                      ///         Footer         ///
-                      ///                        ///
-                      //////////////////////////////
-                      Footer(),
-                    ],
-                  ),
+                //////////////////////////////
+                ///                        ///
+                ///         Footer         ///
+                ///                        ///
+                //////////////////////////////
+                Footer(),
+              ],
+            ),
           ),
         ),
         // bottomNavigationBar: Footer(),

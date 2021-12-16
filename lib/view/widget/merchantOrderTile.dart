@@ -203,38 +203,39 @@ class _MerchantOrderTileState extends State<MerchantOrderTile> {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-          title: Text(
-            _status[status],
-            style: GoogleFonts.poppins(
-              textStyle: TextStyle(
-                color: Color(0xFF5B0D1B),
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
+        title: Text(
+          _status[status],
+          style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+              color: Color(0xFF5B0D1B),
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          actions: <Widget>[
-            GestureDetector(
-              child: Text(
-                "Confirm",
-                style: textStyle(15, Color(0xFF5B0D1B)),
-              ),
-              onTap: () async {
-                await confirmOrder(i, body);
-                Navigator.of(context).pop();
-              },
+        ),
+        actions: <Widget>[
+          GestureDetector(
+            child: Text(
+              "Confirm",
+              style: textStyle(15, Color(0xFF5B0D1B)),
             ),
-            SizedBox(width: 20),
-            GestureDetector(
-              child: Text(
-                "Cancel",
-                style: textStyle(15, Color(0xFF5B0D1B)),
-              ),
-              onTap: () async {
-                Navigator.of(context).pop();
-              },
+            onTap: () async {
+              await confirmOrder(i, body);
+              Navigator.of(context).pop();
+            },
+          ),
+          SizedBox(width: 20),
+          GestureDetector(
+            child: Text(
+              "Cancel",
+              style: textStyle(15, Color(0xFF5B0D1B)),
             ),
-          ]),
+            onTap: () async {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
     );
   }
 }

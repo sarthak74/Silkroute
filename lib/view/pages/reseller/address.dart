@@ -11,6 +11,7 @@ import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/model/services/PaymentGatewayService.dart';
 import 'package:silkroute/model/services/authservice.dart';
+import 'package:silkroute/model/services/couponApi.dart';
 import 'package:silkroute/model/services/shiprocketApi.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -180,6 +181,10 @@ class _AddressPageState extends State<AddressPage> {
     setState(() {
       for (var x in fields) {
         print("pre-- $x");
+        if (x == "fullName") {
+          data[x] = user["name"];
+          continue;
+        }
         if (preAdd != null) {
           if (preAdd[x] != null) {
             print("supe-- ${preAdd[x]}");
@@ -190,6 +195,10 @@ class _AddressPageState extends State<AddressPage> {
         } else {
           if (user[x] != null) {
             data[x] = user[x];
+          } else {
+            if (user["currAdd"][x] != null) {
+              data[x] = user["currAdd"][x];
+            }
           }
         }
       }
@@ -704,7 +713,7 @@ class _AddressPageState extends State<AddressPage> {
         key, secret, int.parse(amtForRazor.toString().split('.')[0]));
 
     print("\norder_id: $_id\n");
-    var addr = await storage.getItem('address');
+    var addr = await storage.getItem('paymentAddress');
     setState(() {
       _bill['totalCost'] = double.parse(amt);
       _bill['logistic'] = double.parse(_deliveryServiceabilityStatus['rate']);
@@ -817,6 +826,7 @@ class _AddressPageState extends State<AddressPage> {
       "status": "Order Placed",
       "razorpay": raz
     });
+    await CouponApi().useCoupons(user['contact'], _bill['couponsApplied']);
     setState(() {
       _proceeding = false;
     });
