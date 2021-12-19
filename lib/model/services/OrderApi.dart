@@ -44,7 +44,7 @@ class OrderApi {
           body: json.encode(data));
       print("Set order res -  ${res.body}");
       var decodedRes2 = jsonDecode(res.body);
-      print("Set order res -  $decodedRes2");
+
       print("Set order res -  ${decodedRes2['success']}");
       return decodedRes2;
     } catch (e) {

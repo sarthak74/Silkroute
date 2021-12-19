@@ -30,7 +30,9 @@ class _TopBarState extends State<TopBar> {
       transitionDuration: Duration(milliseconds: 500),
       pageBuilder: (context, a1, a2) {
         return ShowDialog(
-            NotificationDialogBox(), MediaQuery.of(context).size.width * 0.14);
+          NotificationDialogBox(),
+          MediaQuery.of(context).size.width * 0.1 + 20,
+        );
       },
     );
   }

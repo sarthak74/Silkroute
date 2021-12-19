@@ -8,8 +8,9 @@ class MerchantHomeApi {
   LocalStorage storage = LocalStorage('silkroute');
   Future<List<ProductList>> getProductList() async {
     try {
+      String contact = await storage.getItem('contact');
       var data = {
-        "contact": storage.getItem('contact'),
+        "contact": contact,
       };
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getAllProducts');
@@ -29,8 +30,9 @@ class MerchantHomeApi {
 
   Future<List<ProductList>> getEightProducts() async {
     try {
+      String contact = await storage.getItem('contact');
       var data = {
-        "contact": storage.getItem('contact'),
+        "contact": contact,
       };
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getEightProducts');

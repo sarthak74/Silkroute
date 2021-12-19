@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:silkroute/methods/toast.dart';
 
 import 'package:silkroute/view/widget/top_banner.dart';
 import 'package:silkroute/model/services/authservice.dart';
@@ -26,6 +27,13 @@ class EnterContactState extends State<EnterContactPage> {
     try {
       res = await AuthService().auth(contact);
       // token = (str.split('"')[11]).toString(),
+      if (res == null) {
+        setState(() {
+          sending = false;
+        });
+        Toast().notifyErr("Some server error occurred");
+        return;
+      }
 
       if (res[0]) {
         token = res[1];

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/l10n/l10n.dart';
+import 'package:silkroute/model/services/NotificationApi.dart';
 import 'package:silkroute/view/pages/coming_soon.dart';
 import 'package:silkroute/view/pages/loader.dart';
 import 'package:silkroute/view/pages/manual_verification.dart';
@@ -69,7 +72,7 @@ Future<void> main() async {
 
   LocalStorage storage = await LocalStorage('silkroute');
 
-  secureScreen();
+  // secureScreen();
 
   void runapp() {
     storage.ready.then((res) {
@@ -153,6 +156,18 @@ class MyApp extends StatelessWidget {
 }
 
 Future<void> _firebasePushHandler(RemoteMessage message) async {
-  print("Notififcation: ${message.data}");
+  print("Notififcation data: ${message.data}");
+  RemoteNotification not = message.notification;
+  print("Notififcation: $not");
+  var notificationData = {
+    "title": not.title,
+    "body": not.body,
+    "data": message.data,
+    "messageId": message.messageId,
+    "sentTime": message.sentTime.toLocal().toString(),
+  };
+  print("Notififcation: ${notificationData}");
+  var res = await NotificationApi().saveNotification(notificationData);
+
   AwesomeNotifications().createNotificationFromJsonData(message.data);
 }
