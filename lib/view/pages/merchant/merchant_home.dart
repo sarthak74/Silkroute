@@ -1,6 +1,9 @@
 import 'dart:convert';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/checkAccountDetails.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/notification_service.dart';
@@ -8,10 +11,14 @@ import 'package:silkroute/methods/showdailog.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/services/MerchantHomeAPI.dart';
 import 'package:silkroute/model/services/ResellerHomeApi.dart';
+import 'package:silkroute/model/services/firebase.dart';
 import 'package:silkroute/provider/ProductListProvider.dart';
+import 'package:silkroute/view/dialogBoxes/editAccountDetailsBottomsheet.dart';
 import 'package:silkroute/view/pages/reseller/order_page.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/carousel_indicator.dart';
 import 'package:silkroute/view/widget/product_tile.dart';
+import 'package:silkroute/view/widget/customBottomSheet.dart';
 import 'package:silkroute/view/widget/topSelling.dart';
 import 'package:silkroute/view/widget2/allProducts.dart';
 import 'package:silkroute/view/widget2/footer.dart';
@@ -42,6 +49,10 @@ class _MerchantHomeState extends State<MerchantHome> {
   void loadVars() async {
     MerchantHome.categoriess = await ResellerHomeApi().getCategories();
     List<dynamic> adLists = await ResellerHomeApi().getOffers();
+    String token = await FirebaseService().getToken();
+
+    print("token $token");
+
     setState(() {
       categories = MerchantHome.categoriess;
       adList = adLists;
@@ -55,17 +66,64 @@ class _MerchantHomeState extends State<MerchantHome> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         NotRegisteredDialogMethod().check(context);
       });
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        loadVars();
-      });
     }
+  }
+
+  void awesomeNotifications() {
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Allow Notifications'),
+            content: Text('Our app would like to send you notifications'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Deny",
+                  style: textStyle1(15, Colors.grey, FontWeight.bold),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  AwesomeNotifications()
+                      .requestPermissionToSendNotifications()
+                      .then((_) => Navigator.pop(context));
+                },
+                child: Text(
+                  'Allow',
+                  style: textStyle1(15, Color(0xFF811111), FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    });
+
+    AwesomeNotifications().createdStream.listen((event) {
+      print("awsm notif create event $event");
+    });
+
+    AwesomeNotifications().actionStream.listen((event) {
+      print('awsm notif action event $event');
+      print(event.toMap().toString());
+      Navigator.pushNamed(context, '/merchant_orders');
+    });
   }
 
   @override
   void initState() {
     super.initState();
+    awesomeNotifications();
     init();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadVars();
+    });
   }
 
   @override
@@ -127,7 +185,7 @@ class _MerchantHomeState extends State<MerchantHome> {
 
                       SizedBox(height: 20),
 
-                      TopSelling(),
+                      // TopSelling(),
 
                       AllProducts(),
                     ]),

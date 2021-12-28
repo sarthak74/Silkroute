@@ -17,6 +17,7 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
 
   void loadVars() async {
     var temp = await DashboardApi().getData();
+    print("dash-- $temp");
     setState(() {
       data = temp;
       loading = false;

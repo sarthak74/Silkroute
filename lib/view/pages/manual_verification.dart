@@ -28,7 +28,7 @@ class _ManualVerificationState extends State<ManualVerification> {
     });
 
     if (verified == true) {
-      String ut = storage.getItem('userType');
+      String ut = await storage.getItem('userType');
       String nextpage =
           (ut == "Reseller") ? "/reseller_home" : "/merchant_acc_details";
       // Navigator.of(context).pop();

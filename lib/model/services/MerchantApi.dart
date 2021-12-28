@@ -10,14 +10,18 @@ class MerchantApi {
   LocalStorage storage = LocalStorage('silkroute');
   dynamic addNewProduct(product) async {
     try {
-      print("Add new prodTuct $product");
       var data = product;
       print("Add new product $product");
       var uri = Math().ip();
+
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
       var url = Uri.parse(uri + '/manufacturerApi/addProduct');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
       // var id = res.body.toString();
       print("resp: ${res.body}");
       // print("resp: ${decodedRes2[0].id}");
@@ -39,9 +43,13 @@ class MerchantApi {
       };
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getMerchantOrders');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
       var decodedRes2 = jsonDecode(res.body);
       // print("mer orders: $decodedRes2");
       List<MerchantOrderItem> resp = [];
@@ -64,9 +72,17 @@ class MerchantApi {
       var data = {"contact": await storage.getItem("contact")};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getPendingOrders');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
+
       var decodedRes2 = jsonDecode(res.body);
       print("mer orders: $decodedRes2");
       List<MerchantOrderItem> resp = [];
@@ -89,9 +105,16 @@ class MerchantApi {
       var data = body;
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/updateProduct');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
       var decodedRes2 = jsonDecode(res.body);
 
       print("update product result: $decodedRes2");
@@ -108,9 +131,16 @@ class MerchantApi {
       var data = body;
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/deleteProduct');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
       var decodedRes2 = jsonDecode(res.body);
 
       print("update product result: $decodedRes2");

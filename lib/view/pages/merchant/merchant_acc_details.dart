@@ -17,17 +17,25 @@ class MechantAccountDetails extends StatefulWidget {
 class _MechantAccountDetailsState extends State<MechantAccountDetails> {
   String contact, businessAdd = "";
   dynamic data = {
-    "bankAccountNo": "",
-    "ifsc": "",
-    "pickupAdd": "",
-    "accountHolderName": ""
-  };
+        "bankAccountNo": "",
+        "ifsc": "",
+        "pickupAdd": "",
+        "accountHolderName": "",
+        "email": ""
+      },
+      user;
   bool loading = true, agreementCheck = false;
   LocalStorage storage = LocalStorage('silkroute');
 
   TextEditingController pickupController = new TextEditingController();
 
-  List<String> reqFields;
+  List<String> reqFields = [
+    "bankAccountNo",
+    "ifsc",
+    "pickupAdd",
+    "accountHolderName",
+    "email"
+  ];
 
   ////   SOME METHODS //////////
 
@@ -44,7 +52,7 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
       );
       return false;
     }
-    reqFields = ["bankAccountNo", "ifsc", "pickupAdd", "accountHolderName"];
+
     for (String x in reqFields) {
       print("$x - ${data[x].toString()}");
       if ((data[x].toString()).length == 0) {
@@ -82,14 +90,30 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
   }
 
   void loadVars() async {
-    var user = await storage.getItem('user');
+    user = await storage.getItem('user');
     var ct = user["contact"];
-    businessAdd = user["currAdd"]["address"];
     if (ct == null) {
       contact = null;
       check();
       return;
     }
+    for (var x in reqFields) {
+      if (user[x] == null) {
+        continue;
+      }
+      if (user[x].length == 0) {
+        continue;
+      }
+      data[x] = user[x];
+    }
+    print("user: $user");
+    businessAdd = (user["currAdd"]["address"] ?? '');
+    setState(() {
+      pickupController.text = user['pickupAdd'] ?? '';
+      data['pickupAdd'] = user['pickupAdd'] ?? '';
+    });
+    print("${user['pickupAdd']}\n${pickupController.text}");
+
     setState(() {
       contact = ct;
       loading = false;
@@ -118,6 +142,9 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
       Navigator.of(context).pushNamed("/enter_contact");
     } else {
       var res = await AuthService().updateUser(contact, data);
+
+      // add fund account in razorpay
+
       print("res: $res");
       if (res != null) {
         // var user = await storage.getItem('user');
@@ -164,7 +191,6 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
     return GestureDetector(
       onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         drawer: Navbar(),
         primary: false,
         body: Container(
@@ -188,190 +214,262 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
               Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    SliverList(
-                      delegate: SliverChildListDelegate([
-                        loading
-                            ? Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.2,
-                                margin: EdgeInsets.fromLTRB(
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.05,
+                      vertical: 20),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 2),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(35),
+                      topRight: Radius.circular(35),
+                    ),
+                    color: Colors.white,
+                  ),
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildListDelegate([
+                          loading
+                              ? Container(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.2,
+                                  margin: EdgeInsets.fromLTRB(
                                     0,
                                     MediaQuery.of(context).size.height * 0.2,
                                     0,
-                                    0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      height: 30,
-                                      width: 30,
-                                      child: CircularProgressIndicator(
-                                        color: Color(0xFF5B0D1B),
+                                    0,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      SizedBox(
+                                        height: 30,
+                                        width: 30,
+                                        child: CircularProgressIndicator(
+                                          color: Color(0xFF5B0D1B),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : Container(
-                                margin: EdgeInsets.all(
-                                    MediaQuery.of(context).size.width * 0.05),
-                                height:
-                                    MediaQuery.of(context).size.height * 0.75,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    CustomTextField(
-                                      "Enter Account Number",
-                                      "Account Number",
-                                      false,
-                                      (val) async {
-                                        setState(() {
-                                          data["bankAccountNo"] = val;
-                                        });
-                                      },
-                                    ),
-                                    SizedBox(height: 20),
-                                    CustomTextField(
-                                      "Enter IFSC Code",
-                                      "IFSC Code",
-                                      false,
-                                      (val) async {
-                                        setState(() {
-                                          data["ifsc"] = val;
-                                        });
-                                      },
-                                    ),
-                                    SizedBox(height: 20),
-                                    CustomTextField(
-                                      "Enter Account Holder Name",
-                                      "Account Holder",
-                                      false,
-                                      (val) async {
-                                        setState(() {
-                                          data["accountHolderName"] = val;
-                                        });
-                                      },
-                                    ),
-                                    SizedBox(height: 20),
-
-                                    ///// PICKUPP ADDRESS
-
-                                    new Theme(
-                                      data: new ThemeData(
-                                        primaryColor: Colors.black87,
+                                    ],
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "*These details are necessary to showcase your products to customer!",
+                                        style: textStyle1(
+                                          14,
+                                          Colors.black,
+                                          FontWeight.w500,
+                                        ),
                                       ),
-                                      child: new TextFormField(
-                                        initialValue: null,
-                                        obscureText: false,
-                                        onChanged: (val) async {
+                                      SizedBox(height: 20),
+                                      CustomTextField(
+                                        "Email",
+                                        "Email",
+                                        false,
+                                        (val) async {
                                           setState(() {
-                                            data["pickupAdd"] =
-                                                pickupController.text;
+                                            data["email"] = val;
                                           });
                                         },
-                                        decoration: new InputDecoration(
-                                          isDense: true,
-                                          border: OutlineInputBorder(
-                                            borderSide: new BorderSide(
+                                        initialValue: data["email"],
+                                      ),
+                                      SizedBox(height: 20),
+                                      CustomTextField(
+                                        "Account Number",
+                                        "Account Number",
+                                        false,
+                                        (val) async {
+                                          setState(() {
+                                            data["bankAccountNo"] = val;
+                                          });
+                                        },
+                                        initialValue: data["bankAccountNo"],
+                                      ),
+                                      SizedBox(height: 20),
+                                      CustomTextField(
+                                        "IFSC Code",
+                                        "IFSC Code",
+                                        false,
+                                        (val) async {
+                                          setState(() {
+                                            data["ifsc"] = val;
+                                          });
+                                        },
+                                        initialValue: data["ifsc"],
+                                      ),
+                                      SizedBox(height: 20),
+                                      CustomTextField(
+                                        "Account Holder Name",
+                                        "Account Holder",
+                                        false,
+                                        (val) async {
+                                          setState(() {
+                                            data["accountHolderName"] = val;
+                                          });
+                                        },
+                                        initialValue: data["accountHolderName"],
+                                      ),
+                                      SizedBox(height: 20),
+
+                                      ///// PICKUPP ADDRESS
+
+                                      new Theme(
+                                        data: new ThemeData(
+                                          primaryColor: Colors.black87,
+                                        ),
+                                        child: new TextFormField(
+                                          obscureText: false,
+                                          onChanged: (val) async {
+                                            setState(() {
+                                              data["pickupAdd"] =
+                                                  pickupController.text;
+                                            });
+                                          },
+                                          decoration: new InputDecoration(
+                                            isDense: true,
+                                            border: OutlineInputBorder(
+                                              borderSide: new BorderSide(
+                                                color: Colors.black,
+                                              ),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(30)),
+                                            ),
+                                            contentPadding:
+                                                new EdgeInsets.symmetric(
+                                              horizontal: 20.0,
+                                              vertical: 10,
+                                            ),
+                                            labelText: "Pickup Address",
+                                            prefixStyle: new TextStyle(
                                               color: Colors.black,
                                             ),
+                                            hintText: "Pickup Address",
+                                          ),
+                                          controller: pickupController,
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 10),
+
+                                      GestureDetector(
+                                        onTap: () async {
+                                          // print("clicked");
+                                          setState(() {
+                                            pickupController.text = businessAdd;
+                                            data["pickupAdd"] = businessAdd;
+                                          });
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Color(0xFF5B0D1B),
                                             borderRadius: BorderRadius.all(
-                                                Radius.circular(30)),
+                                                Radius.circular(10)),
                                           ),
-                                          contentPadding:
-                                              new EdgeInsets.symmetric(
-                                            horizontal: 20.0,
-                                            vertical: 10,
-                                          ),
-                                          labelText: "Enter Pickup Address",
-                                          prefixStyle: new TextStyle(
-                                            color: Colors.black,
-                                          ),
-                                          hintText: "Pickup Address",
-                                        ),
-                                        controller: pickupController,
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 10),
-
-                                    GestureDetector(
-                                      onTap: () async {
-                                        // print("clicked");
-                                        setState(() {
-                                          pickupController.text = businessAdd;
-                                          data["pickupAdd"] = businessAdd;
-                                        });
-                                      },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFF5B0D1B),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                        ),
-                                        padding:
-                                            EdgeInsets.fromLTRB(20, 5, 20, 5),
-                                        child: Text(
-                                          "Same as business Address?",
-                                          style: textStyle1(
-                                            14,
-                                            Colors.white,
-                                            FontWeight.w500,
+                                          padding:
+                                              EdgeInsets.fromLTRB(20, 5, 20, 5),
+                                          child: Text(
+                                            "Same as business Address?",
+                                            style: textStyle1(
+                                              14,
+                                              Colors.white,
+                                              FontWeight.w500,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
 
-                                    SizedBox(height: 20),
+                                      SizedBox(height: 20),
 
-                                    // Terms and Conditions
+                                      // Terms and Conditions
 
-                                    Agreements(agreementCheck,
-                                        agreementCheckFunction, checkboxColor),
+                                      Agreements(
+                                          agreementCheck,
+                                          agreementCheckFunction,
+                                          checkboxColor),
 
-                                    // navigator
+                                      // navigator
 
-                                    Align(
-                                      alignment: Alignment.topRight,
-                                      child: new Container(
-                                        width: 70,
-                                        height: 70,
-                                        margin:
-                                            EdgeInsets.fromLTRB(0, 0, 0, 10),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(70)),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Color(0xFF530000),
-                                              Color.fromRGBO(129, 20, 20, 1),
-                                            ],
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          InkWell(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              Navigator.of(context)
+                                                  .pushNamed("/merchant_home");
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  20, 5, 20, 5),
+                                              decoration: BoxDecoration(
+                                                color: Color.fromRGBO(
+                                                    0, 0, 0, 0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                              child: Text(
+                                                "Skip",
+                                                style:
+                                                    textStyle(13, Colors.black),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                        child: new IconButton(
-                                          icon: Icon(
-                                            Icons.keyboard_arrow_right,
-                                            color: Colors.white,
+                                          new Container(
+                                            width: 70,
+                                            height: 70,
+                                            margin: EdgeInsets.fromLTRB(
+                                                0, 0, 0, 10),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(70)),
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Color(0xFF530000),
+                                                  Color.fromRGBO(
+                                                      129, 20, 20, 1),
+                                                ],
+                                              ),
+                                            ),
+                                            child: new IconButton(
+                                              icon: Icon(
+                                                Icons.keyboard_arrow_right,
+                                                color: Colors.white,
+                                              ),
+                                              iconSize: 40.0,
+                                              onPressed: () async {
+                                                if (await validForm())
+                                                  await navigatorFuntion();
+                                              },
+                                            ),
                                           ),
-                                          iconSize: 40.0,
-                                          onPressed: () async {
-                                            if (await validForm())
-                                              await navigatorFuntion();
-                                          },
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(context)
+                                              .viewInsets
+                                              .bottom,
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                      ]),
-                    ),
-                  ],
+                        ]),
+                      ),
+                      SliverFillRemaining(
+                          hasScrollBody: false, child: Container()),
+                    ],
+                  ),
                 ),
               ),
             ],

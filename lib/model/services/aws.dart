@@ -3,16 +3,25 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
 
 class AWS {
+  LocalStorage storage = LocalStorage('silkroute');
   Future<Map<String, dynamic>> getUrl(Map<String, dynamic> file) async {
     try {
       var uri1 = Math().ip();
       var url1 = Uri.parse(uri1 + '/getAWSSignedUrl');
-      final res1 = await http.post(url1,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(file));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res1 = await http.post(
+        url1,
+        headers: headers,
+        body: json.encode(file),
+      );
       var decodedRes2 = jsonDecode(res1.body);
       print("get upload url res -  $decodedRes2");
       return decodedRes2;

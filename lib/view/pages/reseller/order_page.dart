@@ -406,7 +406,7 @@ class _OrderStatusState extends State<OrderStatus> {
   void loadVars() {
     setState(() {
       itemDetails = widget.itemDetails;
-      if (itemDetails['customerStatus'] == "Cancelled") {
+      if (itemDetails['customerStatus'] == "Return Requested") {
         cancelled = true;
       } else {
         index = statuses.indexOf(itemDetails['customerStatus']);
@@ -492,7 +492,7 @@ class _OrderStatusState extends State<OrderStatus> {
                           Container(
                             width: 70,
                             margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                            height: 165,
+                            height: 170,
                             child: IconStepper(
                               enableNextPreviousButtons: false,
                               enableStepTapping: false,
@@ -513,7 +513,7 @@ class _OrderStatusState extends State<OrderStatus> {
                           ),
                           Container(
                             margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                            height: 165,
+                            height: 170,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,

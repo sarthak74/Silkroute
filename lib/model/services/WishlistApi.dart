@@ -10,15 +10,17 @@ class WishlistApi {
 
   setWishlist() async {
     try {
-      var user = storage.getItem('user');
+      var user = await storage.getItem('user');
       var data = {
-        'contact': storage.getItem('contact'),
+        'contact': await storage.getItem('contact'),
         'wishlist': user['wishlist'].toString()
       };
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
       print("setWishlist $data");
       var uri = Math().ip();
       var url = Uri.parse(uri + '/userApi/setWishlist');
-      final res = await http.post(url, body: data);
+      final res = await http.post(url, body: data, headers: headers);
       print("res $res");
     } catch (e) {
       print("error - $e");
@@ -41,7 +43,9 @@ class WishlistApi {
         var reqBody = {"id": pId};
         var uri = Math().ip();
         var url = Uri.parse(uri + '/manufacturerApi/getProductInfo');
-        final res = await http.post(url, body: reqBody);
+        String token = await storage.getItem('token');
+        var headers = {"Authorization": token};
+        final res = await http.post(url, body: reqBody, headers: headers);
         dynamic product = jsonDecode(res.body);
         product["id"] = pId.toString();
         ProductList fp = ProductList.fromMap(product);

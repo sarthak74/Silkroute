@@ -37,6 +37,8 @@ class _MerchantOrderTileState extends State<MerchantOrderTile> {
         setState(() {
           orders[index]['merchantStatus'] = "Ready";
         });
+        // todo:
+        // await createPayout();
       }
     } else {
       Toast().notifyErr("Error Occurred, Please try again");
@@ -50,8 +52,8 @@ class _MerchantOrderTileState extends State<MerchantOrderTile> {
         orders.add(order.toMap());
       }
       _status = [
-        "By accepting this, you confirm that you have seen order and started working on it.",
-        "By accepting this, you confirm that your order is completed and ready to be shipped."
+        "By accepting this, you confirm that you have seen order and started working on it. You can't undo this action!",
+        "By accepting this, you confirm that your order is completed and ready to be shipped. You can't undo this action!"
       ];
       loading = false;
     });

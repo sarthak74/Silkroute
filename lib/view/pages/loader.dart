@@ -1,6 +1,10 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
+import 'package:silkroute/model/services/firebase.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 
 class MainLoader extends StatefulWidget {
   @override
@@ -15,6 +19,7 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
     controller = new AnimationController(
       duration: new Duration(seconds: 10),
       vsync: this,
@@ -28,15 +33,18 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
     });
     controller.repeat();
     Future.delayed(const Duration(seconds: 2), () async {
-      // LocalStorage storage = LocalStorage('silkroute');
+      LocalStorage storage = await LocalStorage('silkroute');
       // await storage.clear();
-      var auth = await Methods().isAuthenticated();
-      var usr = await Methods().getUser();
+      var usr = await storage.getItem('user');
+      var auth = usr == null ? false : true;
       var reg = (usr != null) ? usr["registered"] : null;
       var ut = (usr != null) ? usr["userType"] : null;
       print("aut-- $auth $ut $usr");
       dynamic nextpage = "";
       if (auth && (usr != null) && (reg != null) && (reg == true)) {
+        if (usr['fcmtoken'] == null) {
+          usr['fcmtoken'] = await FirebaseService().getToken();
+        }
         if (ut == "Manufacturer") {
           if (usr["verified"] == true) {
             if (usr["bankAccountNo"] != null &&

@@ -12,7 +12,12 @@ class ProductDetailApi {
       var reqBody = {"id": pId};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getProductInfo');
-      final res = await http.post(url, body: reqBody);
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(url, body: reqBody, headers: headers);
       dynamic product = jsonDecode(res.body);
       // dynamic fp = ProductList.toMap(product);
       return product;

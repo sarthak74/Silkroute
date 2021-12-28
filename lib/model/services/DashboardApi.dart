@@ -15,9 +15,12 @@ class DashboardApi {
       String contact = await storage.getItem('contact');
       String userType = await storage.getItem('userType');
       print("$contact");
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
       var route = (userType == "Reseller") ? "resellerApi" : "manufacturerApi";
       var url = Uri.parse(Math().ip() + '/' + route + '/getDashboardData');
-      final res = await http.post(url, body: {'contact': contact});
+      final res =
+          await http.post(url, body: {'contact': contact}, headers: headers);
       var decodedRes2 = jsonDecode(res.body);
       print("dash res: $decodedRes2");
       return decodedRes2['data'];

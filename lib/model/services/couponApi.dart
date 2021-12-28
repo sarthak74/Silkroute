@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,7 +12,12 @@ class CouponApi {
       dynamic body = await json.encode(data);
       print("getcoupons data: $data");
       print("body $body");
-      var headers = {"Content-Type": "application/json"};
+      LocalStorage storage = await LocalStorage('silkroute');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
       var url = Uri.parse(Math().ip() + '/resellerApi/getCoupons');
       final res = await http.post(url, body: body, headers: headers);
       var decodedRes2 = jsonDecode(res.body);
@@ -28,7 +34,12 @@ class CouponApi {
       dynamic body = await json.encode(data);
       print("usecoupons data: $data");
       print("body $body");
-      var headers = {"Content-Type": "application/json"};
+      LocalStorage storage = await LocalStorage('silkroute');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
       var url = Uri.parse(Math().ip() + '/resellerApi/useCoupons');
       final res = await http.post(url, body: body, headers: headers);
       var decodedRes2 = jsonDecode(res.body);

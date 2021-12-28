@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:silkroute/methods/notification_service.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/model/services/PaymentGatewayService.dart';
@@ -802,6 +803,7 @@ class _AddressPageState extends State<AddressPage> {
       item['merchantStatus'] = 'Not Seen';
       item['merchantPaymentStatus'] = "Incomplete";
       await OrderApi().addOrderItem(_id, item);
+
       print("item ${i.toString()} shiprocket status:\n$item");
     }
 
@@ -814,6 +816,16 @@ class _AddressPageState extends State<AddressPage> {
     //   "manifest_url": "res['payload']['manifest_url']",
     //   "routing_code": "res['payload']['routing_code']"
     // };
+
+    DateTime now = DateTime.now();
+
+    var data = {
+      "title": "Order Initiated",
+      "body": "Your order with id $_id has been initiated!",
+      "sentTime": now.toString()
+    };
+
+    await NotificationService().Notify(data);
 
     print("razorpay_payment_id ${res.paymentId}");
     Map<String, String> raz = {};

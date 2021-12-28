@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/glitch/NoInternetGlitch.dart';
@@ -16,6 +17,7 @@ import 'package:silkroute/view/widget/product_tile.dart';
 import 'package:silkroute/view/widget/footer.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
+import 'package:silkroute/view/widget2/merchantProductTile.dart';
 
 class ProductListPage extends StatefulWidget {
   const ProductListPage({this.category, this.subCat});
@@ -33,19 +35,23 @@ class _ProductListPageState extends State<ProductListPage> {
   bool _sortShow = false;
   bool _filterShow = false;
   bool noMore = false;
+  String userType = "Reseller";
 
   dynamic _searchProvider = new ProductListProvider();
   Icon radioOn, radioOff;
   List<dynamic> categories;
+  LocalStorage storage = LocalStorage('silkroute');
 
   void loadVars() async {
     List<dynamic> categoriess = await ResellerHomeApi().getCategories();
+    userType = await storage.getItem('userType');
     setState(() {
       categories = categoriess;
       _products = [];
 
       radioOn = Icon(Icons.radio_button_checked);
       radioOff = Icon(Icons.radio_button_off);
+
       loading = false;
     });
   }
@@ -282,9 +288,16 @@ class _ProductListPageState extends State<ProductListPage> {
                                                         ? 0
                                                         : _products.length,
                                                     (index) {
-                                                      return ProductTile(
-                                                          product:
-                                                              _products[index]);
+                                                      return (userType ==
+                                                              "Reseller")
+                                                          ? ProductTile(
+                                                              product:
+                                                                  _products[
+                                                                      index])
+                                                          : MerchantProductTile(
+                                                              product:
+                                                                  _products[
+                                                                      index]);
                                                     },
                                                   ),
                                                 ),

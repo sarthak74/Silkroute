@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:silkroute/methods/isauthenticated.dart';
+import 'package:silkroute/view/dialogBoxes/editPickupAddressDialog.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Helpers {
@@ -25,5 +30,111 @@ class Helpers {
         "due to false information, you will pay logistic charges."
       ]
     ];
+  }
+
+  Future<ImageSource> getImageSource(context) async {
+    ImageSource source;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      constraints: BoxConstraints(minHeight: 100),
+      // isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(30, 1, 30, 1),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  source = ImageSource.camera;
+                  Navigator.pop(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      "Camera",
+                      style: textStyle(13, Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(),
+              GestureDetector(
+                onTap: () {
+                  source = ImageSource.gallery;
+                  Navigator.pop(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.image,
+                      color: Colors.black,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      "Gallery",
+                      style: textStyle(13, Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    return source;
+  }
+
+  Future showPickupAddressDialog(context) async {
+    var user = await Methods().getUser();
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => EditPickupAddressDialog(
+        info: user['pickupAdd'].toString(),
+      ),
+    );
+  }
+
+  Future showBusinessAddressDialog(context, info) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => AlertDialog(
+        title: Text(
+          info.toString(),
+          style: textStyle(15, Colors.black),
+        ),
+        actions: <Widget>[
+          GestureDetector(
+            child: Text(
+              "Close",
+              style: textStyle(12, Color(0xFF5B0D1B)),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

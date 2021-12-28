@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
+import 'package:localstorage/localstorage.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class PaymentGatewayService {
   var key = "rzp_test_XGLJQQbg9CfbPJ", secret = 'wzwPMXY3An2S8SPrmrnwrikM';
   Razorpay _razorpay = new Razorpay();
+  LocalStorage storage = LocalStorage('silkroute');
 
   Future<String> generateOrderId(String key, String secret, int amount) async {
     try {
@@ -64,4 +66,57 @@ class PaymentGatewayService {
       return e;
     }
   }
+
+  Future payout(data) async {
+    try {
+      print("payout - $data");
+    } catch (e) {
+      print("payout error - $e");
+      return e;
+    }
+  }
+
+  Future createContact(data) async {
+    try {
+      print("raz add contact - $data");
+      var headers = {'Content-Type': 'application/json'};
+
+      var body = await json.encode(data);
+
+      var uri = 'https://api.razorpay.com/v1/contacts';
+      var url = Uri.parse(uri);
+
+      dynamic res = await http.post(url, headers: headers, body: body);
+
+      res = json.decode(res.body);
+      print("res: $res");
+      return res;
+    } catch (e) {
+      print("raz add contact error - $e");
+      return e;
+    }
+  }
+
+  Future createFundAccount(data) async {
+    try {
+      print("raz add fund acc - $data");
+      var headers = {'Content-Type': 'application/json'};
+
+      var body = await json.encode(data);
+
+      var uri = 'https://api.razorpay.com/v1/fund_accounts';
+      var url = Uri.parse(uri);
+
+      dynamic res = await http.post(url, headers: headers, body: body);
+
+      res = json.decode(res.body);
+      print("res: $res");
+      return res;
+    } catch (e) {
+      print("raz add fund acc error - $e");
+      return e;
+    }
+  }
+
+  // fund acc validation transaction
 }

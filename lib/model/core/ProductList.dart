@@ -36,7 +36,7 @@ class ProductList {
   final num stockAvailability;
   final num resellerCrateAvailability;
   final dynamic images;
-  final double halfSetPrice;
+  final dynamic fullSetSize;
   final double fullSetPrice;
   final dynamic colors;
   final dynamic specifications;
@@ -57,7 +57,7 @@ class ProductList {
     this.stockAvailability,
     this.resellerCrateAvailability,
     this.images,
-    this.halfSetPrice,
+    this.fullSetSize,
     this.fullSetPrice,
     this.colors,
     this.specifications,
@@ -81,7 +81,7 @@ class ProductList {
       'stockAvailability': stockAvailability,
       'resellerCrateAvailability': resellerCrateAvailability,
       'images': images,
-      'halfSetPrice': halfSetPrice,
+      'fullSetSize': fullSetSize,
       'fullSetPrice': fullSetPrice,
       'colors': colors,
       'specifications': specifications,
@@ -90,26 +90,26 @@ class ProductList {
 
   factory ProductList.fromMap(Map<String, dynamic> map) {
     return ProductList(
-      id: map['id'],
-      title: map['title'],
-      discount: map['discount'],
-      mrp: map['mrp'],
-      sp: map['sp'],
-      discountValue: map['discountValue'],
-      category: map['category'],
-      subCat: map['subCat'],
-      userContact: map['userContact'],
-      dateAdded: map['dateAdded'],
-      description: map['description'],
-      setSize: map['setSize'],
-      min: map['min'],
-      stockAvailability: map['stockAvailability'],
-      resellerCrateAvailability: map['resellerCrateAvailability'],
-      images: map['images'],
-      halfSetPrice: map['halfSetPrice'],
-      fullSetPrice: map['fullSetPrice'],
-      colors: map['colors'],
-      specifications: map['specifications'],
+      id: map['id'] ?? '',
+      title: map['title'] ?? '',
+      discount: map['discount'] ?? false,
+      mrp: map['mrp'] ?? 0,
+      sp: map['sp'] ?? 0,
+      discountValue: map['discountValue'] ?? 0,
+      category: map['category'] ?? '',
+      subCat: map['subCat'] ?? null,
+      userContact: map['userContact'] ?? '',
+      dateAdded: map['dateAdded'] ?? '',
+      description: map['description'] ?? '',
+      setSize: map['totalSet'] ?? 0,
+      min: map['min'] ?? 0,
+      stockAvailability: map['stockAvailability'] ?? 0,
+      resellerCrateAvailability: map['resellerCrateAvailability'] ?? 0,
+      images: map['images'] ?? null,
+      fullSetSize: map['fullSetSize'] ?? null,
+      fullSetPrice: map['mrp']?.toDouble() ?? 0.0,
+      colors: map['colors'] ?? null,
+      specifications: map['specifications'] ?? null,
     );
   }
 
@@ -117,4 +117,60 @@ class ProductList {
 
   factory ProductList.fromJson(String source) =>
       ProductList.fromMap(json.decode(source));
+
+  @override
+  String toString() {
+    return 'ProductList(id: $id, title: $title, discount: $discount, mrp: $mrp, sp: $sp, discountValue: $discountValue, category: $category, subCat: $subCat, userContact: $userContact, dateAdded: $dateAdded, description: $description, setSize: $setSize, min: $min, stockAvailability: $stockAvailability, resellerCrateAvailability: $resellerCrateAvailability, images: $images, fullSetSize: $fullSetSize, fullSetPrice: $fullSetPrice, colors: $colors, specifications: $specifications)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is ProductList &&
+        other.id == id &&
+        other.title == title &&
+        other.discount == discount &&
+        other.mrp == mrp &&
+        other.sp == sp &&
+        other.discountValue == discountValue &&
+        other.category == category &&
+        other.subCat == subCat &&
+        other.userContact == userContact &&
+        other.dateAdded == dateAdded &&
+        other.description == description &&
+        other.setSize == setSize &&
+        other.min == min &&
+        other.stockAvailability == stockAvailability &&
+        other.resellerCrateAvailability == resellerCrateAvailability &&
+        other.images == images &&
+        other.fullSetSize == fullSetSize &&
+        other.fullSetPrice == fullSetPrice &&
+        other.colors == colors &&
+        other.specifications == specifications;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        title.hashCode ^
+        discount.hashCode ^
+        mrp.hashCode ^
+        sp.hashCode ^
+        discountValue.hashCode ^
+        category.hashCode ^
+        subCat.hashCode ^
+        userContact.hashCode ^
+        dateAdded.hashCode ^
+        description.hashCode ^
+        setSize.hashCode ^
+        min.hashCode ^
+        stockAvailability.hashCode ^
+        resellerCrateAvailability.hashCode ^
+        images.hashCode ^
+        fullSetSize.hashCode ^
+        fullSetPrice.hashCode ^
+        colors.hashCode ^
+        specifications.hashCode;
+  }
 }

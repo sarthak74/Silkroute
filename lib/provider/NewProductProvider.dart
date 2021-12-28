@@ -4,19 +4,22 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 class NewProductProvider {
-  static List<File> images = [];
   static String title = "";
+  static String subCat = "";
   static String description = "";
   static int setSize = 0;
   static String category = "";
   static int stockAvailability = 0;
-  static List<File> colors = [];
+  static List<dynamic> colors = [];
+  static List<dynamic> images = [];
   static int min = 0;
   static double halfSetPrice = 0.0;
   static double fullSetPrice = 0.0;
   static dynamic specifications = [];
-  static Map<String, double> halfSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
-  static Map<String, double> fullSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
+  static List<dynamic> editColors = [];
+  static List<dynamic> editImages = [];
+
+  static dynamic fullSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
 }
 
 /*

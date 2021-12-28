@@ -8,6 +8,7 @@ import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/model/services/ProductListApi.dart';
 import 'package:silkroute/model/services/WishlistApi.dart';
+import 'package:silkroute/view/pages/merchant/add_new_product_page.dart';
 import 'package:silkroute/view/pages/reseller/order_page.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/subcategory_head.dart';
@@ -109,9 +110,17 @@ class _ProductPageState extends State<ProductPage> {
                                       ProductDescription(
                                           product: productDetails),
                                       ProductCounter(product: productDetails),
+                                      ProductSpecifications(
+                                          specifications:
+                                              productDetails['specifications']),
                                     ],
                                   ),
                                 ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                          ),
                         ]),
                       ),
                       SliverFillRemaining(
@@ -136,6 +145,65 @@ class _ProductPageState extends State<ProductPage> {
   }
 }
 
+class ProductSpecifications extends StatelessWidget {
+  const ProductSpecifications({Key key, this.specifications}) : super(key: key);
+  final specifications;
+
+  @override
+  Widget build(BuildContext context) {
+    print("$specifications");
+    return Container(
+      margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.05,
+        vertical: 10,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        child: DataTable(
+          columns: <DataColumn>[
+            DataColumn(
+              label: Text(
+                'Feature',
+                style: textStyle1(13, Colors.black, FontWeight.bold),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Value',
+                style: textStyle1(13, Colors.black, FontWeight.bold),
+              ),
+            ),
+          ],
+          rows: List<DataRow>.generate(
+            specifications.length,
+            (int index) => DataRow(
+              cells: [
+                DataCell(
+                  Text(
+                    specifications[index]["title"],
+                    style: textStyle1(13, Colors.black, FontWeight.w500),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    specifications[index]["value"],
+                    style: textStyle1(13, Colors.black, FontWeight.w400),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class ProductCounter extends StatefulWidget {
   const ProductCounter({this.product});
   final dynamic product;
@@ -147,7 +215,7 @@ class ProductCounter extends StatefulWidget {
 class _ProductCounterState extends State<ProductCounter> {
   num counter, min, max, gap;
   bool loading = true, addingtoCrate = false;
-  List proColors = [];
+  List proColors = [], selectedColors = [];
   String
       // url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0",
       url =
@@ -158,27 +226,41 @@ class _ProductCounterState extends State<ProductCounter> {
 
   void inc() {
     setState(() {
-      counter = max;
+      if (_qtyController.text == null || _qtyController.text.length == 0) {
+        _qtyController.text = "0";
+      }
+      dynamic x = int.parse(_qtyController.text);
+      x = Math().min(x + 1, widget.product["stockAvailability"]);
+      _qtyController.text = x.toString();
+      _qty = x.toString();
     });
   }
 
   void dec() {
     setState(() {
-      counter = min;
+      if (_qtyController.text == null || _qtyController.text.length == 0) {
+        _qtyController.text = "0";
+      }
+      dynamic x = int.parse(_qtyController.text);
+      x = Math().max(x - 1, 0);
+      _qtyController.text = x.toString();
+      _qty = x.toString();
     });
   }
 
   void loadVars() {
     setState(() {
-      counter = widget.product['min'];
-      min = widget.product['min'];
-      max = widget.product['totalSet'];
+      // counter = widget.product['min'];
+      // min = widget.product['min'];
+      // max = widget.product['totalSet'];
 
       // ignore: todo
       // TODO: proColors is list of colors/images of product in set
 
       proColors = widget.product["colors"];
-
+      for (var x in widget.product["colors"]) {
+        selectedColors.add(false);
+      }
       loading = false;
     });
   }
@@ -201,11 +283,28 @@ class _ProductCounterState extends State<ProductCounter> {
       });
       return;
     }
+
+    List selectedColorsUrl = [];
+    for (int i = 0; i < selectedColors.length; i++) {
+      if (selectedColors[i] == true) {
+        selectedColorsUrl.add(proColors[i]);
+      }
+    }
+
+    if (selectedColorsUrl.length < widget.product['min']) {
+      setState(() {
+        addingtoCrate = false;
+        Toast()
+            .notifyErr("Select a minimum of ${widget.product["min"]} colors!");
+      });
+      return;
+    }
+
     var data = {
       'id': widget.product['_id'].toString(),
-      'contact': storage.getItem('contact'),
+      'contact': await storage.getItem('contact'),
       'quantity': _qty,
-      'colors': proColors.sublist(0, counter),
+      'colors': selectedColorsUrl,
       'mrp': widget.product['mrp'].toString(),
       'merchantContact': widget.product['userContact'].toString(),
       'disValue': widget.product['discountValue'].toString(),
@@ -230,9 +329,8 @@ class _ProductCounterState extends State<ProductCounter> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadVars();
-    });
+
+    loadVars();
   }
 
   @override
@@ -245,63 +343,6 @@ class _ProductCounterState extends State<ProductCounter> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // COUNTER
-
-          Row(
-            children: <Widget>[
-              GestureDetector(
-                onTap: dec,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    border: Border.all(width: 2, color: Colors.black),
-                  ),
-                  padding: EdgeInsets.fromLTRB(8, 1, 8, 1),
-                  child: Text(
-                    "-",
-                    style: textStyle(
-                      12,
-                      Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  border: Border.all(width: 2, color: Colors.black),
-                ),
-                padding: EdgeInsets.fromLTRB(10, 1, 10, 1),
-                child: Text(
-                  loading ? "." : counter.toString(),
-                  style: textStyle(
-                    14,
-                    Colors.black,
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              GestureDetector(
-                onTap: inc,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    border: Border.all(width: 2, color: Colors.black),
-                  ),
-                  padding: EdgeInsets.fromLTRB(8, 1, 8, 1),
-                  child: Text(
-                    "+",
-                    style: textStyle(
-                      12,
-                      Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
           //  COLORS
           SizedBox(height: 15),
           Align(
@@ -313,17 +354,32 @@ class _ProductCounterState extends State<ProductCounter> {
                     height: 25,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: counter,
+                      itemCount: widget.product["colors"].length,
                       itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                          width: 25,
-                          margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12.5)),
-                            image: DecorationImage(
-                              image: NetworkImage(url),
-                              fit: BoxFit.fill,
+                        print("sel c: $selectedColors");
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedColors[index] = !selectedColors[index];
+                            });
+                          },
+                          child: Container(
+                            width: 25,
+                            margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12.5),
+                              ),
+                              border: Border.all(
+                                width: 2,
+                                color: selectedColors[index]
+                                    ? Colors.black
+                                    : Color.fromRGBO(0, 0, 0, 0),
+                              ),
+                              image: DecorationImage(
+                                image: NetworkImage(url),
+                                fit: BoxFit.fill,
+                              ),
                             ),
                           ),
                         );
@@ -335,47 +391,88 @@ class _ProductCounterState extends State<ProductCounter> {
 
           Row(
             children: <Widget>[
-              Container(
-                width: 92,
-                child: TextFormField(
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly
-                  ],
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) async {
-                    setState(() {
-                      _qty = _qtyController.text;
-                    });
-                  },
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+              Row(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: dec,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        border: Border.all(width: 2, color: Colors.black),
+                      ),
+                      padding: EdgeInsets.fromLTRB(8, 1, 8, 1),
+                      child: Text(
+                        "-",
+                        style: textStyle(
+                          12,
+                          Colors.black,
+                        ),
+                      ),
                     ),
                   ),
-                  controller: _qtyController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Quantity",
-                    isDense: true,
-                    focusColor: Color(0xFF5B0D1B),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(width: 2, color: Color(0xFF5B0D1B)),
+                  SizedBox(width: 10),
+                  Container(
+                    width: 92,
+                    child: TextFormField(
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      keyboardType: TextInputType.number,
+                      onChanged: (val) async {
+                        setState(() {
+                          _qty = _qtyController.text;
+                        });
+                      },
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      controller: _qtyController,
+                      decoration: InputDecoration(
+                        hintText: "Enter Quantity",
+                        isDense: true,
+                        focusColor: Color(0xFF5B0D1B),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(width: 2, color: Color(0xFF5B0D1B)),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: inc,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        border: Border.all(width: 2, color: Colors.black),
+                      ),
+                      padding: EdgeInsets.fromLTRB(8, 1, 8, 1),
+                      child: Text(
+                        "+",
+                        style: textStyle(
+                          12,
+                          Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(width: 10),
               GestureDetector(
                 onTap: addToCrateHandler,
                 child: Container(
-                  width: MediaQuery.of(context).size.width * 0.5,
+                  // width: MediaQuery.of(context).size.width * 0.5,
+
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black, width: 2),
                     borderRadius: BorderRadius.all(Radius.circular(15)),
                   ),
-                  padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+                  padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
                   alignment: Alignment.center,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -531,11 +628,7 @@ class _ProductDescriptionState extends State<ProductDescription> {
                       ),
                       padding: EdgeInsets.all(5),
                       child: Text(
-                        ("Set of " +
-                                ((widget.product['totalSet'] == null)
-                                        ? widget.product['min']
-                                        : widget.product['totalSet'])
-                                    .toString())
+                        ("Set of " + widget.product['min'].toString())
                             .toString(),
                         style: textStyle(10, Colors.black),
                       ),
@@ -580,16 +673,14 @@ class _ProductImageState extends State<ProductImage> {
       setState(() {
         wishlists.add(pid);
         user['wishlist'] = wishlists;
-        storage.setItem('user', user);
       });
     } else {
       setState(() {
         wishlists.remove(pid);
         user['wishlist'] = wishlists;
-        storage.setItem('user', user);
       });
     }
-
+    await storage.setItem('user', user);
     await WishlistApi().setWishlist();
   }
 

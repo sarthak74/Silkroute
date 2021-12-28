@@ -10,6 +10,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/l10n/l10n.dart';
 import 'package:silkroute/model/services/NotificationApi.dart';
+import 'package:silkroute/model/services/firebase.dart';
 import 'package:silkroute/view/pages/coming_soon.dart';
 import 'package:silkroute/view/pages/loader.dart';
 import 'package:silkroute/view/pages/manual_verification.dart';
@@ -62,16 +63,20 @@ Future<void> main() async {
       channelKey: 'key1',
       channelName: 'notificationtest',
       channelDescription: 'ex',
-      defaultColor: Colors.blue,
-      ledColor: Colors.white,
+      importance: NotificationImportance.High,
+      channelShowBadge: true,
       playSound: true,
-      enableLights: true,
-      enableVibration: true,
-    )
+    ),
   ]);
 
   LocalStorage storage = await LocalStorage('silkroute');
 
+  FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+    await storage.setItem('fcmtoken', token);
+    await FirebaseService().saveToken(token);
+  });
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   // secureScreen();
 
   void runapp() {
@@ -84,7 +89,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  static final String title = 'Silk Route';
+  final String title = 'Silk Route';
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(
@@ -164,10 +169,8 @@ Future<void> _firebasePushHandler(RemoteMessage message) async {
     "body": not.body,
     "data": message.data,
     "messageId": message.messageId,
-    "sentTime": message.sentTime.toLocal().toString(),
+    "sentTime": message.sentTime.toString()
   };
-  print("Notififcation: ${notificationData}");
-  var res = await NotificationApi().saveNotification(notificationData);
 
-  AwesomeNotifications().createNotificationFromJsonData(message.data);
+  await NotificationService().Notify(notificationData);
 }

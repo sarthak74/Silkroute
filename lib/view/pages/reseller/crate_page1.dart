@@ -46,15 +46,36 @@ class _CratePage1State extends State<CratePage1> {
       bill = widget.bill;
       orderAmount = bill["totalValue"] - bill["implicitDiscount"];
       price = [
-        {"title": "Total Value", "value": bill['totalValue']},
-        {"title": "Discount", "value": bill['implicitDiscount']},
-        {"title": "Coupon Discount", "value": bill['couponDiscount']},
-        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
-        {"title": "GST", "value": bill['gst']},
-        {"title": "Logistics Cost", "value": bill['logistic']},
+        {
+          "title": "Total Value",
+          "value": bill['totalValue'],
+          "isDiscount": false
+        },
+        {
+          "title": "Discount",
+          "value": bill['implicitDiscount'],
+          "isDiscount": true
+        },
+        {
+          "title": "Coupon Discount",
+          "value": bill['couponDiscount'],
+          "isDiscount": true
+        },
+        {
+          "title": "Price After Discount",
+          "value": bill['priceAfterDiscount'],
+          "isDiscount": false
+        },
+        {"title": "GST", "value": bill['gst'], "isDiscount": false},
+        {
+          "title": "Logistics Cost",
+          "value": bill['logistic'],
+          "isDiscount": false
+        },
       ];
+      priceData['savings'] = bill['implicitDiscount'] + bill['couponDiscount'];
       priceData['totalCost'] = bill['totalCost'];
-      priceData['savings'] = bill['totalValue'] - bill['totalCost'];
+
       loading = false;
     });
   }
@@ -86,14 +107,34 @@ class _CratePage1State extends State<CratePage1> {
       priceData['totalCost'] = bill['totalCost'];
       priceData['logisticsSaving'] = logisticsSaving;
       price = [
-        {"title": "Total Value", "value": bill['totalValue']},
-        {"title": "Discount", "value": bill['implicitDiscount']},
-        {"title": "Coupon Discount", "value": bill['couponDiscount']},
-        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
-        {"title": "GST", "value": bill['gst']},
-        {"title": "Logistics Cost", "value": bill['logistic']},
+        {
+          "title": "Total Value",
+          "value": bill['totalValue'],
+          "isDiscount": false
+        },
+        {
+          "title": "Discount",
+          "value": bill['implicitDiscount'],
+          "isDiscount": true
+        },
+        {
+          "title": "Coupon Discount",
+          "value": bill['couponDiscount'],
+          "isDiscount": true
+        },
+        {
+          "title": "Price After Discount",
+          "value": bill['priceAfterDiscount'],
+          "isDiscount": false
+        },
+        {"title": "GST", "value": bill['gst'], "isDiscount": false},
+        {
+          "title": "Logistics Cost",
+          "value": bill['logistic'],
+          "isDiscount": false
+        },
       ];
-      priceData['savings'] = bill['totalValue'] - bill['totalCost'];
+      priceData['savings'] = bill['implicitDiscount'] + bill['couponDiscount'];
       loadingBill = false;
     });
   }
@@ -295,6 +336,8 @@ class _DetailPriceListState extends State<DetailPriceList> {
   bool loading = true;
 
   void loadPrice() {
+    print("${widget.bill}");
+    print("${widget.priceData}");
     setState(() {
       loading = false;
     });
@@ -321,7 +364,11 @@ class _DetailPriceListState extends State<DetailPriceList> {
                 itemBuilder: (BuildContext context, int index) {
                   return PriceRow(
                     title: widget.bill[index]['title'],
-                    value: ("₹" + (widget.bill[index]['value']).toString())
+                    value: (((widget.bill[index]["isDiscount"] == true)
+                                ? "-"
+                                : "") +
+                            "₹" +
+                            (widget.bill[index]['value']).toString())
                         .toString(),
                     logisticsSaving: widget.priceData['logisticsSaving'],
                     finalLogistic: widget.priceData['finalLogistic'],

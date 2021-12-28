@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
@@ -9,11 +10,16 @@ class ProductListApi {
   Future<List<ProductList>> getProductList() async {
     try {
       var data = {
-        "contact": storage.getItem('contact'),
+        "contact": await storage.getItem('contact'),
       };
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getAllProducts');
-      final res = await http.post(url, body: data);
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(url, body: data, headers: headers);
       var decodedRes2 = jsonDecode(res.body);
       List<ProductList> resp = [];
       for (var i in decodedRes2) {
@@ -32,7 +38,9 @@ class ProductListApi {
       var reqBody = {"id": pId};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/getProductInfo');
-      final res = await http.post(url, body: reqBody);
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
+      final res = await http.post(url, body: reqBody, headers: headers);
       dynamic product = jsonDecode(res.body);
       // dynamic fp = ProductList.toMap(product);
       return product;
@@ -47,10 +55,18 @@ class ProductListApi {
       var data = {"sortBy": sortBy, "filter": filter};
       print("data $data");
       var uri = Math().ip();
-      var url = Uri.parse(uri + '/resellerApi/getProdfromCat');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      var userType = await storage.getItem('userType');
+      var route = userType == "Reseller" ? "resellerApi" : "manufacturerApi";
+      var url = Uri.parse(uri + '/' + route + '/getProdfromCat');
+      String token = await storage.getItem('token');
+
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
       print("res $res");
       var decodedRes2 = jsonDecode(res.body);
       print("dec $decodedRes2");
@@ -74,10 +90,13 @@ class ProductListApi {
       print("data $data");
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/getProdfromSearch');
-
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
 
       var decodedRes2 = jsonDecode(res.body);
 

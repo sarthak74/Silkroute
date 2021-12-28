@@ -12,12 +12,14 @@ class OrderApi {
     try {
       var contact = await storage.getItem('contact');
       var userType = await storage.getItem('userType');
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
       var apiRoute =
           (userType == "Reseller") ? "resellerApi" : "manufacturerApi";
       var reqBody = {"contact": contact};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/' + apiRoute + '/getOrders');
-      final res = await http.post(url, body: reqBody);
+      final res = await http.post(url, body: reqBody, headers: headers);
       var decodedRes2 = jsonDecode(res.body);
       List<OrderListItem> resp = [];
       print("decodedRes2 $decodedRes2");
@@ -39,9 +41,16 @@ class OrderApi {
       print("Set order data -  $data");
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/setOrder');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
       print("Set order res -  ${res.body}");
       var decodedRes2 = jsonDecode(res.body);
 
@@ -59,9 +68,16 @@ class OrderApi {
       print("Update order data -  $data");
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/updateOrder');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
       print("Update order res -  ${res.body}");
       var decodedRes2 = jsonDecode(res.body);
       print("Update order res -  $decodedRes2");
@@ -79,9 +95,16 @@ class OrderApi {
       print("add order item data -  $data");
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/addOrderItem');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
       print("add order res -  ${res.body}");
       var decodedRes2 = jsonDecode(res.body);
       print("add order res -  $decodedRes2");
@@ -104,9 +127,16 @@ class OrderApi {
       var ut = await storage.getItem('userType');
       var route = (ut == 'Reseller') ? 'resellerApi' : 'manufacturerApi';
       var url = Uri.parse(uri + '/' + route + '/updateOrderItem');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
       print("Update order res -  ${res.body}");
       var decodedRes2 = jsonDecode(res.body);
       print("Update order res -  $decodedRes2");

@@ -15,8 +15,10 @@ class CrateApi {
       var contact = await storage.getItem('contact');
       var data = {'contact': contact};
       print("get crate items: $data");
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
       var url = Uri.parse(Math().ip() + '/crateApi/getAllProducts');
-      final res = await http.post(url, body: data);
+      final res = await http.post(url, body: data, headers: headers);
       var decodedRes2 = jsonDecode(res.body);
       List<CrateListItem> resp = [];
       for (var i in decodedRes2[0]) {
@@ -38,9 +40,14 @@ class CrateApi {
       var data = body;
       print("Set Crate items body: $data");
       var url = Uri.parse(endpoint + '/crateApi/setItem');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
       print(res.statusCode);
     } catch (e) {
       print("Set crate items error - $e");
@@ -50,11 +57,14 @@ class CrateApi {
   removeCrateItem(id) async {
     try {
       var data = {"id": id, "contact": storage.getItem('contact')};
-
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
       var url = Uri.parse(endpoint + '/crateApi/removeItem');
-      final res = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(data));
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
       print(res.statusCode);
     } catch (e) {
       print("error - $e");

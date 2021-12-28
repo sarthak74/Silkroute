@@ -132,9 +132,6 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                       print("User --  $user");
                       print("\nOtp result --- $res\n");
                       if (user == null) {
-                        nextpage = "/register_detail";
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushNamed(nextpage);
                         return;
                       }
                       setState(() {

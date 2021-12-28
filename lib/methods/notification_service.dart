@@ -1,30 +1,46 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:silkroute/methods/toast.dart';
+import 'package:silkroute/model/services/NotificationApi.dart';
 
 class NotificationService {
-  Future<void> _firebasePushHandler(RemoteMessage message) async {
-    print("Notififcation: ${message.data}");
-    AwesomeNotifications().createNotificationFromJsonData(message.data);
-  }
-
-  void Notify() async {
+  void Notify(data) async {
+    print("notify");
     // String _timezone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: 1,
-        channelKey: 'key1',
-        title: "Notification Title",
-        body: 'notification body',
-        bigPicture: 'https://pub.dev/static/img/pub-dev-icon-cover-image.png',
-        notificationLayout: NotificationLayout.BigPicture,
-      ),
-      // schedule: NotificationInterval(
-      //   interval: 60,
-      //   timeZone: _timezone,
-      //   repeats: true,
-      // ),
-    );
-  }
+    await NotificationApi().saveNotification(data);
 
-  get firebasePushHandler => _firebasePushHandler;
+    if (data["img"] == null) {
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: data['messageId'],
+          channelKey: 'key1',
+          title: data["title"],
+          body: data["body"],
+          wakeUpScreen: true,
+        ),
+        // schedule: NotificationInterval(
+        //   interval: 60,
+        //   timeZone: _timezone,
+        //   repeats: true,
+        // ),
+      );
+    } else {
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: data['messageId'],
+          channelKey: 'key1',
+          title: data["title"],
+          body: data["body"],
+          bigPicture: data["data"]["img"],
+          notificationLayout: NotificationLayout.BigPicture,
+          wakeUpScreen: true,
+        ),
+        // schedule: NotificationInterval(
+        //   interval: 60,
+        //   timeZone: _timezone,
+        //   repeats: true,
+        // ),
+      );
+    }
+  }
 }

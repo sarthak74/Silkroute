@@ -1,6 +1,9 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:silkroute/methods/registerredirect.dart';
+import 'package:silkroute/model/services/ExtraApi.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/profile_pic_picker.dart';
 import 'package:localstorage/localstorage.dart';
@@ -127,10 +130,47 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     });
   }
 
+  List<String> states = [], cities = ["Select a State"];
+  dynamic statesData;
+
+  void getStatesData() async {
+    var data = await ExtraApi().getStatesData();
+    setState(() {
+      statesData = data;
+
+      cities = [];
+      states = [];
+      for (var x in statesData["states"]) {
+        states.add(x.toString());
+      }
+    });
+  }
+
+  Future<List<String>> getStates(String cs) async {
+    if (states.length == 0) {
+      await getStatesData();
+    }
+    return states;
+  }
+
+  Future<List<String>> getCities(String cc) async {
+    if (state.length == 0) {
+      return ["Select a state"];
+    }
+    print(statesData["stateCity"][state]);
+    cities = [];
+    for (var x in statesData["stateCity"][state]) {
+      cities.add(x.toString());
+    }
+    print("$cities");
+    return cities;
+  }
+
   @override
   void initState() {
     super.initState();
     getContact();
+    // getStatesData();
   }
 
   void agreementCheckFunction(bool agreementCheckCurrent) {
@@ -180,6 +220,31 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     Navigator.of(context).pop();
     Navigator.of(context).pushNamed(nextpage);
   }
+
+  InputDecoration dropdownDecoration = InputDecoration(
+    contentPadding: EdgeInsets.fromLTRB(20, 0, 10, 0),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(30),
+      borderSide: BorderSide(
+        width: 1,
+        color: Colors.black45,
+      ),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(30),
+      borderSide: BorderSide(
+        width: 1,
+        color: Colors.black45,
+      ),
+    ),
+    disabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(30),
+      borderSide: BorderSide(
+        width: 1,
+        color: Colors.black12,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +323,9 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         (val) {
                           check();
                           // onChnaged
-                          data["businessName"] = val;
+                          setState(() {
+                            data["businessName"] = val;
+                          });
                         },
                       ),
 
@@ -266,7 +333,11 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         height: 20.0,
                       ),
 
+                      /////////////////////////////////////////////////////////
+
                       // Business Address
+
+                      ///print newly selected country state and city in Text Widget
 
                       Container(
                         alignment: Alignment.topLeft,
@@ -277,33 +348,93 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       ),
                       SizedBox(height: 10),
 
-                      CustomTextField(
-                        "Street*", "",
-                        false, // isPassword
-                        (val) {
+                      DropdownSearch<String>(
+                        mode: Mode.MENU,
+                        showSelectedItems: true,
+                        items: states,
+                        // searchDelay: Duration(milliseconds: 200),
+                        // showClearButton: true,
+                        dropDownButton: Icon(Icons.arrow_downward),
+                        // showSearchBox: true,
+                        // selectedItem: states[0],
+
+                        selectionListViewProps: SelectionListViewProps(
+                          padding: EdgeInsets.symmetric(vertical: 0),
+                        ),
+
+                        dropdownBuilderSupportsNullItem: true,
+                        dropdownSearchDecoration: dropdownDecoration,
+                        label: "State",
+                        onChanged: (value) async {
+                          print(value);
                           setState(() {
-                            street = val;
+                            if (value == null) {
+                              value = "";
+                            }
+                            state = value;
+                            city = "";
+                            if (state == null) {
+                              cities = [];
+                              cities = ["Select a state"];
+                            } else if (state.length == 0) {
+                              cities = [];
+                              cities = ["Select a state"];
+                            } else {
+                              cities = [];
+                              for (var x in statesData["stateCity"][state]) {
+                                cities.add(x.toString());
+                              }
+                            }
                           });
                         },
+                        onFind: (String filter) => getStates(filter),
+                        // showClearButton: true,
                       ),
 
-                      new SizedBox(
-                        height: 10.0,
-                      ),
+                      SizedBox(height: 10),
 
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Container(
                             width: MediaQuery.of(context).size.width * 0.42,
-                            child: CustomTextField(
-                              "City*", "",
-                              false, // isPassword
-                              (val) {
+                            child: DropdownSearch<String>(
+                              mode: Mode.BOTTOM_SHEET,
+                              showSelectedItems: true,
+                              items: cities,
+                              enabled: (state == null)
+                                  ? false
+                                  : ((state.length == 0) ? false : true),
+                              // searchDelay: Duration(milliseconds: 200),
+                              // showClearButton: true,
+                              dropDownButton: Icon(
+                                Icons.arrow_downward,
+                                color: (state == null)
+                                    ? Colors.black12
+                                    : ((state.length == 0)
+                                        ? Colors.black12
+                                        : Colors.black54),
+                              ),
+                              // showSearchBox: true,
+                              // selectedItem: states[0],
+
+                              selectionListViewProps: SelectionListViewProps(
+                                padding: EdgeInsets.symmetric(vertical: 0),
+                              ),
+
+                              dropdownBuilderSupportsNullItem: true,
+                              dropdownSearchDecoration: dropdownDecoration,
+                              label: "District",
+                              onChanged: (value) {
+                                if (value == null) {
+                                  value = "";
+                                }
                                 setState(() {
-                                  city = val;
+                                  city = value;
                                 });
                               },
+                              onFind: (String filter) => getCities(filter),
+                              // showClearButton: true,
                             ),
                           ),
                           Container(
@@ -324,11 +455,11 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       SizedBox(height: 10),
 
                       CustomTextField(
-                        "State*", "",
+                        "Street*", "",
                         false, // isPassword
                         (val) {
                           setState(() {
-                            state = val;
+                            street = val;
                           });
                         },
                       ),
@@ -343,7 +474,9 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         "GSTIN*", "",
                         false, // isPassword
                         (val) {
-                          data["gst"] = val;
+                          setState(() {
+                            data["gst"] = val;
+                          });
                         },
                       ),
 
@@ -355,7 +488,9 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         "Another Number", "",
                         false, // isPassword
                         (val) {
-                          data["anotherNumber"] = val;
+                          setState(() {
+                            data["anotherNumber"] = val;
+                          });
                         },
                       ),
 

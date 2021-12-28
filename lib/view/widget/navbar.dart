@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/view/widget/profile_pic_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Navbar extends StatefulWidget {
   @override
@@ -22,6 +25,29 @@ class _NavbarState extends State<Navbar> {
 
   dynamic navBarList;
 
+  openwhatsapp() async {
+    var whatsapp = "+917007135430";
+    var whatsappURl_android = "whatsapp://send?phone=" + whatsapp + "&text=";
+    var whatappURL_ios = "https://wa.me/$whatsapp?text=${Uri.parse("")}";
+    if (Platform.isIOS) {
+      // for iOS phone only
+      if (await canLaunch(whatappURL_ios)) {
+        await launch(whatappURL_ios, forceSafariVC: false);
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: new Text("whatsapp no installed")));
+      }
+    } else {
+      // android , web
+      if (await canLaunch(whatsappURl_android)) {
+        await launch(whatsappURl_android);
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: new Text("whatsapp no installed")));
+      }
+    }
+  }
+
   void loadVars() async {
     user = await Methods().getUser();
     setState(() {
@@ -38,11 +64,24 @@ class _NavbarState extends State<Navbar> {
           (userType == "Reseller") ? "/reseller_profile" : "/merchant_profile";
       var orderUrl = (userType == "Reseller") ? "/orders" : "/merchant_orders";
       navBarList = [
-        {"name": "Profile", "url": profileUrl},
-        {"name": "Orders", "url": orderUrl},
-        {"name": "FAQs", "url": "/faqs"},
-        {"name": "Contact Us", "url": "/contact_us"}
+        {
+          "name": "Profile",
+          "url": () {
+            Navigator.pop(context);
+            Navigator.of(context).pushNamed(profileUrl);
+          }
+        },
+        {
+          "name": "Orders",
+          "url": () {
+            Navigator.pop(context);
+            Navigator.of(context).pushNamed(orderUrl);
+          }
+        },
+        {"name": "FAQs", "url": openwhatsapp},
+        {"name": "Contact Us", "url": openwhatsapp}
       ];
+
       loading = false;
     });
   }
@@ -138,10 +177,7 @@ class _NavbarState extends State<Navbar> {
                           ? Color(0xFFEFE9E1)
                           : Color(0xFFFFFFFF);
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context)
-                              .pushNamed(navBarList[index]["url"]);
-                        },
+                        onTap: navBarList[index]["url"],
                         child: Container(
                           width: double.infinity,
                           decoration: BoxDecoration(

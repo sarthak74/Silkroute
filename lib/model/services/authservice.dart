@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/model/services/firebase.dart';
 
 class AuthService {
   Dio dio = new Dio();
@@ -65,43 +66,54 @@ class AuthService {
       var res = await http.post(url,
           body: tosend, headers: {HttpHeaders.authorizationHeader: token});
 
-      var data = await jsonDecode(res.body);
-      print("Otp response - \ndata -- $data\nUser--${data['contact']}");
+      var dres = await jsonDecode(res.body);
+      print("Otp response - \ndata -- $dres\nUser--${dres['user']}");
 
       LocalStorage storage = await LocalStorage('silkroute');
-
+      dynamic data = dres['user'];
+      data["success"] = dres["success"];
+      data["msg"] = dres["msg"];
       String send = "";
 
-      print("print ${data['success']}");
-      if (data["success"]) {
+      print("print ${dres['success']}");
+      if (dres["success"]) {
         print("success");
         send += "1";
+        await storage.clear();
+
+        await storage.setItem('token', token.toString());
+
+        await storage.setItem('contact', data['contact']);
+        await storage.setItem('userType', data['userType']);
+        await storage.setItem('name', data['name']);
+        await storage.setItem('user', data);
+
+        var usr = await storage.getItem('user');
+        if (data['registered']) {
+          print("reg");
+          send += "1";
+
+          if (usr['fcmtoken'] == null) {
+            usr['fcmtoken'] = await FirebaseService().getToken();
+          }
+
+          print("Storage User -- $usr");
+        } else {
+          send += "0";
+        }
+
         Fluttertoast.showToast(
-          msg: data['msg'],
+          msg: dres['msg'],
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.grey[100],
           textColor: Colors.grey[500],
           fontSize: 10,
         );
-        await storage.clear();
-
-        await storage.setItem('contact', data['contact']);
-        if (data['registered']) {
-          print("reg");
-          send += "1";
-          await storage.setItem('userType', data['userType']);
-          await storage.setItem('name', data['name']);
-          await storage.setItem('user', data);
-          var usr = await storage.getItem('user');
-          print("Storage User -- $usr");
-        } else {
-          send += "0";
-        }
       } else {
         send += "00";
         Fluttertoast.showToast(
-          msg: data['msg'],
+          msg: dres['msg'],
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.CENTER,
           backgroundColor: Colors.grey[100],
@@ -124,9 +136,12 @@ class AuthService {
 
   getinfo(contact) async {
     try {
+      LocalStorage storage = await LocalStorage('silkroute');
       var url = Uri.parse(uri + '/getinfo');
       var tosend = {"contact": contact};
-      final res = await http.post(url, body: tosend);
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
+      final res = await http.post(url, body: tosend, headers: headers);
       print("getinfo res --  $res");
       var data = await jsonDecode(res.body);
       print("getinfo data --  $data");
@@ -186,12 +201,15 @@ class AuthService {
         await storage.clear();
         data = data["user"];
         print("bef user --  $data");
+        await storage.setItem('token', data['token']);
         await storage.setItem('contact', data['contact']);
-
         await storage.setItem('userType', data['userType']);
         await storage.setItem('name', data['name']);
         await storage.setItem('user', data);
         var usr = await storage.getItem('user');
+        if (usr['fcmtoken'] == null) {
+          usr['fcmtoken'] = await FirebaseService().getToken();
+        }
         print("Storage User -- $usr");
         return true;
       } else {
@@ -224,9 +242,11 @@ class AuthService {
     try {
       var url = Uri.parse(uri + '/updateUser');
       var tosend = await json.encode({"contact": contact, "data": userData});
-
+      LocalStorage storage = await LocalStorage('silkroute');
+      String token = await storage.getItem('token');
       final res = await http.post(url,
-          headers: {"Content-Type": "application/json"}, body: tosend);
+          headers: {"Content-Type": "application/json", "Authorization": token},
+          body: tosend);
       print("updateUser res --  $res");
       var data = await jsonDecode(res.body);
 
@@ -269,12 +289,13 @@ class AuthService {
   Future<bool> checkVerificationStatus() async {
     try {
       LocalStorage storage = LocalStorage('silkroute');
-      var contact = storage.getItem('contact');
+      var contact = await storage.getItem('contact');
       var url = Uri.parse(uri + '/checkVerificationStatus');
       var tosend = await json.encode({"contact": contact});
-
+      String token = await storage.getItem('token');
       final res = await http.post(url,
-          headers: {"Content-Type": "application/json"}, body: tosend);
+          headers: {"Content-Type": "application/json", "Authorization": token},
+          body: tosend);
       print("updateUser res --  $res");
       var data = await jsonDecode(res.body);
 

@@ -5,6 +5,7 @@ import 'package:silkroute/model/services/MerchantHomeAPI.dart';
 import 'package:silkroute/provider/ProductListProvider.dart';
 import 'package:silkroute/view/pages/reseller/order_page.dart';
 import 'package:silkroute/view/widget/product_tile.dart';
+import 'package:silkroute/view/widget2/merchantProductTile.dart';
 
 class AllProducts extends StatefulWidget {
   @override
@@ -45,7 +46,7 @@ class _AllProductsState extends State<AllProducts> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Text(
-                "ALL PRODUCTS",
+                "YOUR PRODUCTS",
                 style: textStyle(
                   18,
                   Colors.black54,
@@ -55,7 +56,7 @@ class _AllProductsState extends State<AllProducts> {
               GestureDetector(
                 onTap: null,
                 child: Icon(
-                  Icons.arrow_forward,
+                  Icons.arrow_downward,
                   size: 20,
                   color: Colors.black54,
                 ),
@@ -87,7 +88,7 @@ class _AllProductsState extends State<AllProducts> {
                   children: List.generate(
                     _products == [] ? 0 : _products.length,
                     (index) {
-                      return ProductTile(
+                      return MerchantProductTile(
                         product: _products[index],
                       );
                     },

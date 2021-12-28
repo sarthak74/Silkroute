@@ -8,17 +8,20 @@ class NotificationApi {
   Future saveNotification(data) async {
     try {
       print("save notification $data");
-      String contact = await storage.getItem('contact');
-      var body = {"contact": contact, "data": data};
-      var headers = {"Content-Type": "application/json"};
+      var contact = await storage.getItem('contact');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      data["contact"] = contact;
+
       var uri = Uri.parse(Math().ip() + "/notifications/save");
       dynamic res =
-          await http.post(uri, headers: headers, body: json.encode(body));
+          await http.post(uri, headers: headers, body: json.encode(data));
       print("res: $res");
-      return res;
     } catch (e) {
       print("save notfication err -- $e");
-      return e;
     }
   }
 
@@ -26,8 +29,13 @@ class NotificationApi {
     try {
       print("get notifications: ");
       String contact = await storage.getItem('contact');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
       var uri = Uri.parse(Math().ip() + "/notifications/get/$contact");
-      dynamic res = await http.get(uri);
+      dynamic res = await http.get(uri, headers: headers);
       // print("res: $res");
       var decoded = json.decode(res.body);
 

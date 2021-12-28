@@ -7,23 +7,14 @@ class ResellerHomeApi {
   LocalStorage storage = LocalStorage('silkroute');
 
   Future<List<dynamic>> getCategories() async {
-    // Schema: List<Map<String, Dynamic>>
-    // [{
-    //   "title": "",
-    //   "Url": "",
-    //   "SubCat": [
-    //     {
-    //       "title": "",
-    //       "url": "",
-    //     }
-    //   ],
-    // }, ...]
     try {
       print("getcats:");
       var reqBody = {};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/getCategories');
-      final res = await http.post(url, body: reqBody);
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
+      final res = await http.post(url, body: reqBody, headers: headers);
       List<dynamic> categorylist = jsonDecode(res.body);
       return categorylist;
     } catch (err) {
@@ -48,7 +39,9 @@ class ResellerHomeApi {
       var reqBody = {};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/getOffers');
-      final res = await http.post(url, body: reqBody);
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
+      final res = await http.post(url, body: reqBody, headers: headers);
       List<dynamic> offerlist = jsonDecode(res.body);
 
       return offerlist;
@@ -73,7 +66,12 @@ class ResellerHomeApi {
       var reqBody = {};
       var uri = Math().ip();
       var url = Uri.parse(uri + '/resellerApi/getTopPicks');
-      final res = await http.post(url, body: reqBody);
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(url, body: reqBody, headers: headers);
       List<Map<String, dynamic>> toplist = jsonDecode(res.body);
 
       return toplist;

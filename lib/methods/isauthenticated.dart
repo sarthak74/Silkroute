@@ -3,7 +3,7 @@ import 'package:localstorage/localstorage.dart';
 
 class Methods {
   LocalStorage storage = LocalStorage('silkroute');
-
+  dynamic user;
   Future<bool> isAuthenticated() async {
     var contact = await storage.getItem('contact');
 
@@ -18,13 +18,15 @@ class Methods {
   }
 
   dynamic getUser() async {
-    var user = await storage.getItem('user');
-    print("getuser method-$user");
+    if (user == null) {
+      user = await storage.getItem('user');
+    }
+
     return user;
   }
 
-  void logout(context) {
-    storage.clear();
+  void logout(context) async {
+    await storage.clear();
     print(
         "Logout \n Contact - ${storage.getItem('contact') == null ? "null" : "In"}");
     Navigator.of(context).pushNamed('/enter_contact');
