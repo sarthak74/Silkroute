@@ -4,6 +4,7 @@ import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/model/services/couponApi.dart';
 import 'package:silkroute/view/dialogBoxes/CouponDialogBox.dart';
+import 'package:silkroute/view/dialogBoxes/colorImageDialog.dart';
 import 'package:silkroute/view/dialogBoxes/editPickupAddressDialog.dart';
 import 'package:silkroute/view/dialogBoxes/showBankAccountDialog.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -190,5 +191,17 @@ class Helpers {
         return CouponsDialog();
       },
     );
+  }
+
+  Future showColorImageDialog(context, images, selected, setSize) async {
+    await showDialog(
+      context: context,
+      builder: (_) => ColorImageDialog(
+        images: images,
+        selected: selected,
+        setSize: setSize,
+      ),
+    );
+    return selected;
   }
 }

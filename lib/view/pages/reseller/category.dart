@@ -83,7 +83,7 @@ class _CategoryPageState extends State<CategoryPage> {
                             ///                        ///
                             //////////////////////////////
 
-                            SizedBox(height: 20),
+                            SizedBox(height: 10),
 
                             Container(
                               margin: EdgeInsets.symmetric(
@@ -92,7 +92,7 @@ class _CategoryPageState extends State<CategoryPage> {
                               ),
                               child: SizedBox(
                                 height:
-                                    MediaQuery.of(context).size.height * 0.6,
+                                    MediaQuery.of(context).size.height * 0.55,
                                 child: loading
                                     ? Text("Loading Loading")
                                     : GridView.count(

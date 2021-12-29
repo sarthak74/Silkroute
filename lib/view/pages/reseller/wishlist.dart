@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/services/WishlistApi.dart';
@@ -78,7 +80,14 @@ class _WishlistPageState extends State<WishlistPage> {
                       ///                        ///
                       //////////////////////////////
 
-                      CategoryHead(title: "Wishlist"),
+                      CategoryHead(
+                        title: "Wishlist",
+                        icon: Icon(
+                          FontAwesomeIcons.solidBookmark,
+                          color: Color(0xFF811111),
+                          size: 25,
+                        ),
+                      ),
 
                       //////////////////////////////
                       ///                        ///
@@ -92,6 +101,7 @@ class _WishlistPageState extends State<WishlistPage> {
                         margin: EdgeInsets.symmetric(
                           horizontal: MediaQuery.of(context).size.width * 0.05,
                         ),
+                        height: MediaQuery.of(context).size.height * 0.62,
                         alignment: Alignment.center,
                         child: (products.length > 0)
                             ? SizedBox(
@@ -100,6 +110,8 @@ class _WishlistPageState extends State<WishlistPage> {
                                 child: loading
                                     ? Text("Loading")
                                     : GridView.count(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
                                         childAspectRatio: aspectRatio,
                                         crossAxisCount: 2,
                                         children: List.generate(
@@ -113,9 +125,11 @@ class _WishlistPageState extends State<WishlistPage> {
                                         ),
                                       ),
                               )
-                            : Text(
-                                "No Items to show",
-                                style: textStyle(15, Colors.grey[400]),
+                            : Center(
+                                child: Text(
+                                  "No Items to show",
+                                  style: textStyle(15, Colors.grey[400]),
+                                ),
                               ),
                       ),
                     ]),

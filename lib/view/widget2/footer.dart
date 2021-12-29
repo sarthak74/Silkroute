@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
 import 'package:silkroute/view/pages/reseller/reseller_home.dart';
@@ -99,7 +100,7 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.shop),
+                            Icon(FontAwesomeIcons.shopify),
                             Text("Market"),
                           ],
                         ),
@@ -142,7 +143,7 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.widgets),
+                            Icon(CupertinoIcons.heart_fill),
                             Text("Wishlist"),
                           ],
                         ),

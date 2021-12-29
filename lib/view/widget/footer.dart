@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
 import 'package:silkroute/view/pages/reseller/reseller_home.dart';
@@ -97,8 +99,12 @@ class _FooterState extends State<Footer> {
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Icon(Icons.shop),
+                            Icon(
+                              FontAwesomeIcons.store,
+                              size: 22,
+                            ),
                             Text("Market"),
                           ],
                         ),
@@ -141,7 +147,11 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.widgets),
+                            Icon(
+                              FontAwesomeIcons.solidBookmark,
+                              size: 20,
+                            ),
+                            SizedBox(height: 5),
                             Text("Wishlist"),
                           ],
                         ),
@@ -153,7 +163,11 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.shopping_cart),
+                            Image.asset(
+                              'assets/images/crateicon.png',
+                              width: 25,
+                              height: 25,
+                            ),
                             Text("Crate"),
                           ],
                         ),

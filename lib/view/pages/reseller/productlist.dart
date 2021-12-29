@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
@@ -134,7 +136,7 @@ class _ProductListPageState extends State<ProductListPage> {
       builder: (context, child) {
         double aspectRatio = (MediaQuery.of(context).size.width * 0.4 +
                 MediaQuery.of(context).size.width * 0.03) /
-            (MediaQuery.of(context).size.width * 0.4 + 100);
+            (MediaQuery.of(context).size.width * 0.4 + 80);
         _products = [];
         return GestureDetector(
           onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
@@ -212,7 +214,9 @@ class _ProductListPageState extends State<ProductListPage> {
                                         },
                                         child: Row(
                                           children: [
-                                            Icon(Icons.sort, size: 25),
+                                            Icon(FontAwesomeIcons.sort,
+                                                size: 15),
+                                            SizedBox(width: 2),
                                             Text(
                                               " Sort",
                                               style:
@@ -227,7 +231,9 @@ class _ProductListPageState extends State<ProductListPage> {
                                         },
                                         child: Row(
                                           children: [
-                                            Icon(Icons.tungsten, size: 25),
+                                            Icon(FontAwesomeIcons.filter,
+                                                size: 13),
+                                            SizedBox(width: 2),
                                             Text(
                                               " Filter",
                                               style:
@@ -253,7 +259,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                             0.05,
                                   ),
                                   height:
-                                      MediaQuery.of(context).size.height * 0.53,
+                                      MediaQuery.of(context).size.height * 0.62,
                                   child: SingleChildScrollView(
                                     child: StreamBuilder<List<ProductList>>(
                                       stream: _searchProvider.productListStream,
@@ -327,7 +333,157 @@ class _ProductListPageState extends State<ProductListPage> {
                                                           FontWeight.w500,
                                                         ),
                                                       ))
-                                                    : Container()
+                                                    : Container(),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    _sortShow
+                                                        ? GestureDetector(
+                                                            onTap: () {
+                                                              refreshList();
+                                                              setState(() {
+                                                                _sortShow =
+                                                                    false;
+                                                              });
+                                                            },
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .fromLTRB(
+                                                                          10,
+                                                                          5,
+                                                                          10,
+                                                                          5),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .grey[300],
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            20)),
+                                                              ),
+                                                              child: Row(
+                                                                children: <
+                                                                    Widget>[
+                                                                  Text(
+                                                                    "Apply Sort",
+                                                                    style: GoogleFonts
+                                                                        .poppins(
+                                                                      textStyle:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .black,
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : Container(),
+                                                    SizedBox(width: 10),
+                                                    _btnShow
+                                                        ? GestureDetector(
+                                                            onTap: () =>
+                                                                _searchProvider
+                                                                    .loadMore(),
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .fromLTRB(
+                                                                          10,
+                                                                          5,
+                                                                          10,
+                                                                          5),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .grey[300],
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            20)),
+                                                              ),
+                                                              child: Row(
+                                                                children: <
+                                                                    Widget>[
+                                                                  Text(
+                                                                    "Load More",
+                                                                    style: GoogleFonts
+                                                                        .poppins(
+                                                                      textStyle:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .black,
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : Container(),
+                                                    SizedBox(width: 10),
+                                                    _filterShow
+                                                        ? GestureDetector(
+                                                            onTap: () {
+                                                              refreshList();
+
+                                                              _filterShow =
+                                                                  false;
+                                                            },
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .fromLTRB(
+                                                                          10,
+                                                                          5,
+                                                                          10,
+                                                                          5),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .grey[300],
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            20)),
+                                                              ),
+                                                              child: Row(
+                                                                children: <
+                                                                    Widget>[
+                                                                  Text(
+                                                                    "Apply Filters",
+                                                                    style: GoogleFonts
+                                                                        .poppins(
+                                                                      textStyle:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .black,
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : Container(),
+                                                  ],
+                                                ),
                                               ],
                                             );
                                           } else {
@@ -338,116 +494,6 @@ class _ProductListPageState extends State<ProductListPage> {
                                     ),
                                   ),
                                 ),
-
-                                //////// LOAD MORE BUTTON
-
-                                SizedBox(height: 10),
-
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    _sortShow
-                                        ? GestureDetector(
-                                            onTap: () {
-                                              refreshList();
-                                              setState(() {
-                                                _sortShow = false;
-                                              });
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  10, 5, 10, 5),
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[300],
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20)),
-                                              ),
-                                              child: Row(
-                                                children: <Widget>[
-                                                  Text(
-                                                    "Apply Sort",
-                                                    style: GoogleFonts.poppins(
-                                                      textStyle: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                    SizedBox(width: 10),
-                                    _btnShow
-                                        ? GestureDetector(
-                                            onTap: () =>
-                                                _searchProvider.loadMore(),
-                                            child: Container(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  10, 5, 10, 5),
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[300],
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20)),
-                                              ),
-                                              child: Row(
-                                                children: <Widget>[
-                                                  Text(
-                                                    "Load More",
-                                                    style: GoogleFonts.poppins(
-                                                      textStyle: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                    SizedBox(width: 10),
-                                    _filterShow
-                                        ? GestureDetector(
-                                            onTap: () {
-                                              refreshList();
-
-                                              _filterShow = false;
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  10, 5, 10, 5),
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[300],
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20)),
-                                              ),
-                                              child: Row(
-                                                children: <Widget>[
-                                                  Text(
-                                                    "Apply Filters",
-                                                    style: GoogleFonts.poppins(
-                                                      textStyle: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                  ],
-                                ),
-                                SizedBox(height: 30),
                               ]),
                             ),
                             SliverFillRemaining(

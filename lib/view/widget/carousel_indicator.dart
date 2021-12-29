@@ -18,7 +18,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicator> {
       children: [
         CarouselSlider(
           options: CarouselOptions(
-            height: 200.0,
+            height: MediaQuery.of(context).size.width * 0.5,
             enableInfiniteScroll: true,
             autoPlay: true,
             autoPlayInterval: Duration(seconds: 2),
@@ -34,29 +34,17 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicator> {
           items: widget.adList.map((offer) {
             return Builder(
               builder: (BuildContext context) {
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                    border: Border.all(color: Color(0xFF5B0D1B), width: 5),
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        offer['url'],
-                        // width: 300,
-                      ),
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                  child: new ClipRRect(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(15.0),
-                    ),
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).pushNamed("/reseller_home");
-                        },
-                        child: null,
+                return GestureDetector(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                      border: Border.all(color: Colors.transparent, width: 0),
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          offer['url'],
+                        ),
+                        fit: BoxFit.fill,
                       ),
                     ),
                   ),

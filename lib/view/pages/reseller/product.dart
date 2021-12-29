@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
@@ -168,14 +171,8 @@ class ProductSpecifications extends StatelessWidget {
           columns: <DataColumn>[
             DataColumn(
               label: Text(
-                'Feature',
-                style: textStyle1(13, Colors.black, FontWeight.bold),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Value',
-                style: textStyle1(13, Colors.black, FontWeight.bold),
+                'Details',
+                style: textStyle1(15, Colors.black, FontWeight.bold),
               ),
             ),
           ],
@@ -184,15 +181,23 @@ class ProductSpecifications extends StatelessWidget {
             (int index) => DataRow(
               cells: [
                 DataCell(
-                  Text(
-                    specifications[index]["title"],
-                    style: textStyle1(13, Colors.black, FontWeight.w500),
-                  ),
-                ),
-                DataCell(
-                  Text(
-                    specifications[index]["value"],
-                    style: textStyle1(13, Colors.black, FontWeight.w400),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          specifications[index]["title"],
+                          style: textStyle1(13, Colors.black, FontWeight.w500),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          specifications[index]["value"],
+                          style: textStyle1(13, Colors.black, FontWeight.w500),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -344,7 +349,16 @@ class _ProductCounterState extends State<ProductCounter> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           //  COLORS
-          SizedBox(height: 15),
+          SizedBox(height: 1),
+          Text(
+            "Select any ${widget.product['min']}:",
+            style: textStyle1(
+              13,
+              Colors.black,
+              FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 5),
           Align(
             alignment: Alignment.topLeft,
             child: loading
@@ -356,12 +370,16 @@ class _ProductCounterState extends State<ProductCounter> {
                       scrollDirection: Axis.horizontal,
                       itemCount: widget.product["colors"].length,
                       itemBuilder: (BuildContext context, int index) {
-                        print("sel c: $selectedColors");
+                        // print("sel c: $selectedColors");
                         return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedColors[index] = !selectedColors[index];
-                            });
+                          onTap: () async {
+                            selectedColors = await Helpers()
+                                .showColorImageDialog(
+                                    context,
+                                    widget.product["colors"],
+                                    selectedColors,
+                                    widget.product['min']);
+                            setState(() {});
                           },
                           child: Container(
                             width: 25,
@@ -371,10 +389,8 @@ class _ProductCounterState extends State<ProductCounter> {
                                 Radius.circular(12.5),
                               ),
                               border: Border.all(
-                                width: 2,
-                                color: selectedColors[index]
-                                    ? Colors.black
-                                    : Color.fromRGBO(0, 0, 0, 0),
+                                width: selectedColors[index] ? 1.8 : 0.3,
+                                color: Color(0xFF811111),
                               ),
                               image: DecorationImage(
                                 image: NetworkImage(url),
@@ -591,10 +607,8 @@ class _ProductDescriptionState extends State<ProductDescription> {
                               ),
                               SizedBox(width: 5),
                               Text(
-                                ("-" +
-                                        widget.product['discountValue']
-                                            .toString() +
-                                        "%")
+                                (widget.product['discountValue'].toString() +
+                                        "% off")
                                     .toString(),
                                 style: GoogleFonts.poppins(
                                   textStyle: TextStyle(
@@ -670,16 +684,19 @@ class _ProductImageState extends State<ProductImage> {
   void wishlistFunction() async {
     String pid = widget.productDetails['_id'];
     if (!wishlists.contains(pid)) {
+      await wishlists.add(pid);
       setState(() {
-        wishlists.add(pid);
         user['wishlist'] = wishlists;
       });
     } else {
+      await wishlists.remove(pid);
       setState(() {
-        wishlists.remove(pid);
         user['wishlist'] = wishlists;
       });
     }
+    setState(() {
+      wishlist = !wishlist;
+    });
     await storage.setItem('user', user);
     await WishlistApi().setWishlist();
   }
@@ -689,7 +706,7 @@ class _ProductImageState extends State<ProductImage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadImages().then((value) async {
         // print("images: $images");
-        var user = await storage.getItem('user');
+        user = await storage.getItem('user');
         // print("user -- , $user");
         setState(() {
           List<dynamic> xy = (user != null && user['wishlist'] != null)
@@ -702,7 +719,8 @@ class _ProductImageState extends State<ProductImage> {
           wishlist =
               wishlists.contains(widget.productDetails['_id'].toString());
           // user = storage.getItem('user');
-          print("images: $images");
+
+          print("images: $images\n$wishlist");
           loading = false;
         });
       });
@@ -715,18 +733,20 @@ class _ProductImageState extends State<ProductImage> {
     return loading
         ? Text("Loading")
         : Container(
-            margin: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width * 0.03,
-                vertical: 10),
-            padding: EdgeInsets.all(10),
-            height: 300,
+            margin: EdgeInsets.symmetric(vertical: 8),
+            height: MediaQuery.of(context).size.width -
+                75 -
+                MediaQuery.of(context).size.width * 0.05,
+            alignment: Alignment.topCenter,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  height: 280,
+                  width: 70,
+                  height: MediaQuery.of(context).size.width -
+                      100 -
+                      MediaQuery.of(context).size.width * 0.05,
                   child: ListView.builder(
                     itemCount: images.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -740,7 +760,7 @@ class _ProductImageState extends State<ProductImage> {
                               });
                             },
                             child: Container(
-                              width: MediaQuery.of(context).size.width * 0.18,
+                              width: 60,
                               height: 60,
                               decoration: BoxDecoration(
                                 border: Border.all(
@@ -761,6 +781,7 @@ class _ProductImageState extends State<ProductImage> {
                                           blurRadius: 0.0,
                                         ),
                                 ],
+                                color: Colors.white,
                                 image: DecorationImage(
                                   image: CachedNetworkImageProvider(url),
                                   fit: BoxFit.fill,
@@ -768,20 +789,31 @@ class _ProductImageState extends State<ProductImage> {
                               ),
                             ),
                           ),
-                          if (index < 3) SizedBox(height: 13)
+                          if (index < 3)
+                            SizedBox(
+                                height: (MediaQuery.of(context).size.width -
+                                        100 -
+                                        MediaQuery.of(context).size.width *
+                                            0.05 -
+                                        240) /
+                                    3)
                         ],
                       );
                     },
                   ),
                 ),
-                SizedBox(width: 10),
+                // SizedBox(width: 10),
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.55,
-                  height: 280,
+                  width: MediaQuery.of(context).size.width -
+                      100 -
+                      MediaQuery.of(context).size.width * 0.05,
+                  height: MediaQuery.of(context).size.width -
+                      100 -
+                      MediaQuery.of(context).size.width * 0.05,
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: NetworkImage(url.toString()),
-                      fit: BoxFit.fill,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   padding: EdgeInsets.all(10),
@@ -794,7 +826,7 @@ class _ProductImageState extends State<ProductImage> {
                         height: 35,
                         decoration: BoxDecoration(
                           border:
-                              Border.all(color: Color(0xFF5B0D1B), width: 3),
+                              Border.all(color: Color(0xFF5B0D1B), width: 2),
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                           boxShadow: [
                             BoxShadow(
@@ -803,14 +835,16 @@ class _ProductImageState extends State<ProductImage> {
                               blurRadius: 4.0,
                             ),
                           ],
-                          color:
-                              !wishlist ? Color(0xFFFFFFFF) : Color(0xFFE1AC5D),
+                          color: Color(0xFFFFFFFF),
                         ),
-                        child: Icon(
-                          Icons.widgets,
-                          size: 20,
-                          color:
-                              wishlist ? Color(0xFFFFFFFF) : Color(0xFFE1AC5D),
+                        child: Center(
+                          child: Icon(
+                            wishlist
+                                ? FontAwesomeIcons.solidBookmark
+                                : FontAwesomeIcons.bookmark,
+                            size: 15,
+                            color: Color(0xFF811111),
+                          ),
                         ),
                       ),
                     ),

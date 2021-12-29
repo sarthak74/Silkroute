@@ -523,11 +523,6 @@ class _OptionsListState extends State<OptionsList> {
               children: <Widget>[
                 OptionRow(
                   prefixIcon: Icons.receipt,
-                  title: "Refer & Earn",
-                  suffixIcon: Icons.arrow_forward,
-                ),
-                OptionRow(
-                  prefixIcon: Icons.receipt,
                   title: "Coupons",
                   suffixIcon: Icons.arrow_forward,
                   function: () async {

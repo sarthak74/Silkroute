@@ -1752,7 +1752,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       margin: EdgeInsets.symmetric(vertical: 8),
       height: MediaQuery.of(context).size.width -
           75 -
@@ -1850,6 +1850,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
                                   ? AssetImage("assets/images/noimage.jpg")
                                   : FileImage(File(_image[index].path)),
                               initialScale: PhotoViewComputedScale.contained,
+
                               // heroAttributes: PhotoViewHeroAttributes(tag: galleryItems[index].id),
                             );
                           },

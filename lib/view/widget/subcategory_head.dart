@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 
 class CategoryHead extends StatefulWidget {
-  const CategoryHead({this.title});
-
+  const CategoryHead({this.icon, this.title});
+  final dynamic icon;
   final String title;
 
   @override
@@ -14,26 +15,25 @@ class _CategoryHeadState extends State<CategoryHead> {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      height: MediaQuery.of(context).size.height * 0.10,
-      margin: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.15,
-      ),
+      height: 40,
+      // margin: EdgeInsets.symmetric(
+      //   horizontal: MediaQuery.of(context).size.width * 0.15,
+      // ),
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF5B0D1B), width: 4),
+        border: Border.all(color: Colors.transparent, width: 0),
         borderRadius: BorderRadius.all(Radius.circular(35)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Image.asset(
-            "assets/images/1.png",
-            height: MediaQuery.of(context).size.height * 0.07,
-          ),
+          (widget.icon == null) ? SizedBox(width: 0) : widget.icon,
+          SizedBox(width: 10),
           Text(
             widget.title,
-            style: TextStyle(
-              color: Color(0xFF5B0D1B),
-              fontSize: 25,
+            style: textStyle1(
+              (widget.icon == null) ? 18 : 25,
+              Color(0xFF811111),
+              FontWeight.normal,
             ),
           ),
         ],

@@ -20,11 +20,12 @@ class _CouponsDialogState extends State<CouponsDialog> {
 
   void loadVars() async {
     if (widget.coupons == null) {
+      // means accessing from reseller profile page
       user = await Methods().getUser();
       dynamic res = await CrateApi().getCrateItems();
       bill = res.item2.toMap();
       orderAmount = bill["totalValue"] - bill["implicitDiscount"];
-      _coupons = await CouponApi().getCoupons(user["contact"], orderAmount);
+      _coupons = await CouponApi().getCoupons(user["contact"], 0);
     } else {
       _coupons = widget.coupons;
     }
@@ -52,7 +53,9 @@ class _CouponsDialogState extends State<CouponsDialog> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Applied Coupons",
+                    (widget.coupons == null)
+                        ? "Available Coupons"
+                        : "Applied Coupons",
                     style: textStyle(18, Colors.black),
                   ),
                 ),
@@ -134,7 +137,7 @@ class _CouponsDialogState extends State<CouponsDialog> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           Text(
-                                            'Amount: ₹${_coupons[i]["amount"]}',
+                                            'Validity: ${_coupons[i]["validity"].toString().substring(0, 10)}',
                                             style: textStyle1(
                                               13,
                                               Colors.black54,
@@ -157,7 +160,7 @@ class _CouponsDialogState extends State<CouponsDialog> {
                         alignment: Alignment.center,
                         child: Text(
                           "No coupons available",
-                          style: textStyle(20, Colors.grey),
+                          style: textStyle1(20, Colors.grey, FontWeight.w500),
                         ),
                       )),
           ),

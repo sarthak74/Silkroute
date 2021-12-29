@@ -50,6 +50,34 @@ class ProductListApi {
     }
   }
 
+  Future<List<ProductList>> getTopPicks() async {
+    try {
+      var uri = Math().ip();
+      var userType = await storage.getItem('userType');
+      var route = userType == "Reseller" ? "resellerApi" : "manufacturerApi";
+      var url = Uri.parse(uri + '/' + route + '/getTopPicks');
+      String token = await storage.getItem('token');
+
+      var headers = {"Authorization": token};
+
+      final res = await http.get(url, headers: headers);
+      print("res $res");
+      var decodedRes = jsonDecode(res.body);
+
+      var decodedRes2 = decodedRes["products"];
+      print("dec $decodedRes2");
+      List<ProductList> resp = [];
+      for (var i in decodedRes2) {
+        ProductList r = ProductList.fromMap(i);
+        resp.add(r);
+      }
+      return resp;
+    } catch (err) {
+      print("get top picks err $err");
+      return null;
+    }
+  }
+
   Future<List<ProductList>> getProdListfromCat(sortBy, filter) async {
     try {
       var data = {"sortBy": sortBy, "filter": filter};
