@@ -6,6 +6,7 @@ import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/model/services/ResellerProfileApi.dart';
 import 'package:silkroute/view/pages/reseller/order_page.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/profile_pic_picker.dart';
 import 'package:silkroute/view/widget/topbar.dart';
@@ -115,7 +116,7 @@ class _LogoutButtonState extends State<LogoutButton> {
         ),
         child: Text(
           "Logout",
-          style: textStyle(15, Colors.white),
+          style: textStyle1(15, Colors.white, FontWeight.bold),
         ),
       ),
     );
@@ -134,7 +135,7 @@ class _ProfileImageBarState extends State<ProfileImageBar> {
 
   loadVars() async {
     contact = await storage.getItem('contact');
-    name = await await storage.getItem('name');
+    name = await storage.getItem('name');
     setState(() {
       loading = false;
     });
@@ -166,7 +167,7 @@ class _ProfileImageBarState extends State<ProfileImageBar> {
                   children: <Widget>[
                     Text(
                       name,
-                      style: textStyle(15, Colors.black),
+                      style: textStyle1(15, Colors.black, FontWeight.bold),
                     ),
                   ],
                 ),
@@ -210,7 +211,8 @@ class _ProfileDetailContainerState extends State<ProfileDetailContainer> {
                       SizedBox(width: 10),
                       Text(
                         "Profile Details",
-                        style: textStyle(15, Colors.grey[700]),
+                        style:
+                            textStyle1(15, Colors.grey[700], FontWeight.bold),
                       ),
                     ],
                   ),
@@ -242,7 +244,7 @@ class _ProfileDetailsListState extends State<ProfileDetailsList> {
     ['email', true],
     ['anotherNumber', true]
   ];
-  List alts = ['name', 'contact', 'email', 'anotherNumber'];
+  // List alts = ['Name', 'Contact', 'Email', 'Alternate Number'];
 
   void loadPerson() async {
     personDetail = await storage.getItem('user');
@@ -290,20 +292,18 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
   TextEditingController _controller = TextEditingController();
   dynamic user;
   dynamic title, data;
-  List fields = ['name', 'contact', 'email', 'anotherNumber'];
+  List fields = ['Name', 'Contact', 'Email', 'Alternate Number'];
   List alts = ['name', 'contact', 'email', 'anotherNumber'];
 
   void save() async {
     if (_enabled == false) {
       return;
     }
-    title = fields[alts.indexOf(widget.title)];
+
     data = _controller.text;
-    if (title == "address") {
-      user[title]["address"] = data;
-    } else {
-      user[title] = data;
-    }
+
+    user[widget.title] = data;
+    await storage.deleteItem('user');
     await storage.setItem('user', user);
     setState(() {
       _controller.text = "";
@@ -317,14 +317,11 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
   void loadVars() async {
     user = await storage.getItem('user');
     setState(() {
-      title = widget.title;
-      if (title == "address") {
-        data = user[alts[fields.indexOf(title)]]["address"];
-      } else {
-        data = user[alts[fields.indexOf(title)]];
-      }
-      data;
-      print("$title $data");
+      title = fields[alts.indexOf(widget.title)];
+      data = user[widget.title];
+
+      _controller.text = data;
+      print("${widget.title} $data");
       isContact = ('contact' == widget.title ? true : false);
       loading = false;
     });
@@ -373,14 +370,18 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
                           controller: _controller,
                           enabled: _enabled,
                           onChanged: null,
-                          style: textStyle(13, Colors.black87),
+                          style:
+                              textStyle1(13, Colors.black87, FontWeight.w500),
                           decoration: new InputDecoration(
+                            labelStyle:
+                                textStyle1(13, Colors.black54, FontWeight.w500),
                             filled: true,
                             fillColor: Colors.white,
-                            hintStyle: textStyle(13, Colors.black54),
+                            hintStyle:
+                                textStyle1(13, Colors.black54, FontWeight.w500),
                             disabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                width: 3,
+                                width: 1,
                                 color: Colors.black54,
                               ),
                               borderRadius:
@@ -416,7 +417,7 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
                             prefixStyle: new TextStyle(
                               color: Colors.black,
                             ),
-                            hintText: _enabled ? "" : data,
+                            labelText: title,
                           ),
                         ),
                       ),
@@ -429,14 +430,15 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(width: 3, color: Colors.black54),
+                        border: Border.all(width: 1, color: Colors.black54),
                         borderRadius: BorderRadius.circular(30),
                         color: Colors.white,
                       ),
                       child: SingleChildScrollView(
                         child: Text(
                           data.toString(),
-                          style: textStyle(13, Colors.black54),
+                          style:
+                              textStyle1(13, Colors.black54, FontWeight.w500),
                         ),
                       ),
                     ),
@@ -524,6 +526,9 @@ class _OptionsListState extends State<OptionsList> {
                   prefixIcon: Icons.card_travel,
                   title: "GSTIN",
                   suffixIcon: Icons.arrow_forward,
+                  function: () async {
+                    await Helpers().showGstinDialog(context, user["gst"]);
+                  },
                 ),
                 OptionRow(
                   prefixIcon: Icons.card_giftcard,
@@ -537,8 +542,8 @@ class _OptionsListState extends State<OptionsList> {
                   prefixIcon: Icons.account_box,
                   title: "Bank Account",
                   suffixIcon: Icons.edit,
-                  function: () {
-                    Navigator.of(context).pushNamed("/merchant_acc_details");
+                  function: () async {
+                    await Helpers().showBankAccountDialog(context);
                   },
                 ),
               ],

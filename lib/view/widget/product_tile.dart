@@ -114,8 +114,8 @@ class _ProductTileState extends State<ProductTile> {
                   fit: BoxFit.fill,
                 ),
               ),
-              width: MediaQuery.of(context).size.width * 0.41,
-              height: MediaQuery.of(context).size.height * 0.22,
+              width: MediaQuery.of(context).size.width * 0.4,
+              height: MediaQuery.of(context).size.width * 0.4,
               padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -193,8 +193,8 @@ class _ProductTileState extends State<ProductTile> {
                 ],
                 color: Color(0xFFFAF5ED),
               ),
-              height: MediaQuery.of(context).size.height * 0.11,
-              width: MediaQuery.of(context).size.width * 0.41,
+              height: 80,
+              width: MediaQuery.of(context).size.width * 0.40,
               padding: EdgeInsets.all(5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

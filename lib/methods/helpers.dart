@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
+import 'package:silkroute/model/services/CrateApi.dart';
+import 'package:silkroute/model/services/couponApi.dart';
+import 'package:silkroute/view/dialogBoxes/CouponDialogBox.dart';
 import 'package:silkroute/view/dialogBoxes/editPickupAddressDialog.dart';
+import 'package:silkroute/view/dialogBoxes/showBankAccountDialog.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -115,12 +119,13 @@ class Helpers {
   }
 
   Future showBusinessAddressDialog(context, info) async {
+    var user = await Methods().getUser();
     await showDialog(
       context: context,
       barrierDismissible: true,
       builder: (_) => AlertDialog(
         title: Text(
-          info.toString(),
+          user["currAdd"]["address"].toString(),
           style: textStyle(15, Colors.black),
         ),
         actions: <Widget>[
@@ -135,6 +140,55 @@ class Helpers {
           ),
         ],
       ),
+    );
+  }
+
+  Future showGstinDialog(context, info) async {
+    var user = await Methods().getUser();
+    var gst = user["gst"];
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => AlertDialog(
+        title: Text(
+          (gst == null) ? "No gst added" : gst.toString(),
+          style: textStyle(15, Colors.black),
+        ),
+        actions: <Widget>[
+          GestureDetector(
+            child: Text(
+              "Close",
+              style: textStyle(12, Color(0xFF5B0D1B)),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future showBankAccountDialog(context) async {
+    await showDialog(
+      context: context,
+      builder: (_) => BankAccountDialog(),
+    );
+  }
+
+  Future showCoupons(context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return CouponsDialog();
+      },
     );
   }
 }

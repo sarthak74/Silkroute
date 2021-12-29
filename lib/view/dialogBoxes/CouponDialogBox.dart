@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:silkroute/methods/isauthenticated.dart';
+import 'package:silkroute/model/services/CrateApi.dart';
+import 'package:silkroute/model/services/couponApi.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 
 class CouponsDialog extends StatefulWidget {
@@ -11,6 +14,31 @@ class CouponsDialog extends StatefulWidget {
 }
 
 class _CouponsDialogState extends State<CouponsDialog> {
+  bool loading = true;
+
+  dynamic user, bill, orderAmount, _coupons;
+
+  void loadVars() async {
+    if (widget.coupons == null) {
+      user = await Methods().getUser();
+      dynamic res = await CrateApi().getCrateItems();
+      bill = res.item2.toMap();
+      orderAmount = bill["totalValue"] - bill["implicitDiscount"];
+      _coupons = await CouponApi().getCoupons(user["contact"], orderAmount);
+    } else {
+      _coupons = widget.coupons;
+    }
+    setState(() {
+      loading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadVars();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -42,85 +70,96 @@ class _CouponsDialogState extends State<CouponsDialog> {
           ),
           SizedBox(height: 20),
           Expanded(
-            child: (widget.coupons.length > 0)
-                ? SingleChildScrollView(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: widget.coupons.length,
-                      itemBuilder: (BuildContext context, int i) {
-                        return Card(
-                          elevation: 5,
-                          margin:
-                              EdgeInsets.only(bottom: 10, right: 5, left: 5),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Expanded(
-                                flex: 1,
-                                child: AspectRatio(
-                                  aspectRatio: 1,
-                                  child: Image.network(
-                                    widget.coupons[i]["link"],
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Container(
-                                  padding: EdgeInsets.fromLTRB(10, 5, 5, 5),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        widget.coupons[i]["code"],
-                                        style: textStyle1(
-                                          13,
-                                          Colors.black,
-                                          FontWeight.w700,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        widget.coupons[i]["description"],
-                                        style: textStyle1(
-                                          13,
-                                          Colors.black54,
-                                          FontWeight.w500,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        'Amount: ₹${widget.coupons[i]["amount"]}',
-                                        style: textStyle1(
-                                          13,
-                                          Colors.black54,
-                                          FontWeight.w500,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+            child: loading
+                ? Center(
+                    child: SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: Color(0xFF811111),
+                      ),
                     ),
                   )
-                : Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "No coupons available",
-                      style: textStyle(20, Colors.grey),
-                    ),
-                  ),
+                : ((_coupons.length > 0)
+                    ? SingleChildScrollView(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: _coupons.length,
+                          itemBuilder: (BuildContext context, int i) {
+                            return Card(
+                              elevation: 5,
+                              margin: EdgeInsets.only(
+                                  bottom: 10, right: 5, left: 5),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 1,
+                                    child: AspectRatio(
+                                      aspectRatio: 1,
+                                      child: Image.network(
+                                        _coupons[i]["link"],
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      padding: EdgeInsets.fromLTRB(10, 5, 5, 5),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            _coupons[i]["code"],
+                                            style: textStyle1(
+                                              13,
+                                              Colors.black,
+                                              FontWeight.w700,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            _coupons[i]["description"],
+                                            style: textStyle1(
+                                              13,
+                                              Colors.black54,
+                                              FontWeight.w500,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'Amount: ₹${_coupons[i]["amount"]}',
+                                            style: textStyle1(
+                                              13,
+                                              Colors.black54,
+                                              FontWeight.w500,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "No coupons available",
+                          style: textStyle(20, Colors.grey),
+                        ),
+                      )),
           ),
         ],
       ),

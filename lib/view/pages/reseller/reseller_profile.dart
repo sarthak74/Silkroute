@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/model/services/ResellerProfileApi.dart';
 import 'package:silkroute/view/widget/navbar.dart';
@@ -10,6 +12,8 @@ import 'package:silkroute/view/widget/text_field.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 import 'package:silkroute/view/widget/footer.dart';
 import 'package:getwidget/getwidget.dart';
+
+import 'orders.dart';
 
 TextStyle textStyle(num size, Color color) {
   return GoogleFonts.poppins(
@@ -71,19 +75,6 @@ class _ResellerProfileState extends State<ResellerProfile> {
 
                       SizedBox(height: 20),
 
-                      // MIDDLE CONTAINER
-                      Container(
-                        margin: EdgeInsets.symmetric(
-                            horizontal:
-                                MediaQuery.of(context).size.width * 0.05),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                          color: Colors.grey[200],
-                        ),
-                        height: MediaQuery.of(context).size.height * 0.15,
-                      ),
-                      SizedBox(height: 20),
-
                       // OPTIONS LIST
                       OptionsList(),
 
@@ -121,30 +112,50 @@ class ProfileImageBar extends StatefulWidget {
 
 class _ProfileImageBarState extends State<ProfileImageBar> {
   LocalStorage storage = LocalStorage('silkroute');
+  bool loading = true;
+  String contact, name;
+
+  loadVars() async {
+    contact = await storage.getItem('contact');
+    name = await storage.getItem('name');
+    setState(() {
+      loading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadVars();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(
-          left: MediaQuery.of(context).size.width * 0.1,
-          right: MediaQuery.of(context).size.width * 0.1,
-          top: MediaQuery.of(context).size.width * 0.1),
-      child: Row(
-        children: <Widget>[
-          ProfilePic(storage.getItem('contact')),
-          SizedBox(width: 10),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                storage.getItem('name'),
-                style: textStyle(15, Colors.black),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+    return loading
+        ? Text("Loading...")
+        : Container(
+            margin: EdgeInsets.only(
+                left: MediaQuery.of(context).size.width * 0.1,
+                right: MediaQuery.of(context).size.width * 0.1,
+                top: MediaQuery.of(context).size.width * 0.1),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ProfilePic(contact),
+                SizedBox(width: 10),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      name,
+                      style: textStyle1(15, Colors.black, FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
   }
 }
 
@@ -172,56 +183,6 @@ class _LogoutButtonState extends State<LogoutButton> {
           "Logout",
           style: textStyle(15, Colors.white),
         ),
-      ),
-    );
-  }
-}
-
-class OptionsList extends StatefulWidget {
-  @override
-  _OptionsListState createState() => _OptionsListState();
-}
-
-class _OptionsListState extends State<OptionsList> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-          horizontal: MediaQuery.of(context).size.width * 0.05),
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-        color: Colors.grey[200],
-      ),
-      child: Column(
-        children: <Widget>[
-          OptionRow(
-            prefixIcon: Icons.receipt,
-            title: "Refer & Earn",
-            suffixIcon: Icons.arrow_forward,
-          ),
-          OptionRow(
-            prefixIcon: Icons.receipt,
-            title: "Coupons",
-            suffixIcon: Icons.arrow_forward,
-          ),
-          OptionRow(
-            prefixIcon: Icons.receipt,
-            title: "Actions",
-            suffixIcon: Icons.arrow_forward,
-          ),
-          OptionRow(
-            prefixIcon: Icons.card_membership,
-            title: "Saved Cards",
-            suffixIcon: Icons.edit,
-          ),
-          OptionRow(
-            prefixIcon: Icons.receipt,
-            title: "GSTIN",
-            suffixIcon: Icons.edit,
-          ),
-        ],
       ),
     );
   }
@@ -287,8 +248,12 @@ class ProfileDetailsList extends StatefulWidget {
 class _ProfileDetailsListState extends State<ProfileDetailsList> {
   dynamic personDetail = {}, loading = true;
   LocalStorage storage = LocalStorage('silkroute');
-  List fields = ['name', 'contact', 'address', 'anotherNumber'];
-  List alts = ['name', 'contact', 'currAdd', 'anotherNumber'];
+  List fields = [
+    ['name', true],
+    ['contact', false],
+    ['anotherNumber', true]
+  ];
+  // List alts = ['Name', 'Contact', 'Email', 'Alternate Number'];
 
   void loadPerson() async {
     personDetail = await storage.getItem('user');
@@ -314,15 +279,17 @@ class _ProfileDetailsListState extends State<ProfileDetailsList> {
             itemCount: fields.length,
             itemBuilder: (BuildContext context, int i) {
               return PersonalDetailRow(
-                title: fields[i],
+                title: fields[i][0],
+                editable: fields[i][1],
               );
             });
   }
 }
 
 class PersonalDetailRow extends StatefulWidget {
-  PersonalDetailRow({this.title});
+  PersonalDetailRow({this.title, this.editable});
   final String title;
+  final bool editable;
 
   @override
   _PersonalDetailRowState createState() => _PersonalDetailRowState();
@@ -334,21 +301,18 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
   TextEditingController _controller = TextEditingController();
   dynamic user;
   dynamic title, data;
-  List fields = ['name', 'contact', 'address', 'anotherNumber'];
-  List alts = ['name', 'contact', 'currAdd', 'anotherNumber'];
+  List fields = ['Name', 'Contact', 'Alternate Number'];
+  List alts = ['name', 'contact', 'anotherNumber'];
 
   void save() async {
     if (_enabled == false) {
       return;
     }
-    title = fields[alts.indexOf(widget.title)];
-    data = _controller.text;
-    if (widget.title == "currAdd") {
-      user[title]["address"] = data;
-    } else {
-      user[title] = data;
-    }
 
+    data = _controller.text;
+
+    user[widget.title] = data;
+    await storage.deleteItem('user');
     await storage.setItem('user', user);
     setState(() {
       _controller.text = "";
@@ -362,15 +326,11 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
   void loadVars() async {
     user = await storage.getItem('user');
     setState(() {
-      title = widget.title;
-      // data = user[alts[fields.indexOf(title)]];
+      title = fields[alts.indexOf(widget.title)];
+      data = user[widget.title];
 
-      if (title == "address") {
-        data = user[alts[fields.indexOf(title)]]["address"];
-      } else {
-        data = user[alts[fields.indexOf(title)]];
-      }
-      print("$title $data");
+      _controller.text = data;
+      print("${widget.title} $data");
       isContact = ('contact' == widget.title ? true : false);
       loading = false;
     });
@@ -406,64 +366,93 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 5),
-                width: MediaQuery.of(context).size.width * 0.65,
-                child: Theme(
-                  data: new ThemeData(
-                    primaryColor: Colors.black87,
-                  ),
-                  child: new TextField(
-                    maxLines: null,
-                    controller: _controller,
-                    enabled: _enabled,
-                    onChanged: null,
-                    style: textStyle(13, Colors.black87),
-                    decoration: new InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 3,
-                          color: Colors.black54,
+              (widget.editable)
+                  ? Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      width: MediaQuery.of(context).size.width * 0.65,
+                      child: Theme(
+                        data: new ThemeData(
+                          primaryColor: Colors.black87,
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(
-                          color: Colors.black87,
-                          width: 3,
+                        child: new TextField(
+                          maxLines: null,
+                          controller: _controller,
+                          enabled: _enabled,
+                          onChanged: null,
+                          style:
+                              textStyle1(13, Colors.black87, FontWeight.w500),
+                          decoration: new InputDecoration(
+                            labelStyle:
+                                textStyle1(13, Colors.black54, FontWeight.w500),
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintStyle:
+                                textStyle1(13, Colors.black54, FontWeight.w500),
+                            disabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Colors.black54,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: new BorderSide(
+                                color: Colors.black87,
+                                width: 3,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: new BorderSide(
+                                color: Colors.black54,
+                                width: 3,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: new BorderSide(
+                                color: Colors.black54,
+                                width: 3,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                            ),
+                            contentPadding: new EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                            ),
+                            prefixStyle: new TextStyle(
+                              color: Colors.black,
+                            ),
+                            labelText: title,
+                          ),
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(
-                          color: Colors.black54,
-                          width: 3,
+                    )
+                  : Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      width: MediaQuery.of(context).size.width * 0.65,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 1, color: Colors.black54),
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.white,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Text(
+                          data.toString(),
+                          style:
+                              textStyle1(13, Colors.black54, FontWeight.w500),
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
                       ),
-                      border: OutlineInputBorder(
-                        borderSide: new BorderSide(
-                          color: Colors.black54,
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
-                      ),
-                      contentPadding: new EdgeInsets.symmetric(
-                        horizontal: 20.0,
-                      ),
-                      prefixStyle: new TextStyle(
-                        color: Colors.black,
-                      ),
-                      hintText: _enabled ? "" : data,
                     ),
-                  ),
-                ),
-              ),
-              isContact
-                  ? Text("")
-                  : GestureDetector(
+              (widget.editable)
+                  ? GestureDetector(
                       onTap: () {
                         setState(() {
                           if (!_enabled) {
@@ -474,8 +463,9 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
                         });
                       },
                       child: Icon(_enabled ? Icons.save : Icons.edit, size: 18),
-                    ),
-              _enabled
+                    )
+                  : SizedBox(width: 10),
+              (_enabled && widget.editable)
                   ? GestureDetector(
                       onTap: () {
                         setState(() {
@@ -488,6 +478,86 @@ class _PersonalDetailRowState extends State<PersonalDetailRow> {
                     )
                   : Text(""),
             ],
+          );
+  }
+}
+
+class OptionsList extends StatefulWidget {
+  @override
+  _OptionsListState createState() => _OptionsListState();
+}
+
+class _OptionsListState extends State<OptionsList> {
+  bool loading = true;
+  dynamic user;
+  String pickupAdd, businessAdd;
+
+  void loadVars() async {
+    user = await Methods().getUser();
+
+    setState(() {
+      loading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadVars();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return loading
+        ? Text("Loading...")
+        : Container(
+            margin: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.05),
+            width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+              color: Colors.grey[200],
+            ),
+            child: Column(
+              children: <Widget>[
+                OptionRow(
+                  prefixIcon: Icons.receipt,
+                  title: "Refer & Earn",
+                  suffixIcon: Icons.arrow_forward,
+                ),
+                OptionRow(
+                  prefixIcon: Icons.receipt,
+                  title: "Coupons",
+                  suffixIcon: Icons.arrow_forward,
+                  function: () async {
+                    await Helpers().showCoupons(context);
+                  },
+                ),
+                OptionRow(
+                  prefixIcon: CupertinoIcons.location,
+                  title: "Address",
+                  suffixIcon: Icons.arrow_forward,
+                  function: () async {
+                    await Helpers()
+                        .showBusinessAddressDialog(context, businessAdd);
+                  },
+                ),
+                OptionRow(
+                  prefixIcon: Icons.card_membership,
+                  title: "Saved Cards",
+                  suffixIcon: Icons.edit,
+                ),
+                OptionRow(
+                  prefixIcon: Icons.receipt,
+                  title: "GSTIN",
+                  suffixIcon: Icons.arrow_forward,
+                  function: () async {
+                    await Helpers().showGstinDialog(context, user["gst"]);
+                  },
+                ),
+              ],
+            ),
           );
   }
 }
@@ -519,17 +589,23 @@ class _OptionRowState extends State<OptionRow> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Icon(widget.prefixIcon, size: 18, color: Colors.black),
-        Text(widget.title, style: textStyle(15, Colors.black54)),
-        Align(
-          alignment: Alignment.centerRight,
-          child: IconButton(
-            icon: Icon(
-              widget.suffixIcon,
-              size: 18,
-              color: Colors.blue,
+        SizedBox(width: 10),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              widget.title,
+              style: textStyle(15, Colors.black54),
             ),
-            onPressed: widget.function,
           ),
+        ),
+        IconButton(
+          icon: Icon(
+            widget.suffixIcon,
+            size: 18,
+            color: Color(0xFF811111),
+          ),
+          onPressed: widget.function,
         ),
       ],
     );

@@ -132,10 +132,9 @@ class _ProductListPageState extends State<ProductListPage> {
   Widget build(BuildContext context) => ChangeNotifierProvider(
       create: (context) => ProductListProvider(),
       builder: (context, child) {
-        double aspectRatio = 1.45 *
-            (MediaQuery.of(context).size.width *
-                0.86 /
-                MediaQuery.of(context).size.height);
+        double aspectRatio = (MediaQuery.of(context).size.width * 0.4 +
+                MediaQuery.of(context).size.width * 0.03) /
+            (MediaQuery.of(context).size.width * 0.4 + 100);
         _products = [];
         return GestureDetector(
           onTap: () => {FocusManager.instance.primaryFocus.unfocus()},
@@ -254,7 +253,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                             0.05,
                                   ),
                                   height:
-                                      MediaQuery.of(context).size.height * 0.5,
+                                      MediaQuery.of(context).size.height * 0.53,
                                   child: SingleChildScrollView(
                                     child: StreamBuilder<List<ProductList>>(
                                       stream: _searchProvider.productListStream,
@@ -281,7 +280,23 @@ class _ProductListPageState extends State<ProductListPage> {
                                                   shrinkWrap: true,
                                                   physics:
                                                       NeverScrollableScrollPhysics(),
-                                                  childAspectRatio: aspectRatio,
+                                                  childAspectRatio: (userType ==
+                                                          "Reseller")
+                                                      ? aspectRatio
+                                                      : (MediaQuery.of(context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.4 +
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.03) /
+                                                          (MediaQuery.of(context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.4 +
+                                                              75),
                                                   crossAxisCount: 2,
                                                   children: List.generate(
                                                     _products == []
@@ -326,7 +341,7 @@ class _ProductListPageState extends State<ProductListPage> {
 
                                 //////// LOAD MORE BUTTON
 
-                                SizedBox(height: 5),
+                                SizedBox(height: 10),
 
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,

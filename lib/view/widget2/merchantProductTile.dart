@@ -59,30 +59,29 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
             ),
             margin: EdgeInsets.symmetric(
               horizontal: MediaQuery.of(context).size.width * 0.015,
-              vertical: 10,
+              vertical: 5,
             ),
-            width: MediaQuery.of(context).size.width * 0.41,
-            height: MediaQuery.of(context).size.width * 0.41,
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: Column(
+            width: MediaQuery.of(context).size.width * 0.4,
+            height: MediaQuery.of(context).size.width * 0.4,
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      ("4.2").toString(),
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                          color: Colors.black,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+              children: [
+                Text(
+                  ("4.2").toString(),
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      color: Colors.grey[200],
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
                     ),
-                    Icon(Icons.star, size: 13),
-                  ],
+                  ),
+                ),
+                Icon(
+                  Icons.star,
+                  size: 13,
+                  color: Colors.grey[200],
                 )
               ],
             ),
@@ -112,54 +111,52 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
             margin: EdgeInsets.symmetric(
               horizontal: MediaQuery.of(context).size.width * 0.015,
             ),
-            // height: 40,
+            height: 60,
             // width: MediaQuery.of(context).size.width * 0.41,
             padding: EdgeInsets.all(5),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      flex: 7,
-                      child: Text(
-                        widget.product.title,
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                Flexible(
+                  child: Text(
+                    widget.product.title +
+                        " asjcn sajn ajscn askcn aslcn kslc ks",
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        ("₹" + mrp.toString()).toString(),
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            color: Color(0xFF5B0D1B),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      "Stock: ${widget.product.stockAvailability}",
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 10,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      ("₹" + mrp.toString()).toString(),
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          color: Color(0xFF5B0D1B),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
-                ),
-                Text(
-                  "Stock: ${widget.product.stockAvailability}",
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 10,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
                 ),
               ],
             ),

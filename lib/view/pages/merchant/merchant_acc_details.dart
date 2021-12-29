@@ -260,14 +260,6 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      Text(
-                                        "*These details are necessary to showcase your products to customer!",
-                                        style: textStyle1(
-                                          14,
-                                          Colors.black,
-                                          FontWeight.w500,
-                                        ),
-                                      ),
                                       SizedBox(height: 20),
                                       CustomTextField(
                                         "Email",
