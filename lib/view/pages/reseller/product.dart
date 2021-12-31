@@ -30,9 +30,10 @@ TextStyle textStyle(num size, Color color) {
 }
 
 class ProductPage extends StatefulWidget {
-  const ProductPage({this.id});
+  const ProductPage({this.id, this.crateData});
 
   final String id;
+  final dynamic crateData;
 
   @override
   _ProductPageState createState() => _ProductPageState();
@@ -112,7 +113,13 @@ class _ProductPageState extends State<ProductPage> {
                                           productDetails: productDetails),
                                       ProductDescription(
                                           product: productDetails),
-                                      ProductCounter(product: productDetails),
+                                      widget.crateData == null
+                                          ? ProductCounter(
+                                              product: productDetails)
+                                          : ProductCounter(
+                                              product: productDetails,
+                                              crateData: widget.crateData,
+                                            ),
                                       ProductSpecifications(
                                           specifications:
                                               productDetails['specifications']),
@@ -210,8 +217,9 @@ class ProductSpecifications extends StatelessWidget {
 }
 
 class ProductCounter extends StatefulWidget {
-  const ProductCounter({this.product});
-  final dynamic product;
+  const ProductCounter({this.product, this.crateData});
+  final dynamic product, crateData;
+  // crateData != null means modifying crate item
 
   @override
   _ProductCounterState createState() => _ProductCounterState();
@@ -219,7 +227,8 @@ class ProductCounter extends StatefulWidget {
 
 class _ProductCounterState extends State<ProductCounter> {
   num counter, min, max, gap;
-  bool loading = true, addingtoCrate = false;
+  num preqty = 0; // if crateData != null
+  bool loading = true, addingtoCrate = false, showprice = false;
   List proColors = [], selectedColors = [];
   String
       // url = Math().ip() + "/images/616ff5ab029b95081c237c89-color-0",
@@ -239,6 +248,7 @@ class _ProductCounterState extends State<ProductCounter> {
       _qtyController.text = x.toString();
       _qty = x.toString();
     });
+    calcPrice();
   }
 
   void dec() {
@@ -251,22 +261,125 @@ class _ProductCounterState extends State<ProductCounter> {
       _qtyController.text = x.toString();
       _qty = x.toString();
     });
+    calcPrice();
   }
 
-  void loadVars() {
+  num mrp, stock, discountValue;
+  String sp;
+
+  calcPrice() {
     setState(() {
-      // counter = widget.product['min'];
-      // min = widget.product['min'];
-      // max = widget.product['totalSet'];
-
-      // ignore: todo
-      // TODO: proColors is list of colors/images of product in set
-
-      proColors = widget.product["colors"];
-      for (var x in widget.product["colors"]) {
-        selectedColors.add(false);
+      try {
+        mrp = widget.product['mrp'];
+        mrp *= int.parse(_qty);
+        if (_qty == "0" || _qty == 0) {
+          showprice = false;
+          return;
+        }
+        sp = Math.getSp(mrp, discountValue);
+        showprice = true;
+      } catch (e) {
+        showprice = false;
       }
+    });
+  }
+
+  void loadVars() async {
+    // ignore: todo
+    // TODO: proColors is list of colors/images of product in set
+
+    mrp = widget.product['mrp'];
+    discountValue = widget.product['discountValue'];
+
+    if (widget.product['discount']) {
+      sp = Math.getSp(mrp, discountValue);
+    }
+
+    print("cdata ${widget.crateData}");
+    proColors = widget.product["colors"];
+    for (var x in widget.product["colors"]) {
+      selectedColors.add(false);
+    }
+
+    if (widget.crateData != null) {
+      _qtyController.text = widget.crateData["quantity"].toString();
+      _qty = _qtyController.text;
+      showprice = true;
+      for (var x in widget.crateData["colors"]) {
+        for (int i = 0; i < proColors.length; i++) {
+          if (x == proColors[i]) {
+            if (selectedColors[i] == true) continue;
+            selectedColors[i] = true;
+            break;
+          }
+        }
+      }
+      calcPrice();
+    }
+    setState(() {
       loading = false;
+    });
+  }
+
+  editCrateHandler() async {
+    setState(() {
+      addingtoCrate = true;
+    });
+    //You can delete\nthis item using crate through Crate page
+    if (_qtyController.text.length < 1) {
+      setState(() {
+        addingtoCrate = false;
+        Toast().notifyErr("Enter some quantity");
+      });
+      return;
+    }
+    if (int.parse(_qtyController.text) >
+        widget.product['stockAvailability'] + int.parse(preqty.toString())) {
+      setState(() {
+        addingtoCrate = false;
+        Toast().notifyErr("We have less stock available");
+      });
+      return;
+    }
+
+    List selectedColorsUrl = [];
+    for (int i = 0; i < selectedColors.length; i++) {
+      if (selectedColors[i] == true) {
+        selectedColorsUrl.add(proColors[i]);
+      }
+    }
+
+    if (selectedColorsUrl.length < widget.product['min']) {
+      setState(() {
+        addingtoCrate = false;
+        Toast()
+            .notifyErr("Select a minimum of ${widget.product["min"]} colors!");
+      });
+      return;
+    }
+
+    var data = {
+      'id': widget.product['_id'].toString(),
+      'contact': await storage.getItem('contact'),
+      'quantity': int.parse(_qty),
+      'colors': selectedColorsUrl,
+      'mrp': widget.product['mrp'],
+      'merchantContact': widget.product['userContact'],
+      'discountValue': widget.product['discountValue'],
+      'discount': widget.product['discount'],
+      'title': widget.product['title'],
+      'stock': widget.product['stockAvailability']
+    };
+
+    print("editCrateHandler: $data");
+
+    await CrateApi().editCrateItem(data);
+
+    setState(() {
+      _qtyController.text = "";
+
+      addingtoCrate = false;
+      Toast().notifySuccess("Crate Modified");
     });
   }
 
@@ -308,14 +421,14 @@ class _ProductCounterState extends State<ProductCounter> {
     var data = {
       'id': widget.product['_id'].toString(),
       'contact': await storage.getItem('contact'),
-      'quantity': _qty,
+      'quantity': int.parse(_qty),
       'colors': selectedColorsUrl,
-      'mrp': widget.product['mrp'].toString(),
-      'merchantContact': widget.product['userContact'].toString(),
-      'disValue': widget.product['discountValue'].toString(),
-      'discount': widget.product['discount'].toString(),
-      'title': widget.product['title'].toString(),
-      'stock': widget.product['stockAvailability'].toString()
+      'mrp': widget.product['mrp'],
+      'merchantContact': widget.product['userContact'],
+      'discountValue': widget.product['discountValue'],
+      'discount': widget.product['discount'],
+      'title': widget.product['title'],
+      'stock': widget.product['stockAvailability']
     };
 
     print("addToCrateHandler: $data");
@@ -323,7 +436,6 @@ class _ProductCounterState extends State<ProductCounter> {
     await CrateApi().setCrateItems(data);
 
     setState(() {
-      widget.product['stockAvailability'] -= int.parse(_qtyController.text);
       _qtyController.text = "";
 
       addingtoCrate = false;
@@ -406,6 +518,7 @@ class _ProductCounterState extends State<ProductCounter> {
           SizedBox(height: 15),
 
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Row(
                 children: <Widget>[
@@ -428,7 +541,7 @@ class _ProductCounterState extends State<ProductCounter> {
                   ),
                   SizedBox(width: 10),
                   Container(
-                    width: 92,
+                    width: 70,
                     child: TextFormField(
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.digitsOnly
@@ -448,7 +561,7 @@ class _ProductCounterState extends State<ProductCounter> {
                       ),
                       controller: _qtyController,
                       decoration: InputDecoration(
-                        hintText: "Enter Quantity",
+                        hintText: "Quantity",
                         isDense: true,
                         focusColor: Color(0xFF5B0D1B),
                         focusedBorder: UnderlineInputBorder(
@@ -480,7 +593,9 @@ class _ProductCounterState extends State<ProductCounter> {
               ),
               SizedBox(width: 10),
               GestureDetector(
-                onTap: addToCrateHandler,
+                onTap: (widget.crateData == null)
+                    ? addToCrateHandler
+                    : editCrateHandler,
                 child: Container(
                   // width: MediaQuery.of(context).size.width * 0.5,
 
@@ -507,7 +622,10 @@ class _ProductCounterState extends State<ProductCounter> {
                                 color: Color(0xFF5B0D1B),
                               ),
                             )
-                          : Text("Add to Crate",
+                          : Text(
+                              (widget.crateData == null)
+                                  ? "Add to Crate"
+                                  : "Modify Crate",
                               style: textStyle(13, Colors.black)),
                     ],
                   ),
@@ -515,7 +633,43 @@ class _ProductCounterState extends State<ProductCounter> {
               ),
             ],
           ),
-          SizedBox(height: 20),
+
+          showprice
+              ? Column(
+                  children: <Widget>[
+                    SizedBox(height: 10),
+                    Row(children: <Widget>[
+                      Text(
+                        "Amount:   ",
+                        style: textStyle(13, Colors.black),
+                      ),
+                      Text(
+                        "₹" + mrp.toString(),
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            color: Color(0xFF5B0D1B),
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
+                            decoration: (discountValue > 0)
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                            decorationThickness: 3,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      if (discountValue > 0)
+                        Text(
+                          "₹" + sp.toString(),
+                          style: textStyle(13, Color(0xFF811111)),
+                        ),
+                    ])
+                  ],
+                )
+              : Container(),
+
+          SizedBox(height: 10),
+
           Text(
             ("Available in stock: " +
                     widget.product['stockAvailability'].toString())

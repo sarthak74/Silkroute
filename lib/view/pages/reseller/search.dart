@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/model/core/ProductList.dart';
@@ -160,7 +161,7 @@ class _SearchPageState extends State<SearchPage> {
                   //////////////////////////////
 
                   TopBar(),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
                   Expanded(
                     child: loading
@@ -182,9 +183,20 @@ class _SearchPageState extends State<SearchPage> {
                                       Container(
                                         width:
                                             MediaQuery.of(context).size.width *
-                                                0.69,
+                                                0.8,
                                         child: TextFormField(
                                           decoration: InputDecoration(
+                                              suffixIcon: GestureDetector(
+                                                child: Icon(
+                                                  Icons.search,
+                                                  color: Colors.black54,
+                                                  size: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.07,
+                                                ),
+                                                onTap: refreshList,
+                                              ),
                                               hintText: "Search for products",
                                               enabledBorder: OutlineInputBorder(
                                                 borderSide: BorderSide(
@@ -208,17 +220,6 @@ class _SearchPageState extends State<SearchPage> {
                                           controller: _searchTextController,
                                         ),
                                       ),
-                                      GestureDetector(
-                                        child: Icon(
-                                          Icons.search,
-                                          color: Colors.black54,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.07,
-                                        ),
-                                        onTap: refreshList,
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -241,30 +242,72 @@ class _SearchPageState extends State<SearchPage> {
                                         onTap: () {
                                           sortFunction();
                                         },
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.sort, size: 25),
-                                            Text(
-                                              " Sort",
-                                              style:
-                                                  textStyle(13, Colors.black),
-                                            )
-                                          ],
+                                        child: Container(
+                                          padding:
+                                              EdgeInsets.fromLTRB(15, 7, 15, 7),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Color.fromRGBO(
+                                                    0, 0, 0, 0.25),
+                                                offset: Offset(1, 2.0),
+                                                blurRadius: 4.0,
+                                              ),
+                                            ],
+                                            border: Border.all(
+                                                width: 2,
+                                                color: Colors.grey[500]),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(FontAwesomeIcons.sort,
+                                                  size: 15),
+                                              Text(
+                                                " Sort",
+                                                style:
+                                                    textStyle(13, Colors.black),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                       GestureDetector(
                                         onTap: () {
                                           filterFunction();
                                         },
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.tungsten, size: 25),
-                                            Text(
-                                              " Filter",
-                                              style:
-                                                  textStyle(13, Colors.black),
-                                            )
-                                          ],
+                                        child: Container(
+                                          padding:
+                                              EdgeInsets.fromLTRB(15, 7, 15, 7),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Color.fromRGBO(
+                                                    0, 0, 0, 0.25),
+                                                offset: Offset(1, 2.0),
+                                                blurRadius: 4.0,
+                                              ),
+                                            ],
+                                            border: Border.all(
+                                                width: 2,
+                                                color: Colors.grey[500]),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(FontAwesomeIcons.filter,
+                                                  size: 13),
+                                              Text(
+                                                " Filter",
+                                                style:
+                                                    textStyle(13, Colors.black),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       )
                                     ],

@@ -12,7 +12,7 @@ class NotificationService {
     if (data["img"] == null) {
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
-          id: data['messageId'],
+          id: 1,
           channelKey: 'key1',
           title: data["title"],
           body: data["body"],
@@ -27,7 +27,7 @@ class NotificationService {
     } else {
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
-          id: data['messageId'],
+          id: 1,
           channelKey: 'key1',
           title: data["title"],
           body: data["body"],

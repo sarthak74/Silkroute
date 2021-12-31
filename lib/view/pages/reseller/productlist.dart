@@ -58,8 +58,8 @@ class _ProductListPageState extends State<ProductListPage> {
     });
   }
 
-  void sortFunction() {
-    showGeneralDialog(
+  void sortFunction() async {
+    await showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: "",
@@ -79,8 +79,8 @@ class _ProductListPageState extends State<ProductListPage> {
     });
   }
 
-  void filterFunction() {
-    showGeneralDialog(
+  void filterFunction() async {
+    await showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: "",
@@ -162,7 +162,7 @@ class _ProductListPageState extends State<ProductListPage> {
                   //////////////////////////////
 
                   TopBar(),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
                   Expanded(
                     child: loading
@@ -196,7 +196,7 @@ class _ProductListPageState extends State<ProductListPage> {
 
                                 Container(
                                   margin: EdgeInsets.only(
-                                    top: 8,
+                                    top: 0,
                                     left: MediaQuery.of(context).size.width *
                                         0.07,
                                     right: MediaQuery.of(context).size.width *
@@ -212,34 +212,74 @@ class _ProductListPageState extends State<ProductListPage> {
                                         onTap: () {
                                           sortFunction();
                                         },
-                                        child: Row(
-                                          children: [
-                                            Icon(FontAwesomeIcons.sort,
-                                                size: 15),
-                                            SizedBox(width: 2),
-                                            Text(
-                                              " Sort",
-                                              style:
-                                                  textStyle(13, Colors.black),
-                                            )
-                                          ],
+                                        child: Container(
+                                          padding:
+                                              EdgeInsets.fromLTRB(15, 7, 15, 7),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Color.fromRGBO(
+                                                    0, 0, 0, 0.25),
+                                                offset: Offset(1, 2.0),
+                                                blurRadius: 4.0,
+                                              ),
+                                            ],
+                                            border: Border.all(
+                                                width: 2,
+                                                color: Colors.grey[500]),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(FontAwesomeIcons.sort,
+                                                  size: 15),
+                                              SizedBox(width: 2),
+                                              Text(
+                                                " Sort",
+                                                style:
+                                                    textStyle(13, Colors.black),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                       GestureDetector(
                                         onTap: () {
                                           filterFunction();
                                         },
-                                        child: Row(
-                                          children: [
-                                            Icon(FontAwesomeIcons.filter,
-                                                size: 13),
-                                            SizedBox(width: 2),
-                                            Text(
-                                              " Filter",
-                                              style:
-                                                  textStyle(13, Colors.black),
-                                            )
-                                          ],
+                                        child: Container(
+                                          padding:
+                                              EdgeInsets.fromLTRB(15, 7, 15, 7),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Color.fromRGBO(
+                                                    0, 0, 0, 0.25),
+                                                offset: Offset(1, 2.0),
+                                                blurRadius: 4.0,
+                                              ),
+                                            ],
+                                            border: Border.all(
+                                                width: 2,
+                                                color: Colors.grey[500]),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(FontAwesomeIcons.filter,
+                                                  size: 13),
+                                              SizedBox(width: 2),
+                                              Text(
+                                                " Filter",
+                                                style:
+                                                    textStyle(13, Colors.black),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       )
                                     ],

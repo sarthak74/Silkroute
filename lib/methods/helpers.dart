@@ -6,8 +6,10 @@ import 'package:silkroute/model/services/couponApi.dart';
 import 'package:silkroute/view/dialogBoxes/CouponDialogBox.dart';
 import 'package:silkroute/view/dialogBoxes/colorImageDialog.dart';
 import 'package:silkroute/view/dialogBoxes/editPickupAddressDialog.dart';
+import 'package:silkroute/view/dialogBoxes/price_change_alert_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/showBankAccountDialog.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
+import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Helpers {
@@ -203,5 +205,23 @@ class Helpers {
       ),
     );
     return selected;
+  }
+
+  Future showPriceChangeAlert(context) async {
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 800),
+      pageBuilder: (context, a1, a2) {
+        return PriceChangeAlertDialog();
+      },
+    );
   }
 }

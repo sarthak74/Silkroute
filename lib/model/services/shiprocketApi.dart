@@ -13,6 +13,40 @@ class ShiprocketApi {
   LocalStorage storage = LocalStorage('silkroute');
   Dio dio = new Dio();
 
+  Future<bool> authenticate() async {
+    var shiprocket_auth = await storage.getItem('shiprocket_auth');
+    dynamic token, timestamp;
+    if (shiprocket_auth == null) {
+      final res = await ShiprocketApi().getToken();
+      if (res == null) {
+        return false;
+      }
+      token = res['token'];
+      timestamp = DateTime.now().toLocal().toIso8601String();
+
+      shiprocket_auth = {"token": token, "timestamp": timestamp};
+      await storage.setItem('shiprocket_auth', shiprocket_auth);
+    } else {
+      var token = shiprocket_auth['token'];
+      dynamic timestamp = DateTime.parse(shiprocket_auth['timestamp']);
+      print("t, a = $token\n $timestamp");
+      var now = DateTime.now();
+      final diff = (now.difference(timestamp).inHours.floor());
+      print("diff: $diff");
+      if (diff > 20) {
+        final res = await ShiprocketApi().getToken();
+        if (res == null) {
+          return false;
+        }
+        token = res['token'];
+        timestamp = DateTime.now().toLocal().toIso8601String();
+        shiprocket_auth = {"token": token, "timestamp": timestamp};
+        await storage.setItem('shiprocket_auth', shiprocket_auth);
+      }
+    }
+    return true;
+  }
+
   Future<dynamic> getToken() async {
     try {
       String ship_email = await dotenv.env['shiprocket_email'];

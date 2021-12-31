@@ -88,7 +88,6 @@ class _TopPicksState extends State<TopPicks> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.symmetric(vertical: 8),
                     height: MediaQuery.of(context).size.width -
                         75 -
                         MediaQuery.of(context).size.width * 0.05,
@@ -166,11 +165,12 @@ class _TopPicksState extends State<TopPicks> {
                         // SizedBox(width: 10),
                         GestureDetector(
                           onTap: () {
+                            print("id: ${products[selected]['id']}");
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ProductPage(
-                                    id: (products[selected].id).toString()),
+                                    id: (products[selected]['id']).toString()),
                               ),
                             );
                           },

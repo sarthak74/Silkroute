@@ -31,79 +31,59 @@ class _CratePageState extends State<CratePage> {
   bool addressStatus = CratePage().addressStatus,
       paymentStatus = CratePage().paymentStatus;
   List<CrateListItem> _crateList;
+  String pincode = "";
   List products = [];
   bool loading = true, error = false;
-  dynamic bill, _token;
+  dynamic bill;
   LocalStorage storage = LocalStorage('silkroute');
 
+  void setPincode(newpincode) {
+    print("here $newpincode");
+    setState(() {
+      pincode = newpincode;
+    });
+  }
+
   void loadVars() async {
-    var shiprocket_auth = await storage.getItem('shiprocket_auth');
-    dynamic token, timestamp;
-    if (shiprocket_auth == null) {
-      final res = await ShiprocketApi().getToken();
-      if (res == null) {
+    setState(() {
+      loading = true;
+    });
+    bool ship_auth = await ShiprocketApi().authenticate();
+    if (!ship_auth) {
+      setState(() {
         error = true;
         loading = false;
-        return;
-      }
-      token = res['token'];
-      timestamp = DateTime.now().toLocal().toIso8601String();
-
-      shiprocket_auth = {"token": token, "timestamp": timestamp};
-      await storage.setItem('shiprocket_auth', shiprocket_auth);
-      setState(() {
-        _token = token;
       });
-    } else {
-      var token = shiprocket_auth['token'];
-      dynamic timestamp = DateTime.parse(shiprocket_auth['timestamp']);
-      print("t, a = $token\n $timestamp");
-      var now = DateTime.now();
-      final diff = (now.difference(timestamp).inHours.floor());
-      print("diff: $diff");
-      if (diff > 20) {
-        final res = await ShiprocketApi().getToken();
-        if (res == null) {
-          error = true;
-          loading = false;
-          return;
-        }
-        token = res['token'];
-        timestamp = DateTime.now().toLocal().toIso8601String();
-        shiprocket_auth = {"token": token, "timestamp": timestamp};
-        await storage.setItem('shiprocket_auth', shiprocket_auth);
-      }
-
-      setState(() {
-        _token = token;
-      });
+      return;
     }
 
+    var user = await storage.getItem('user');
     await loadProducts();
+    setState(() {
+      error = false;
+      loading = false;
+      pincode = user['currAdd']['pincode'];
+    });
   }
 
   Future<void> loadProducts() async {
     dynamic res = await CrateApi().getCrateItems();
     _crateList = res.item1;
-    print("crate_pr: $_crateList");
     for (var x in _crateList) {
       var data = x.toMap();
-      print("cratepr $data");
       setState(() {
         products.add(data);
       });
     }
     setState(() {
       bill = res.item2.toMap();
-      print("mao bill : $bill");
       loading = false;
     });
   }
 
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadVars();
-    });
+    loadVars();
+
     super.initState();
   }
 
@@ -172,7 +152,7 @@ class _CratePageState extends State<CratePage> {
                 //////////////////////////////
 
                 TopBar(),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
 
                 Expanded(
                   child: loading
@@ -275,34 +255,38 @@ class _CratePageState extends State<CratePage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
-                                        Text("Crate",
-                                            style: textStyle(
-                                                12.0, Color(0xFF5B0D1B))),
-                                        Text("Address",
-                                            style: textStyle(
-                                                12.0,
-                                                addressStatus
-                                                    ? Color(0xFF5B0D1B)
-                                                    : Colors.grey[400])),
-                                        Text("Payment",
-                                            style: textStyle(
-                                                12.0,
-                                                paymentStatus
-                                                    ? Color(0xFF5B0D1B)
-                                                    : Colors.grey[400])),
+                                        Text(
+                                          "Crate",
+                                          style: textStyle(
+                                              12.0, Color(0xFF5B0D1B)),
+                                        ),
+                                        Text(
+                                          "Address",
+                                          style: textStyle(
+                                              12.0,
+                                              addressStatus
+                                                  ? Color(0xFF5B0D1B)
+                                                  : Colors.grey[400]),
+                                        ),
+                                        Text(
+                                          "Payment",
+                                          style: textStyle(
+                                              12.0,
+                                              paymentStatus
+                                                  ? Color(0xFF5B0D1B)
+                                                  : Colors.grey[400]),
+                                        ),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
 
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.05),
+                              SizedBox(height: 10),
 
-                              SizedBox(
+                              Container(
                                 height:
-                                    MediaQuery.of(context).size.height * 0.55,
+                                    MediaQuery.of(context).size.height * 0.65,
                                 child: PageView(
                                   controller: pageController,
                                   children: [
@@ -310,6 +294,8 @@ class _CratePageState extends State<CratePage> {
                                       pageController: pageController,
                                       products: products,
                                       bill: bill,
+                                      setPincode: setPincode,
+                                      pincode: pincode,
                                     ),
                                     AddressPage(
                                       pageController: pageController,
@@ -317,6 +303,7 @@ class _CratePageState extends State<CratePage> {
                                           (products.length > 0) ? true : false,
                                       crateList: _crateList,
                                       bill: bill,
+                                      pincode: pincode,
                                     ),
                                     PaymentPage(
                                       pageController: pageController,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/model/services/couponApi.dart';
+import 'package:silkroute/model/services/shiprocketApi.dart';
 import 'package:silkroute/provider/CrateProvider.dart';
 import 'package:silkroute/view/dialogBoxes/CouponDialogBox.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
@@ -12,18 +14,30 @@ import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/crate_product_tile.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
+import 'package:silkroute/view/widget/text_field.dart';
 
 class CratePage1 extends StatefulWidget {
-  CratePage1({this.pageController, this.products, this.bill});
+  CratePage1(
+      {this.pageController,
+      this.products,
+      this.bill,
+      this.setPincode,
+      this.pincode});
   final PageController pageController;
   final dynamic products, bill;
+  final String pincode;
+  final dynamic setPincode;
   @override
   _CratePage1State createState() => _CratePage1State();
 }
 
 class _CratePage1State extends State<CratePage1> {
   List products = [];
-  bool loading = true, loadingBill = true;
+  bool loading = true,
+      loadingBill = true,
+      canBeDelivered = false,
+      _loadingDeliveryServiceabilityStatus = false;
+  String pincode;
   dynamic bill,
       _coupons,
       orderAmount,
@@ -33,18 +47,89 @@ class _CratePage1State extends State<CratePage1> {
         'finalLogistic': 0,
         'totalCost': 0,
         'savings': 0,
-      };
+      },
+      courierData,
+      user;
   String contact;
   LocalStorage storage = LocalStorage('silkroute');
   num logisticsSaving = 0, finalLogistic = 0;
 
-  void loadProducts() async {
-    contact = await storage.getItem('contact');
+  Map<String, String> _deliveryServiceabilityStatus = {
+    "title": "Enter a valid pincode to check status",
+    "etd": "",
+    "rate": ""
+  };
 
+  void checkDeliveryServiceabilityStatus() async {
+    if (products == null || products.length == 0) {
+      return;
+    }
     setState(() {
-      products = widget.products;
-      bill = widget.bill;
+      _loadingDeliveryServiceabilityStatus = true;
+    });
+
+    print("pincode: $pincode");
+    // todo: first argument has to be merchant pickup pincode and third is weight, 4th of cod and it has to be 0
+    final res =
+        await ShiprocketApi().getDeliveryServiceStatus(210201, pincode, 3, 0);
+    if (res != null) {
+      dynamic status = res['data']['available_courier_companies'];
+      if (status.length > 0) {
+        var f = status[0];
+
+        setState(() {
+          courierData = f;
+          print("courier: ${courierData}");
+          _deliveryServiceabilityStatus = {
+            "title": "Product is deliverable at this location!",
+            "etd": f['etd'].toString(),
+            "rate": f['rate'].toString()
+          };
+
+          bill['totalCost'] -= bill['logistic'];
+          bill['logistic'] = int.parse(_deliveryServiceabilityStatus['rate']);
+          priceData['finalLogistic'] =
+              bill['logistic'] - priceData['logisticsSaving'];
+          bill['totalCost'] += bill['logistic'];
+          priceData['totalCost'] = bill['totalCost'];
+
+          print("status: $_deliveryServiceabilityStatus");
+          _loadingDeliveryServiceabilityStatus = false;
+        });
+      } else {
+        setState(() {
+          canBeDelivered = false;
+          _deliveryServiceabilityStatus = {
+            "title": "Product is NOT deliverable!",
+            "etd": "",
+            "rate": ""
+          };
+          _loadingDeliveryServiceabilityStatus = false;
+        });
+      }
+    }
+  }
+
+  void loadProducts() async {
+    products = widget.products;
+    bill = widget.bill;
+    user = await storage.getItem('user');
+    contact = user['contact'];
+    pincode = widget.pincode;
+    print("1");
+    await checkDeliveryServiceabilityStatus();
+
+    await setState(() {
       orderAmount = bill["totalValue"] - bill["implicitDiscount"];
+      print("products: $products");
+      if (products != null && products.length > 0) {
+        bill['totalCost'] -= bill['logistic'];
+        bill['logistic'] = int.parse(_deliveryServiceabilityStatus['rate']);
+        priceData['finalLogistic'] =
+            bill['logistic'] - priceData['logisticsSaving'];
+        bill['totalCost'] += bill['logistic'];
+      }
+
       price = [
         {
           "title": "Total Value",
@@ -73,6 +158,7 @@ class _CratePage1State extends State<CratePage1> {
           "isDiscount": false
         },
       ];
+
       priceData['savings'] = bill['implicitDiscount'] + bill['couponDiscount'];
       priceData['totalCost'] = bill['totalCost'];
 
@@ -141,7 +227,7 @@ class _CratePage1State extends State<CratePage1> {
 
   Future applyCoupons() async {
     var coupons = await CouponApi().getCoupons(contact, orderAmount);
-    print("coupons $coupons");
+
     setState(() {
       _coupons = coupons;
     });
@@ -174,152 +260,283 @@ class _CratePage1State extends State<CratePage1> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          loading
-              ? Container(
-                  margin: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * 0.3),
+      child: (products == null || products.length == 0)
+          ? Center(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 50),
+                child: Text(
+                  "No items to show",
+                  style: textStyle1(
+                    18,
+                    Colors.black45,
+                    FontWeight.w700,
+                  ),
+                ),
+              ),
+            )
+          : Column(
+              children: <Widget>[
+                loading
+                    ? Container(
+                        margin: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.3),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF5B0D1B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : CrateProductList(products: products),
+
+                SizedBox(height: 20),
+
+                /// Price DETAILS
+
+                loading
+                    ? Container(
+                        margin: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.3),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF5B0D1B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : (products == null || products.length == 0)
+                        ? Container()
+                        : Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              child: CustomTextField(
+                                "Pincode*",
+                                "Pincode",
+                                false,
+                                (val) async {
+                                  setState(() {
+                                    if (val.length == 6) {
+                                      pincode = val;
+                                      widget.setPincode(pincode);
+                                    } else {
+                                      canBeDelivered = false;
+                                      _deliveryServiceabilityStatus = {
+                                        "title":
+                                            "Enter a valid pincode to check status",
+                                        "etd": "",
+                                        "rate": ""
+                                      };
+                                    }
+                                  });
+                                  await checkDeliveryServiceabilityStatus();
+                                },
+                                initialValue: pincode,
+                              ),
+                            ),
+                          ),
+                SizedBox(height: 10),
+                loading
+                    ? Container(
+                        margin: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.3),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF5B0D1B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : (products == null || products.length == 0)
+                        ? Container()
+                        : (pincode != null && pincode.length == 6)
+                            ? (_loadingDeliveryServiceabilityStatus
+                                ? SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xFF5B0D1B),
+                                    ),
+                                  )
+                                : Column(
+                                    children: <Widget>[
+                                      SizedBox(height: 2),
+                                      Text(
+                                        _deliveryServiceabilityStatus["title"],
+                                        style: textStyle1(
+                                          13,
+                                          Colors.black54,
+                                          FontWeight.normal,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        "Estimated Time: " +
+                                            _deliveryServiceabilityStatus[
+                                                "etd"],
+                                        style: textStyle1(
+                                          13,
+                                          Colors.black54,
+                                          FontWeight.normal,
+                                        ),
+                                      ),
+                                    ],
+                                  ))
+                            : SizedBox(height: 20),
+                SizedBox(height: 20),
+
+                Container(
+                  margin: EdgeInsets.all(10),
+                  color: Colors.grey[200],
+                  width: MediaQuery.of(context).size.width,
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        padding: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: Text(
+                          "Price Details:",
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      (loading && loadingBill)
+                          ? Text("Loading bill")
+                          : DetailPriceList(
+                              bill: price,
+                              priceData: priceData,
+                            ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 30),
+
+                ////  ApplyCoupon
+
+                ElevatedButton(
+                  onPressed: applyCoupons,
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey[200],
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        width: 2,
+                        color: Color(0xFF811111),
+                      ),
+                    ),
+                    padding: EdgeInsets.fromLTRB(20, 10, 15, 7),
+                  ),
+                  child: Wrap(
+                    children: <Widget>[
+                      Text(
+                        "Apply Coupons",
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Icon(
+                        Icons.arrow_forward,
+                        color: Colors.black,
+                      )
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                ////// PROCEED
+
+                GestureDetector(
+                  onTap: () async {
+                    dynamic res = await CrateApi().getCrateItems();
+                    dynamic cbill = res.item2.toMap();
+                    print("${cbill['totalValue']} ${bill['totalValue']}");
+                    if (cbill['totalValue'] != bill['totalValue']) {
+                      await Helpers().showPriceChangeAlert(context);
+                      Navigator.pop(context);
+                      Navigator.of(context).pushNamed('/crate');
+                      return;
+                    }
+                    if (products.length > 0) {
+                      setState(() {
+                        widget.pageController.animateToPage(1,
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.easeOut);
+                        CratePage().addressStatus = !CratePage().addressStatus;
+                      });
+                    } else {
+                      Toast().notifyInfo("Add some items to crate to proceed");
+                    }
+                  },
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF5B0D1B),
+                      Container(
+                        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                        decoration: BoxDecoration(
+                          color: (products.length > 0)
+                              ? Color(0xFF5B0D1B)
+                              : Colors.grey[200],
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                        child: Text(
+                          "Proceed",
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              color: (products.length > 0)
+                                  ? Colors.white
+                                  : Colors.black54,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                )
-              : CrateProductList(products: products),
-
-          SizedBox(height: 20),
-
-          ////  ApplyCoupon
-
-          ElevatedButton(
-            onPressed: applyCoupons,
-            style: ElevatedButton.styleFrom(
-              primary: Colors.grey[200],
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  width: 2,
-                  color: Color(0xFF811111),
                 ),
-              ),
-              padding: EdgeInsets.fromLTRB(20, 10, 15, 7),
-            ),
-            child: Wrap(
-              children: <Widget>[
-                Text(
-                  "Apply Coupons",
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Icon(
-                  Icons.arrow_forward,
-                  color: Colors.black,
-                )
+                SizedBox(height: 40),
               ],
             ),
-          ),
-
-          SizedBox(height: 20),
-
-          /// Price DETAILS
-
-          Container(
-            margin: EdgeInsets.all(10),
-            color: Colors.grey[200],
-            width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  padding: EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                  ),
-                  child: Text(
-                    "Price Details:",
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                (loading && loadingBill)
-                    ? Text("Loading bill")
-                    : DetailPriceList(
-                        bill: price,
-                        priceData: priceData,
-                      ),
-              ],
-            ),
-          ),
-          SizedBox(height: 30),
-
-          ////// PROCEED
-
-          GestureDetector(
-            onTap: () {
-              if (products.length > 0) {
-                setState(() {
-                  widget.pageController.animateToPage(1,
-                      duration: Duration(milliseconds: 500),
-                      curve: Curves.easeOut);
-                  CratePage().addressStatus = !CratePage().addressStatus;
-                });
-              } else {
-                Toast().notifyInfo("Add some items to crate to proceed");
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                  decoration: BoxDecoration(
-                    color: (products.length > 0)
-                        ? Color(0xFF5B0D1B)
-                        : Colors.grey[200],
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                  child: Text(
-                    "Proceed",
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        color: (products.length > 0)
-                            ? Colors.white
-                            : Colors.black54,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -336,8 +553,6 @@ class _DetailPriceListState extends State<DetailPriceList> {
   bool loading = true;
 
   void loadPrice() {
-    print("${widget.bill}");
-    print("${widget.priceData}");
     setState(() {
       loading = false;
     });
@@ -445,7 +660,7 @@ class _PriceRowState extends State<PriceRow> {
                 ? Row(
                     children: <Widget>[
                       Text(
-                        "₹" + widget.value,
+                        "₹" + widget.value.toString(),
                         style: GoogleFonts.poppins(
                           textStyle: TextStyle(
                             color: Color(0xFF5B0D1B),
@@ -480,7 +695,7 @@ class _PriceRowState extends State<PriceRow> {
                     ),
                   ))
             : Text(
-                widget.value,
+                widget.value.toString(),
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(
                     color: Color(0xFF5B0D1B),

@@ -4,7 +4,7 @@ import 'package:silkroute/provider/NewProductProvider.dart';
 class Math {
   static String getSp(num mrp, num discount) {
     num ans = (mrp * (100 - discount)) / 100;
-    return ans.toString();
+    return (ans).toString().split('.')[0];
   }
 
   dynamic min(dynamic a, dynamic b) {

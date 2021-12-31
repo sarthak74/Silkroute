@@ -20,14 +20,16 @@ class CrateApi {
       var url = Uri.parse(Math().ip() + '/crateApi/getAllProducts');
       final res = await http.post(url, body: data, headers: headers);
       var decodedRes2 = jsonDecode(res.body);
+
       List<CrateListItem> resp = [];
       for (var i in decodedRes2[0]) {
         CrateListItem r = CrateListItem.fromMap(i);
+
         resp.add(r);
       }
       print("resp: $resp");
       Bill bill = Bill.fromMap(decodedRes2[1]);
-      print("bill: $bill");
+
       return Tuple<List<CrateListItem>, Bill>(resp, bill);
     } catch (e) {
       print("get crate items error - $e");
@@ -51,6 +53,25 @@ class CrateApi {
       print(res.statusCode);
     } catch (e) {
       print("Set crate items error - $e");
+    }
+  }
+
+  editCrateItem(body) async {
+    try {
+      var data = body;
+      print("edit Crate items body:\n$data");
+      var url = Uri.parse(endpoint + '/crateApi/editItem');
+
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
+      print(res.statusCode);
+    } catch (e) {
+      print("edit crate items error - $e");
     }
   }
 

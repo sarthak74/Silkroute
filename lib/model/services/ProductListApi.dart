@@ -50,7 +50,7 @@ class ProductListApi {
     }
   }
 
-  Future<List<ProductList>> getTopPicks() async {
+  Future getTopPicks() async {
     try {
       var uri = Math().ip();
       var userType = await storage.getItem('userType');
@@ -66,12 +66,8 @@ class ProductListApi {
 
       var decodedRes2 = decodedRes["products"];
       print("dec $decodedRes2");
-      List<ProductList> resp = [];
-      for (var i in decodedRes2) {
-        ProductList r = ProductList.fromMap(i);
-        resp.add(r);
-      }
-      return resp;
+
+      return decodedRes2;
     } catch (err) {
       print("get top picks err $err");
       return null;

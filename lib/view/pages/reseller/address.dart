@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/toast/gf_toast.dart';
 import 'package:getwidget/getwidget.dart';
@@ -7,12 +8,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/notification_service.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/model/services/PaymentGatewayService.dart';
 import 'package:silkroute/model/services/authservice.dart';
 import 'package:silkroute/model/services/couponApi.dart';
+import 'package:silkroute/model/services/pincode_api.dart';
 import 'package:silkroute/model/services/shiprocketApi.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -22,10 +25,15 @@ import 'package:silkroute/view/widget/topbar.dart';
 
 class AddressPage extends StatefulWidget {
   AddressPage(
-      {this.pageController, this.productlength, this.crateList, this.bill});
+      {this.pageController,
+      this.productlength,
+      this.crateList,
+      this.bill,
+      this.pincode});
   final PageController pageController;
   final bool productlength;
   final dynamic crateList, bill;
+  final String pincode;
   @override
   _AddressPageState createState() => _AddressPageState();
 }
@@ -36,22 +44,23 @@ class _AddressPageState extends State<AddressPage> {
   bool loading = true,
       _addressSave = false,
       canBeDelivered = false,
-      _loadingDeliveryServiceabilityStatus = false,
       _proceeding = false;
   dynamic _order,
       _bill,
       _crateListM,
       _crateList,
-      _title,
+      pincodeAddress,
       amt,
       amtForRazor,
       courierData,
       user;
-  Map<String, String> _deliveryServiceabilityStatus = {
-    "title": "Enter a valid pincode to check status",
-    "etd": "",
-    "rate": ""
-  };
+  List<String> localities = [];
+  TextEditingController _pincodeController = new TextEditingController();
+  // Map<String, String> _deliveryServiceabilityStatus = {
+  //   "title": "Enter a valid pincode to check status",
+  //   "etd": "",
+  //   "rate": ""
+  // };
   var data = {
     "fullName": "",
     "contact": "",
@@ -80,54 +89,6 @@ class _AddressPageState extends State<AddressPage> {
     "addLine2"
   ];
 
-  void checkDeliveryServiceabilityStatus() async {
-    setState(() {
-      _loadingDeliveryServiceabilityStatus = true;
-    });
-
-    print("pincode: ${data['pincode']}");
-    // todo: first argument has to be merchant pickup pincode and third is weight, 4th of cod and it has to be 0
-    final res = await ShiprocketApi()
-        .getDeliveryServiceStatus(210201, data['pincode'], 3, 0);
-    if (res != null) {
-      dynamic status = res['data']['available_courier_companies'];
-      if (status.length > 0) {
-        var f = status[0];
-
-        setState(() {
-          courierData = f;
-          print("courier: ${courierData}");
-          _deliveryServiceabilityStatus = {
-            "title": "Product is deliverable at this location!",
-            "etd": f['etd'].toString(),
-            "rate": f['rate'].toString()
-          };
-          amt = (double.parse(_deliveryServiceabilityStatus["rate"]) +
-              widget.bill['totalCost']);
-          amt *= 100;
-          amt = amt.floor();
-          amt /= 100;
-          amt = amt.toString();
-          amtForRazor = (double.parse(amt) * 100).toString();
-          amtForRazor = double.parse(amtForRazor.split(".")[0]);
-          canBeDelivered = true;
-          print("status: $_deliveryServiceabilityStatus");
-          _loadingDeliveryServiceabilityStatus = false;
-        });
-      } else {
-        setState(() {
-          canBeDelivered = false;
-          _deliveryServiceabilityStatus = {
-            "title": "Product is NOT deliverable!",
-            "etd": "",
-            "rate": ""
-          };
-          _loadingDeliveryServiceabilityStatus = false;
-        });
-      }
-    }
-  }
-
   Future<bool> addressSaveHandler() async {
     setState(() {
       _addressSave = true;
@@ -139,6 +100,7 @@ class _AddressPageState extends State<AddressPage> {
       "state",
       "city",
       "addLine1",
+      "addLine2"
     ];
     for (String x in req) {
       if (data[x].length < 1) {
@@ -158,9 +120,10 @@ class _AddressPageState extends State<AddressPage> {
   }
 
   void loadVars() async {
-    print("totalCost: ${widget.bill['totalCost']}");
+    // print("totalCost: ${widget.bill['totalCost']}");
+    _pincodeController.text = widget.pincode;
     if (widget.productlength == false) {
-      print("false");
+      // print("false");
       widget.pageController.animateToPage(
         0,
         duration: Duration(milliseconds: 500),
@@ -175,38 +138,26 @@ class _AddressPageState extends State<AddressPage> {
       });
       return;
     }
-    print("preadding");
-    var preAdd = await storage.getItem('paymentAddress');
-    user = await storage.getItem('user');
-    print("preadding $preAdd");
-    setState(() {
-      for (var x in fields) {
-        print("pre-- $x");
-        if (x == "fullName") {
-          data[x] = user["name"];
-          continue;
-        }
-        if (preAdd != null) {
-          if (preAdd[x] != null) {
-            print("supe-- ${preAdd[x]}");
-            data[x] = preAdd[x];
-          } else if (user[x] != null) {
-            data[x] = user[x];
-          }
-        } else {
-          if (user[x] != null) {
-            data[x] = user[x];
-          } else {
-            if (user["currAdd"][x] != null) {
-              data[x] = user["currAdd"][x];
-            }
-          }
-        }
-      }
 
-      if (data["pincode"].length == 6) {
-        checkDeliveryServiceabilityStatus();
+    data["pincode"] = widget.pincode;
+    // print("preadding");
+    var preAdd = await storage.getItem('paymentAddress');
+    pincodeAddress = await PincodeApi().getAddress(widget.pincode);
+    print("pincodeadd -- $pincodeAddress");
+    user = await storage.getItem('user');
+
+    setState(() {
+      for (var add in pincodeAddress) {
+        localities.add(add["Name"]);
       }
+      data['addLine2'] = localities[0];
+      data['fullName'] = user['name'];
+      data['contact'] = user['contact'];
+      data['state'] = pincodeAddress[0]['State'];
+      data['city'] = pincodeAddress[0]['District'];
+      // if (data["pincode"].length == 6) {
+      //   checkDeliveryServiceabilityStatus();
+      // }
 
       _crateList = widget.crateList;
 
@@ -214,12 +165,12 @@ class _AddressPageState extends State<AddressPage> {
 
       for (var i in _crateList) {
         var r = i.toMap();
-        print("rr------ \n $r");
+        // print("cratelist items------ \n $r");
         _crateListM.add(r);
       }
 
       // print("_cratelistM: $_crateListM");
-      _title = widget.crateList[0].toMap()["title"];
+
       _bill = widget.bill;
       loading = false;
     });
@@ -299,29 +250,28 @@ class _AddressPageState extends State<AddressPage> {
                       //// PinCode
 
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.4,
+                        width: MediaQuery.of(context).size.width * 0.35,
                         margin: EdgeInsets.only(top: 20),
-                        child: CustomTextField(
-                          "Pincode*",
-                          "Pincode",
-                          false,
-                          (val) {
-                            setState(() {
-                              data['pincode'] = val.toString();
-                              if (data['pincode'].length == 6) {
-                                checkDeliveryServiceabilityStatus();
-                              } else {
-                                canBeDelivered = false;
-                                _deliveryServiceabilityStatus = {
-                                  "title":
-                                      "Enter a valid pincode to check status",
-                                  "etd": "",
-                                  "rate": ""
-                                };
-                              }
-                            });
-                          },
-                          initialValue: data["pincode"],
+                        child: TextFormField(
+                          controller: _pincodeController,
+                          enabled: false,
+                          decoration: InputDecoration(
+                            disabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            isDense: true,
+                            contentPadding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                            labelText: "Pincode*",
+                            hintText: "Pincode",
+                            labelStyle: TextStyle(
+                              color: Colors.grey,
+                            ),
+                          ),
+                          style: textStyle1(13, Colors.grey, FontWeight.w500),
                         ),
                       ),
 
@@ -330,7 +280,7 @@ class _AddressPageState extends State<AddressPage> {
                       GestureDetector(
                         onTap: null,
                         child: Container(
-                          width: MediaQuery.of(context).size.width * 0.4,
+                          // width: MediaQuery.of(context).size.width * 0.4,
                           margin: EdgeInsets.only(top: 20),
                           padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                           decoration: BoxDecoration(
@@ -347,7 +297,7 @@ class _AddressPageState extends State<AddressPage> {
                               ),
                               SizedBox(width: 5),
                               Text(
-                                "Use My Location",
+                                "Use saved Address",
                                 style: GoogleFonts.poppins(
                                   textStyle: TextStyle(
                                     color: Colors.white,
@@ -381,6 +331,7 @@ class _AddressPageState extends State<AddressPage> {
                             });
                           },
                           initialValue: data["state"],
+                          enabled: false,
                         ),
                       ),
                       //// PinCode
@@ -389,8 +340,8 @@ class _AddressPageState extends State<AddressPage> {
                         width: MediaQuery.of(context).size.width * 0.4,
                         margin: EdgeInsets.only(top: 20),
                         child: CustomTextField(
-                          "City*",
-                          "City",
+                          "City/Dist.*",
+                          "City/Dist.",
                           false,
                           (val) {
                             setState(() {
@@ -398,6 +349,7 @@ class _AddressPageState extends State<AddressPage> {
                             });
                           },
                           initialValue: data["city"],
+                          enabled: false,
                         ),
                       ),
                     ],
@@ -406,8 +358,8 @@ class _AddressPageState extends State<AddressPage> {
                   /////  AddLine1
                   SizedBox(height: 20),
                   CustomTextField(
-                    "Address Line 1*",
-                    "Address Line 1",
+                    "Street*",
+                    "House No, Area",
                     false,
                     (val) {
                       setState(() {
@@ -419,93 +371,101 @@ class _AddressPageState extends State<AddressPage> {
 
                   /////  AddLine2
                   SizedBox(height: 20),
-                  CustomTextField(
-                    "Address Line 2",
-                    "Address Line 2",
-                    false,
-                    (val) {
-                      setState(() {
-                        data['addLine2'] = val.toString();
-                      });
-                    },
-                    initialValue: data["addLine2"],
-                  ),
+
+                  (localities == null || localities.length == 0)
+                      ? Text("Loading")
+                      : DropdownSearch<String>(
+                          mode: Mode.MENU,
+                          showSelectedItems: true,
+                          items: localities,
+                          label: "Locality",
+                          selectedItem: pincodeAddress[0]["Name"],
+                          onChanged: (val) {
+                            setState(() {
+                              data["addLine2"] = val.toString();
+                            });
+                          },
+                          dropdownSearchDecoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            isDense: true,
+                            contentPadding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                          ),
+                        ),
 
                   //// SAVE
 
-                  // TODO: Delivery Serviceability Status
-
-                  (data["pincode"].length == 6)
-                      ? (_loadingDeliveryServiceabilityStatus
-                          ? SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF5B0D1B),
-                              ),
-                            )
-                          : Column(
-                              children: <Widget>[
-                                SizedBox(height: 20),
-                                Text(
-                                  _deliveryServiceabilityStatus["title"],
-                                  style: textStyle1(
-                                    13,
-                                    Colors.black54,
-                                    FontWeight.normal,
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  "Estimated Time: " +
-                                      _deliveryServiceabilityStatus["etd"],
-                                  style: textStyle1(
-                                    13,
-                                    Colors.black54,
-                                    FontWeight.normal,
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  "Rate: " +
-                                      _deliveryServiceabilityStatus["rate"],
-                                  style: textStyle1(
-                                    13,
-                                    Colors.black54,
-                                    FontWeight.normal,
-                                  ),
-                                ),
-                                Text(
-                                  "Amount to be paid: " + amt,
-                                  style: textStyle1(
-                                      15, Colors.black87, FontWeight.normal),
-                                ),
-                                SizedBox(height: 20),
-                              ],
-                            ))
-                      : SizedBox(height: 20),
-
+                  // (data["pincode"].length == 6)
+                  //     ? (_loadingDeliveryServiceabilityStatus
+                  //         ? SizedBox(
+                  //             height: 30,
+                  //             width: 30,
+                  //             child: CircularProgressIndicator(
+                  //               color: Color(0xFF5B0D1B),
+                  //             ),
+                  //           )
+                  //         : Column(
+                  //             children: <Widget>[
+                  //               SizedBox(height: 20),
+                  //               Text(
+                  //                 _deliveryServiceabilityStatus["title"],
+                  //                 style: textStyle1(
+                  //                   13,
+                  //                   Colors.black54,
+                  //                   FontWeight.normal,
+                  //                 ),
+                  //               ),
+                  //               SizedBox(height: 10),
+                  //               Text(
+                  //                 "Estimated Time: " +
+                  //                     _deliveryServiceabilityStatus["etd"],
+                  //                 style: textStyle1(
+                  //                   13,
+                  //                   Colors.black54,
+                  //                   FontWeight.normal,
+                  //                 ),
+                  //               ),
+                  //               SizedBox(height: 10),
+                  //               Text(
+                  //                 "Rate: " +
+                  //                     _deliveryServiceabilityStatus["rate"],
+                  //                 style: textStyle1(
+                  //                   13,
+                  //                   Colors.black54,
+                  //                   FontWeight.normal,
+                  //                 ),
+                  //               ),
+                  //               Text(
+                  //                 "Amount to be paid: " + amt,
+                  //                 style: textStyle1(
+                  //                     15, Colors.black87, FontWeight.normal),
+                  //               ),
+                  //               SizedBox(height: 20),
+                  //             ],
+                  //           ))
+                  //     : SizedBox(height: 20),
+                  SizedBox(height: 20),
                   GestureDetector(
-                    onTap: canBeDelivered
-                        ? () async {
-                            var res = await addressSaveHandler();
-                            print("_proceeding $res");
-                            if (res) {
-                              setState(() {
-                                _proceeding = true;
-                              });
-                              await initOrder();
-                              setState(() {
-                                _proceeding = false;
-                              });
-                              // dynamic res = await createtShiprocketOrder();
-                              // print("created orfer red : $res");
-                            }
-                          }
-                        : () {
-                            Toast().notifyErr(
-                                "Product is not deliverable or Invalid Pincode");
-                          },
+                    onTap: () async {
+                      var res = await addressSaveHandler();
+                      print("_proceeding $res");
+                      if (res) {
+                        setState(() {
+                          _proceeding = true;
+                        });
+                        await initOrder();
+                        setState(() {
+                          _proceeding = false;
+                        });
+                        // dynamic res = await createtShiprocketOrder();
+                        // print("created orfer red : $res");
+                      }
+                    },
                     child: _addressSave
                         ? Container(
                             width: MediaQuery.of(context).size.width * 0.05,
@@ -520,9 +480,7 @@ class _AddressPageState extends State<AddressPage> {
                               Container(
                                 padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                                 decoration: BoxDecoration(
-                                  color: canBeDelivered
-                                      ? Color(0xFF5B0D1B)
-                                      : Colors.grey[200],
+                                  color: Color(0xFF5B0D1B),
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
                                 ),
@@ -532,9 +490,7 @@ class _AddressPageState extends State<AddressPage> {
                                       : "Save & Proceed to Payment",
                                   style: GoogleFonts.poppins(
                                     textStyle: TextStyle(
-                                      color: canBeDelivered
-                                          ? Colors.white
-                                          : Colors.black54,
+                                      color: Colors.white,
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -710,14 +666,15 @@ class _AddressPageState extends State<AddressPage> {
 
   Future<void> initOrder() async {
     print("amtforrazor: $amtForRazor");
-    _id = await PaymentGatewayService().generateOrderId(
-        key, secret, int.parse(amtForRazor.toString().split('.')[0]));
+    amtForRazor = int.parse((_bill['totalCost'] * 100).toString());
+    _id =
+        await PaymentGatewayService().generateOrderId(key, secret, amtForRazor);
 
     print("\norder_id: $_id\n");
     var addr = await storage.getItem('paymentAddress');
     setState(() {
-      _bill['totalCost'] = double.parse(amt);
-      _bill['logistic'] = double.parse(_deliveryServiceabilityStatus['rate']);
+      // _bill['totalCost'] = double.parse(amt);
+      // _bill['logistic'] = double.parse(_deliveryServiceabilityStatus['rate']);
       print("cratelist M in orders\n$_crateListM");
       _order = {
         "contact": data['contact'],
@@ -753,9 +710,11 @@ class _AddressPageState extends State<AddressPage> {
   }
 
   void checkOut(res) async {
+    amtForRazor = _bill['totalCost'] * 100;
+    print("amt for razor: $amtForRazor");
     var options = {
       "key": key,
-      "amount": amtForRazor,
+      "amount": _bill['totalCost'] * 100,
       "name": user["name"],
       "description": "Payment to Yibrance",
       "prefill": {"contact": user['contact'], "email": ''},
@@ -764,8 +723,10 @@ class _AddressPageState extends State<AddressPage> {
           "method": {"netbanking": "1", "card": "1", "upi": "1", "wallet": "1"}
         }
       },
+      "timeout": "599",
       "order_id": _id,
     };
+    print("optios: $options");
     try {
       _razorpay.open(options);
     } catch (err) {
@@ -822,6 +783,7 @@ class _AddressPageState extends State<AddressPage> {
     var data = {
       "title": "Order Initiated",
       "body": "Your order with id $_id has been initiated!",
+      "messageId": _id,
       "sentTime": now.toString()
     };
 

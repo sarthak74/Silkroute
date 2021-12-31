@@ -68,7 +68,7 @@ class _WishlistPageState extends State<WishlistPage> {
               //////////////////////////////
 
               TopBar(),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
               Expanded(
                 child: CustomScrollView(slivers: [
@@ -95,7 +95,7 @@ class _WishlistPageState extends State<WishlistPage> {
                       ///                        ///
                       //////////////////////////////
 
-                      SizedBox(height: 20),
+                      SizedBox(height: 5),
 
                       Container(
                         margin: EdgeInsets.symmetric(

@@ -33,6 +33,7 @@ class _FooterState extends State<Footer> {
         : Container(
             alignment: Alignment.bottomCenter,
             // margin: EdgeInsets.only(top: 10),
+            height: MediaQuery.of(context).size.height * 0.075,
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             child: (ut == "Manufacturer")
                 ? Row(
