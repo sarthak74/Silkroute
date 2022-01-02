@@ -41,7 +41,7 @@ class _OrderPageState extends State<OrderPage> {
   bool loading = true;
 
   dynamic price;
-  num savings = 0, totalCost = 0;
+  int savings = 0, totalCost = 0;
 
   void loadPrice() {
     print("order: ${widget.order}");
@@ -58,7 +58,8 @@ class _OrderPageState extends State<OrderPage> {
 
       totalCost = bill['totalCost'];
 
-      savings = bill['totalValue'] - totalCost;
+      savings = int.parse(
+          (bill['totalValue'] - bill['priceAfterDiscount']).toString());
       loading = false;
     });
   }
@@ -152,6 +153,8 @@ class _OrderPageState extends State<OrderPage> {
                                     SizedBox(height: 10),
 
                                     OrderPriceDetails(
+                                        invoiceNumber:
+                                            orderDetails['invoiceNumber'],
                                         price: price,
                                         savings: savings,
                                         totalCost: totalCost),
@@ -183,10 +186,11 @@ class _OrderPageState extends State<OrderPage> {
 }
 
 class OrderPriceDetails extends StatefulWidget {
-  OrderPriceDetails({this.price, this.savings, this.totalCost});
+  OrderPriceDetails(
+      {this.price, this.savings, this.totalCost, this.invoiceNumber});
   final dynamic price;
-  final num savings;
-  final num totalCost;
+  final num savings, totalCost;
+  final String invoiceNumber;
   @override
   _OrderPriceDetailsState createState() => _OrderPriceDetailsState();
 }
@@ -212,15 +216,43 @@ class _OrderPriceDetailsState extends State<OrderPriceDetails> {
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-            child: Text(
-              "Price Details:",
-              style: GoogleFonts.poppins(
-                textStyle: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    "Id: ${widget.invoiceNumber}",
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
+                GestureDetector(
+                  onTap: () {},
+                  child: Text(
+                    "View Invoice",
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.transparent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
+                        decoration: TextDecoration.underline,
+                        decorationThickness: 2,
+                        decorationColor: Colors.grey[700],
+                        shadows: [
+                          Shadow(color: Colors.grey[700], offset: Offset(0, -2))
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              ],
             ),
           ),
           SizedBox(height: 20),
@@ -245,7 +277,7 @@ class OrderPriceDetailsList extends StatefulWidget {
 
 class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
   dynamic price;
-  num savings = 0;
+  int savings = 0;
 
   void initState() {
     super.initState();
@@ -287,7 +319,7 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
         SizedBox(height: 10),
         (savings > 0)
             ? Text(
-                ("You saved ₹" + savings.toStringAsFixed(2) + " on this order")
+                ("You saved ₹" + savings.toString() + " on this order")
                     .toString(),
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(
@@ -521,10 +553,10 @@ class _OrderStatusState extends State<OrderStatus> {
                                 SizedBox(height: 12),
                                 Text("Order Placed",
                                     style: textStyle(12, Colors.black54)),
-                                SizedBox(height: 28),
+                                SizedBox(height: 25),
                                 Text("Dispatched",
                                     style: textStyle(12, Colors.black54)),
-                                SizedBox(height: 25),
+                                SizedBox(height: 23),
                                 Text("Out for Delivery",
                                     style: textStyle(12, Colors.black54)),
                                 SizedBox(height: 23),
@@ -587,7 +619,7 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
     var orderId = orderDetails['invoiceNumber'];
     var productId = orderDetails['items'][i]['id'];
     var refundAmount = calculateRefundAmount(i);
-    var requestedDate = DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now());
+    var requestedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
     var body = {
       'merchantStatus': 'Return Requested',
       'customerStatus': 'Return Requested',
@@ -659,7 +691,7 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                       top: 5,
                     ),
                     padding: EdgeInsets.fromLTRB(20, 10, 20, 1),
-                    height: 120,
+                    constraints: BoxConstraints(maxHeight: 100),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.only(
@@ -674,9 +706,8 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                         //   width: MediaQuery.of(context).size.width * 0.25,
                         Image.asset(
                           "assets/images/1.png",
-                          fit: BoxFit.fill,
-                          width: MediaQuery.of(context).size.width * 0.25,
-                          height: 110,
+                          fit: BoxFit.contain,
+                          width: MediaQuery.of(context).size.width * 0.2,
                         ),
                         // SizedBox(width: 20),
                         Container(
@@ -687,17 +718,6 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                             children: <Widget>[
                               Text(
                                 orderDetails['items'][i]['title'],
-                                style: textStyle1(
-                                  13,
-                                  Colors.black,
-                                  FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                ("Quantity: " +
-                                        orderDetails['items'][i]['quantity']
-                                            .toString())
-                                    .toString(),
                                 style: textStyle1(
                                   13,
                                   Colors.black,
@@ -750,16 +770,34 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                             ],
                           ),
                         ),
-                        Codes().statusDescription.indexOf(orderDetails['items']
-                                    [i]['customerStatus']) ==
-                                Codes().statusDescription.indexOf("Delivered")
-                            ? ElevatedButton(
-                                onPressed: () async {
-                                  checkRequestReturn(i);
-                                },
-                                child: Text("Request\nReturn"),
-                              )
-                            : SizedBox(height: 0),
+                        Column(
+                          children: <Widget>[
+                            Text(
+                              ("Quantity: " +
+                                      orderDetails['items'][i]['quantity']
+                                          .toString())
+                                  .toString(),
+                              style: textStyle1(
+                                13,
+                                Colors.black,
+                                FontWeight.w500,
+                              ),
+                            ),
+                            Codes().statusDescription.indexOf(
+                                        orderDetails['items'][i]
+                                            ['customerStatus']) ==
+                                    Codes()
+                                        .statusDescription
+                                        .indexOf("Delivered")
+                                ? ElevatedButton(
+                                    onPressed: () async {
+                                      checkRequestReturn(i);
+                                    },
+                                    child: Text("Request\nReturn"),
+                                  )
+                                : SizedBox(height: 0),
+                          ],
+                        ),
                       ],
                     ),
                   ),

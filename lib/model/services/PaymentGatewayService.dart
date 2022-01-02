@@ -119,4 +119,23 @@ class PaymentGatewayService {
   }
 
   // fund acc validation transaction
+
+  // direct transfer (from our acc to merchant acc)
+
+  Future directTransfer(Map<String, dynamic> data) async {
+    try {
+      print("direct transfer $data");
+      var headers = {'Content-Type': 'application/json'};
+      var body = await json.encode(data);
+      var uri = 'https://api.razorpay.com/v1/transfers';
+      var url = Uri.parse(uri);
+      dynamic res = await http.post(url, headers: headers, body: body);
+      res = json.decode(res.body);
+      print("res: $res");
+      return {'success': true, 'res': res};
+    } catch (err) {
+      print("direct transfer err $err");
+      return {'success': false, 'err': err};
+    }
+  }
 }

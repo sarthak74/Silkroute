@@ -26,10 +26,9 @@ class Math {
   }
 
   double aspectRatio(context) {
-    double aspectRatio = 1.45 *
-        (MediaQuery.of(context).size.width *
-            0.86 /
-            MediaQuery.of(context).size.height);
+    double aspectRatio = (MediaQuery.of(context).size.width * 0.4 +
+            MediaQuery.of(context).size.width * 0.03) /
+        (MediaQuery.of(context).size.width * 0.4 + 80);
     return aspectRatio;
   }
 

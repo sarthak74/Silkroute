@@ -34,6 +34,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     "anotherNumber": "",
     "contact": "",
     "gst": "",
+    "adhaar": "",
+    "pan": "",
     "userType": ""
   };
 
@@ -65,6 +67,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       "contact",
       "userType",
       "gst",
+      "adhaar",
+      "pan",
       "businessName"
     ];
 
@@ -309,6 +313,36 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                           check();
                           // onChnaged
                           data["name"] = val;
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 20.0,
+                      ),
+
+                      CustomTextField(
+                        ("Adhaar*").toString(), // labeltext
+                        "", // hinttext
+                        false, // isPassword
+                        (val) {
+                          check();
+                          // onChnaged
+                          data["adhaar"] = val;
+                        },
+                      ),
+
+                      new SizedBox(
+                        height: 20.0,
+                      ),
+
+                      CustomTextField(
+                        ("PAN*").toString(), // labeltext
+                        "", // hinttext
+                        false, // isPassword
+                        (val) {
+                          check();
+                          // onChnaged
+                          data["pan"] = val;
                         },
                       ),
 

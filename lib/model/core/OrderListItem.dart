@@ -7,6 +7,7 @@ import 'package:silkroute/model/core/Bill.dart';
 import 'package:silkroute/model/core/CrateListItem.dart';
 
 class OrderListItem {
+  final String id;
   final String contact;
   final Bill bill;
   final String status;
@@ -19,6 +20,7 @@ class OrderListItem {
   final List<dynamic> items;
   final String title;
   OrderListItem({
+    this.id,
     this.contact,
     this.bill,
     this.status,
@@ -34,6 +36,7 @@ class OrderListItem {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'contact': contact,
       'bill': bill.toMap(),
       'status': status,
@@ -50,6 +53,7 @@ class OrderListItem {
 
   factory OrderListItem.fromMap(Map<String, dynamic> map) {
     return OrderListItem(
+      id: map['id'] ?? '',
       contact: map['contact'] ?? '',
       bill: Bill.fromMap(map['bill']),
       status: map['status'] ?? '',
@@ -71,7 +75,7 @@ class OrderListItem {
 
   @override
   String toString() {
-    return 'OrderListItem(contact: $contact, bill: $bill, status: $status, address: $address, uniqueId: $uniqueId, invoiceNumber: $invoiceNumber, customerPaymentStatus: $customerPaymentStatus, createdDate: $createdDate, razorpay: $razorpay, items: $items, title: $title)';
+    return 'OrderListItem(id: $id, contact: $contact, bill: $bill, status: $status, address: $address, uniqueId: $uniqueId, invoiceNumber: $invoiceNumber, customerPaymentStatus: $customerPaymentStatus, createdDate: $createdDate, razorpay: $razorpay, items: $items, title: $title)';
   }
 
   @override
@@ -80,6 +84,7 @@ class OrderListItem {
     final listEquals = const DeepCollectionEquality().equals;
 
     return other is OrderListItem &&
+        other.id == id &&
         other.contact == contact &&
         other.bill == bill &&
         other.status == status &&
@@ -95,7 +100,8 @@ class OrderListItem {
 
   @override
   int get hashCode {
-    return contact.hashCode ^
+    return id.hashCode ^
+        contact.hashCode ^
         bill.hashCode ^
         status.hashCode ^
         address.hashCode ^

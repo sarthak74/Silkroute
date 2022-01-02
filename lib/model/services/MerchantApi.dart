@@ -36,7 +36,7 @@ class MerchantApi {
       sortBy, filter, orderType) async {
     try {
       var data = {
-        "contact": storage.getItem("contact"),
+        "contact": await storage.getItem("contact"),
         "sortBy": sortBy,
         "filter": filter,
         "orderType": orderType

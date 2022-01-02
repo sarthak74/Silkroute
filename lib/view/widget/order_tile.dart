@@ -13,6 +13,7 @@ class OrderTile extends StatefulWidget {
 class _OrderTileState extends State<OrderTile> {
   @override
   void initState() {
+    print("uuu ${widget.order}");
     super.initState();
   }
 
@@ -20,74 +21,59 @@ class _OrderTileState extends State<OrderTile> {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
-      height: 120,
+      // height: 120,
+      constraints: BoxConstraints(maxHeight: 100),
       color: Colors.grey[200],
       padding: EdgeInsets.all(10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Container(
-            width: MediaQuery.of(context).size.width * 0.25,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/1.png"),
-                fit: BoxFit.fill,
-              ),
+          Expanded(
+            flex: 2,
+            child: Image.asset(
+              "assets/images/1.png",
+              fit: BoxFit.contain,
             ),
           ),
           SizedBox(width: 20),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.5,
+          Expanded(
+            flex: 7,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  widget.order['title'],
+                  "Order ID: ${widget.order['id']}",
                   style: textStyle(12, Colors.black),
                 ),
                 Text(
-                  widget.order['status'],
+                  "Date: ${widget.order['createdDate'].toString().substring(0, 10)}",
                   style: textStyle(12, Colors.grey[500]),
                 ),
-                SizedBox(height: 5),
                 Text(
-                  "Write a review",
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ),
-                Row(
-                  children: <Widget>[
-                    Icon(Icons.star_border),
-                    Icon(Icons.star_border),
-                    Icon(Icons.star_border),
-                    Icon(Icons.star_border),
-                    Icon(Icons.star_border),
-                  ],
+                  "Status: ${widget.order['status']}",
+                  style: textStyle(12, Colors.grey[500]),
                 ),
               ],
             ),
           ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.1,
-            child: IconButton(
-              icon: Icon(
-                Icons.arrow_forward,
-                color: Colors.black87,
-                size: 30,
+          Expanded(
+            flex: 1,
+            child: Container(
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_forward,
+                  color: Colors.black87,
+                  // size: 25,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OrderPage(order: widget.order),
+                    ),
+                  );
+                },
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OrderPage(order: widget.order),
-                  ),
-                );
-              },
             ),
           ),
         ],

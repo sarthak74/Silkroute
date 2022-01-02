@@ -129,7 +129,19 @@ class _ReturnOrdersState extends State<ReturnOrders> {
                 stream: _merchantReturnOrderProvider.productListStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text("Loading");
+                    return Column(
+                      children: <Widget>[
+                        SizedBox(height: 5),
+                        Center(
+                          widthFactor: 1,
+                          heightFactor: 1,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF811111),
+                            strokeWidth: 3,
+                          ),
+                        ),
+                      ],
+                    );
                   } else if (snapshot.connectionState == ConnectionState.done) {
                     return Text("Fetched");
                   } else if (snapshot.hasError) {

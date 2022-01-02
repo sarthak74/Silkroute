@@ -13,10 +13,12 @@ class MerchantOrderItem {
   final dynamic createdDate;
   final String title;
   final String merchantStatus;
+  final num mrp;
   final String merchantPaymentStatus;
   final num quantity;
   final dynamic refund;
   final List<dynamic> colors;
+  final dynamic shiprocket;
   MerchantOrderItem({
     this.productId,
     this.orderId,
@@ -24,10 +26,12 @@ class MerchantOrderItem {
     this.createdDate,
     this.title,
     this.merchantStatus,
+    this.mrp,
     this.merchantPaymentStatus,
     this.quantity,
     this.refund,
     this.colors,
+    this.shiprocket,
   });
 
   Map<String, dynamic> toMap() {
@@ -38,10 +42,12 @@ class MerchantOrderItem {
       'createdDate': createdDate,
       'title': title,
       'merchantStatus': merchantStatus,
+      'mrp': mrp,
       'merchantPaymentStatus': merchantPaymentStatus,
       'quantity': quantity,
       'refund': refund,
       'colors': colors,
+      'shiprocket': shiprocket,
     };
   }
 
@@ -53,10 +59,12 @@ class MerchantOrderItem {
       createdDate: map['createdDate'] ?? null,
       title: map['title'] ?? '',
       merchantStatus: map['merchantStatus'] ?? '',
+      mrp: map['mrp'] ?? 0,
       merchantPaymentStatus: map['merchantPaymentStatus'] ?? '',
       quantity: map['quantity'] ?? 0,
       refund: map['return'] ?? null,
       colors: List<dynamic>.from(map['colors']),
+      shiprocket: map['shiprocket'] ?? null,
     );
   }
 
@@ -67,7 +75,7 @@ class MerchantOrderItem {
 
   @override
   String toString() {
-    return 'MerchantOrderItem(productId: $productId, orderId: $orderId, contact: $contact, createdDate: $createdDate, title: $title, merchantStatus: $merchantStatus, merchantPaymentStatus: $merchantPaymentStatus, quantity: $quantity, refund: $refund, colors: $colors)';
+    return 'MerchantOrderItem(productId: $productId, orderId: $orderId, contact: $contact, createdDate: $createdDate, title: $title, merchantStatus: $merchantStatus, mrp: $mrp, merchantPaymentStatus: $merchantPaymentStatus, quantity: $quantity, refund: $refund, colors: $colors, shiprocket: $shiprocket)';
   }
 
   @override
@@ -82,10 +90,12 @@ class MerchantOrderItem {
         other.createdDate == createdDate &&
         other.title == title &&
         other.merchantStatus == merchantStatus &&
+        other.mrp == mrp &&
         other.merchantPaymentStatus == merchantPaymentStatus &&
         other.quantity == quantity &&
         other.refund == refund &&
-        listEquals(other.colors, colors);
+        listEquals(other.colors, colors) &&
+        other.shiprocket == shiprocket;
   }
 
   @override
@@ -96,9 +106,11 @@ class MerchantOrderItem {
         createdDate.hashCode ^
         title.hashCode ^
         merchantStatus.hashCode ^
+        mrp.hashCode ^
         merchantPaymentStatus.hashCode ^
         quantity.hashCode ^
         refund.hashCode ^
-        colors.hashCode;
+        colors.hashCode ^
+        shiprocket.hashCode;
   }
 }
