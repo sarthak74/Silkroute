@@ -122,7 +122,7 @@ class _ComingOrdersState extends State<ComingOrders> {
             ),
             height: MediaQuery.of(context).size.height * 0.58,
             child: SingleChildScrollView(
-              child: StreamBuilder<List<MerchantOrderItem>>(
+              child: StreamBuilder<List<dynamic>>(
                 stream: _merchantOrderProvider.productListStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {

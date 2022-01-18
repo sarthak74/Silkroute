@@ -8,9 +8,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/notification_service.dart';
+import 'package:silkroute/methods/payment_methods.dart';
 import 'package:silkroute/methods/toast.dart';
+import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/model/services/PaymentGatewayService.dart';
 import 'package:silkroute/model/services/authservice.dart';
@@ -176,6 +179,8 @@ class _AddressPageState extends State<AddressPage> {
     });
   }
 
+  bool postpayment = false;
+
   @override
   void initState() {
     super.initState();
@@ -196,7 +201,7 @@ class _AddressPageState extends State<AddressPage> {
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: loading
+        child: (loading || postpayment)
             ? Container(
                 margin: EdgeInsets.only(
                     top: MediaQuery.of(context).size.height * 0.3),
@@ -232,26 +237,30 @@ class _AddressPageState extends State<AddressPage> {
 
                   //// PHONE NUMBER
                   SizedBox(height: 20),
-                  CustomTextField(
-                    "Phone Number*",
-                    "Phone Number",
-                    false,
-                    (val) {
-                      setState(() {
-                        data['contact'] = val.toString();
-                      });
-                    },
-                    initialValue: data["contact"],
-                  ),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
+                      //// phone number
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: CustomTextField(
+                          "Phone Number*",
+                          "Phone Number",
+                          false,
+                          (val) {
+                            setState(() {
+                              data['contact'] = val.toString();
+                            });
+                          },
+                          initialValue: data["contact"],
+                        ),
+                      ),
+
                       //// PinCode
 
                       Container(
                         width: MediaQuery.of(context).size.width * 0.35,
-                        margin: EdgeInsets.only(top: 20),
                         child: TextFormField(
                           controller: _pincodeController,
                           enabled: false,
@@ -274,44 +283,10 @@ class _AddressPageState extends State<AddressPage> {
                           style: textStyle1(13, Colors.grey, FontWeight.w500),
                         ),
                       ),
-
-                      //// Use My Location
-
-                      GestureDetector(
-                        onTap: null,
-                        child: Container(
-                          // width: MediaQuery.of(context).size.width * 0.4,
-                          margin: EdgeInsets.only(top: 20),
-                          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                          decoration: BoxDecoration(
-                            color: Color(0xFF5B0D1B),
-                            borderRadius: BorderRadius.all(Radius.circular(30)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Icon(
-                                Icons.location_city,
-                                size: 15,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                "Use saved Address",
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     ],
                   ),
+
+                  SizedBox(height: 20),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -319,8 +294,7 @@ class _AddressPageState extends State<AddressPage> {
                       //// PinCode
 
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        margin: EdgeInsets.only(top: 20),
+                        width: MediaQuery.of(context).size.width * 0.43,
                         child: CustomTextField(
                           "State*",
                           "State",
@@ -334,11 +308,9 @@ class _AddressPageState extends State<AddressPage> {
                           enabled: false,
                         ),
                       ),
-                      //// PinCode
 
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        margin: EdgeInsets.only(top: 20),
+                        width: MediaQuery.of(context).size.width * 0.43,
                         child: CustomTextField(
                           "City/Dist.*",
                           "City/Dist.",
@@ -379,7 +351,7 @@ class _AddressPageState extends State<AddressPage> {
                           showSelectedItems: true,
                           items: localities,
                           label: "Locality",
-                          selectedItem: pincodeAddress[0]["Name"],
+                          // selectedItem: pincodeAddress[0]["Name"],
                           onChanged: (val) {
                             setState(() {
                               data["addLine2"] = val.toString();
@@ -392,6 +364,9 @@ class _AddressPageState extends State<AddressPage> {
                                 color: Colors.grey,
                               ),
                               borderRadius: BorderRadius.circular(30),
+                            ),
+                            labelStyle: TextStyle(
+                              color: Colors.grey,
                             ),
                             isDense: true,
                             contentPadding: EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -487,11 +462,11 @@ class _AddressPageState extends State<AddressPage> {
                                 child: Text(
                                   _proceeding
                                       ? "Loading"
-                                      : "Save & Proceed to Payment",
+                                      : "Proceed to Payment",
                                   style: GoogleFonts.poppins(
                                     textStyle: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 15,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -500,6 +475,27 @@ class _AddressPageState extends State<AddressPage> {
                             ],
                           ),
                   ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () async {
+                      var orderId = await initOrder(flag: 1);
+                      print("orderId");
+                      await Helpers()
+                          .showOfflineBankTransferDialog(context, orderId);
+                    },
+                    child: Text(
+                      "Offline Bank Transfer?",
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
       ),
@@ -664,18 +660,27 @@ class _AddressPageState extends State<AddressPage> {
 
   // Payment Methods
 
-  Future<void> initOrder() async {
+  Future initOrder({flag = 0}) async {
     print("amtforrazor: $amtForRazor");
     amtForRazor = int.parse((_bill['totalCost'] * 100).toString());
-    _id =
-        await PaymentGatewayService().generateOrderId(key, secret, amtForRazor);
+    if (_crateListM[0]['orderId'] != null && _crateListM[0]['orderId'] != '') {
+      _id = _crateListM[0]['orderId'];
+    } else {
+      _id = await PaymentGatewayService()
+          .generateOrderId(key, secret, amtForRazor);
+    }
 
     print("\norder_id: $_id\n");
     var addr = await storage.getItem('paymentAddress');
+    await CrateApi().updateOrderId(_id);
     setState(() {
       // _bill['totalCost'] = double.parse(amt);
       // _bill['logistic'] = double.parse(_deliveryServiceabilityStatus['rate']);
       print("cratelist M in orders\n$_crateListM");
+      for (int i = 0; i < _crateListM.length; i++) {
+        _crateListM[i]['orderId'] = _id;
+      }
+
       _order = {
         "contact": data['contact'],
         // "items": _crateListM,
@@ -694,16 +699,13 @@ class _AddressPageState extends State<AddressPage> {
     print("in payement, ${res['cd']}");
 
     if (res['success']) {
-      setState(() {
-        final f = new DateFormat('yyyy-MM-dd hh:mm');
-
-        _date = f.format(DateTime.parse(res['cd'].toString())).toString();
-        print("date-qq: $_date");
-        _dbid = res['id'];
-      });
       Toast().notifySuccess("Order Initiated");
-
-      checkOut(res);
+      if (flag == 0) {
+        checkOut(res);
+      } else {
+        print("ret order : $_id");
+        return _id;
+      }
     } else {
       Toast().notifyErr("Some error occurred");
     }
@@ -717,14 +719,21 @@ class _AddressPageState extends State<AddressPage> {
       "amount": _bill['totalCost'] * 100,
       "name": user["name"],
       "description": "Payment to Yibrance",
-      "prefill": {"contact": user['contact'], "email": ''},
+      "prefill": {
+        "contact": user['contact'],
+        "email": 'not.required@gmail.com'
+      },
+      "readonly": {'email': true, 'contact': true},
       "options": {
         "checkout": {
-          "method": {"netbanking": "1", "card": "1", "upi": "1", "wallet": "1"}
+          "method": {"netbanking": 1, "card": 1, "upi": 1, "wallet": 0}
         }
       },
+      "config": {"display": "en"},
       "timeout": "599",
+      "theme": {"hide_topbar": false},
       "order_id": _id,
+      "modal": {"confirm_close": true, "escape": false}
     };
     print("optios: $options");
     try {
@@ -740,6 +749,10 @@ class _AddressPageState extends State<AddressPage> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse res) async {
     var ship_order_id = res.orderId.split("_")[1];
+    setState(() {
+      _proceeding = false;
+      postpayment = true;
+    });
     int i = 0;
     for (dynamic item in _crateListM) {
       // dynamic data = await createtShiprocketOrder(
@@ -794,6 +807,7 @@ class _AddressPageState extends State<AddressPage> {
     raz["razorpay_paymentId"] = res.paymentId;
     raz["razorpay_signature"] = res.signature;
     raz["razorpay_orderId"] = res.orderId;
+    raz["amount_paid"] = _bill['totalCost'].toString(); // in rs
 
     await OrderApi().updateOrder(_id, {
       "customerPaymentStatus": "Completed",
@@ -801,8 +815,12 @@ class _AddressPageState extends State<AddressPage> {
       "razorpay": raz
     });
     await CouponApi().useCoupons(user['contact'], _bill['couponsApplied']);
+
+    await PaymentMethods()
+        .splitPaymentAmongMerchants(_id, _crateListM, res.paymentId);
+
     setState(() {
-      _proceeding = false;
+      postpayment = false;
     });
     Toast().notifySuccess("Shipment Successful");
     Navigator.popAndPushNamed(context, "/crate");

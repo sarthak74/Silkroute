@@ -9,6 +9,7 @@ import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
 import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/model/services/PaymentGatewayService.dart';
+import 'package:silkroute/view/pages/merchant/merchant_order_detail.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 // import 'package:silkroute/view/pages/reseller/order_page.dart';
 // import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -46,17 +47,22 @@ class _MerchantOrderTileState extends State<MerchantOrderTile> {
           orders[index]['merchantStatus'] = "Ready";
         });
         // todo:
-        // await createPayout();
+
         if (user == null) {
           user = await Methods().getUser();
         }
 
-        dynamic data = {
-          "account": user['razorpay']['accountId'],
-          "amount": widget.orders[index].mrp,
-          "currency": 'INR'
-        };
-        await PaymentGatewayService().directTransfer(data);
+        // relese onhold from item
+        await PaymentGatewayService()
+            .releaseHold(widget.orders[index].razorpayItemId);
+
+        // dynamic data = {
+        //   "account": user['razorpay']['accountId'],
+        //   "amount": widget.orders[index].mrp,
+        //   "currency": 'INR'
+        // };
+
+        // await PaymentGatewayService().directTransfer(data);
       }
     } else {
       Toast().notifyErr("Error Occurred, Please try again");
@@ -64,10 +70,15 @@ class _MerchantOrderTileState extends State<MerchantOrderTile> {
   }
 
   void loadVars() {
-    // print("order list item ${widget.orders}");
+    print("order list item ${widget.orders}");
     setState(() {
       for (var order in widget.orders) {
-        orders.add(order.toMap());
+        orders.add({
+          "invoiceNumber": order["invoiceNumber"],
+          "createdDate": order["createdDate"],
+          "bill": order["bill"],
+          "items": order["items"].map((item) => item.toMap()).toList()
+        });
         isExpanded.add(false);
       }
       _status = [
@@ -101,343 +112,140 @@ class _MerchantOrderTileState extends State<MerchantOrderTile> {
             itemCount: orders.length,
             itemBuilder: (BuildContext context, int i) {
               return Container(
-                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                 margin: EdgeInsets.symmetric(
                   vertical: 5,
                 ),
 
                 // constraints: BoxConstraints(maxHeight: 120),
-                color: Colors.grey[200],
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  // border: Border(
+                  //   left: BorderSide(
+                  //     width: 15,
+                  //     color: Color(0xFF811111),
+                  //   ),
+                  // ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductPage(
-                                id: (orders[i]['productId']).toString(),
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.2,
-                            maxHeight: 90,
-                          ),
-                          child: Image.asset(
-                            "assets/images/1.png",
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+                    Container(
+                      width: 20,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: Color(0xFF811111),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
+                    // SizedBox(width: 15),
                     Expanded(
                       flex: 5,
                       child: Container(
-                        alignment: Alignment.topLeft,
-                        margin: EdgeInsets.only(left: 5),
+                        height: 59,
+                        padding: EdgeInsets.symmetric(horizontal: 15),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
                             Row(
                               children: <Widget>[
-                                Expanded(
-                                  flex: 7,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        orders[i]["title"],
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: textStyle1(
-                                          12,
-                                          Colors.black,
-                                          FontWeight.w700,
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Row(
-                                        children: <Widget>[
-                                          SingleChildScrollView(
-                                            child: Scrollbar(
-                                              child: Container(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.5,
-                                                height: 21,
-                                                child: ListView.builder(
-                                                  shrinkWrap: true,
-                                                  scrollDirection:
-                                                      Axis.horizontal,
-                                                  physics:
-                                                      NeverScrollableScrollPhysics(),
-                                                  itemCount: orders[i]["colors"]
-                                                      .length,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int i) {
-                                                    return Container(
-                                                      margin: EdgeInsets.only(
-                                                          right: 5),
-                                                      height: 20,
-                                                      width: 20,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.grey,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10),
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          orders[i]['colors'].length * 25 >=
-                                                  MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.5
-                                              ? Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  size: 18,
-                                                )
-                                              : Container(),
-                                        ],
-                                      ),
-                                    ],
+                                Text(
+                                  "Order No:",
+                                  style: textStyle1(
+                                    13,
+                                    Colors.black,
+                                    FontWeight.bold,
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: <Widget>[
-                                      Text(
-                                        "${orders[i]['createdDate']}",
-                                        style: textStyle1(
-                                          11,
-                                          Colors.grey[700],
-                                          FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      GestureDetector(
-                                        onTap: () async {
-                                          if (orders[i]['merchantStatus'] ==
-                                              "Not Seen") {
-                                            await showConfirmationAlert(
-                                                i,
-                                                {'merchantStatus': 'Not Ready'},
-                                                0);
-                                          } else if (orders[i]
-                                                  ['merchantStatus'] ==
-                                              "Not Ready") {
-                                            await showConfirmationAlert(i,
-                                                {'merchantStatus': 'Ready'}, 1);
-                                          } else {
-                                            Toast().notifyInfo(
-                                                "Order already Confirmed");
-                                          }
-                                        },
-                                        child: Icon(
-                                          (orders[i]['merchantStatus'] ==
-                                                  "Not Seen")
-                                              ? Icons.check
-                                              : ((orders[i]['merchantStatus'] ==
-                                                      "Not Ready")
-                                                  ? Icons.check_box_outlined
-                                                  : Icons.check_box),
-                                        ),
-                                      ),
-                                    ],
+                                SizedBox(width: 5),
+                                Text(
+                                  widget.orders[i]['invoiceNumber'].toString(),
+                                  style: textStyle1(
+                                    13,
+                                    Colors.black,
+                                    FontWeight.w400,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 5),
-                            ExpansionPanelList(
-                              expansionCallback: (int index, bool expanded) {
-                                setState(() {
-                                  isExpanded[i] = !expanded;
-                                });
-                              },
-                              expandedHeaderPadding: EdgeInsets.all(0),
-                              animationDuration: Duration(milliseconds: 500),
-                              elevation: 0,
-                              children: [
-                                ExpansionPanel(
-                                  canTapOnHeader: true,
-                                  isExpanded: isExpanded[i],
-                                  backgroundColor: Colors.grey[200],
-                                  headerBuilder:
-                                      (BuildContext context, bool isExpanded) {
-                                    return Column(
-                                      children: <Widget>[
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Text(
-                                              "Prod Id: ",
-                                              style: textStyle1(
-                                                12,
-                                                Colors.grey[700],
-                                                FontWeight.w700,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                "${orders[i]['productId']}",
-                                                style: textStyle1(
-                                                  11,
-                                                  Colors.grey[700],
-                                                  FontWeight.w500,
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Text(
-                                              "Quantity: ",
-                                              style: textStyle1(
-                                                11,
-                                                Colors.grey[700],
-                                                FontWeight.w700,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                "${orders[i]['quantity']}",
-                                                style: textStyle1(
-                                                  11,
-                                                  Colors.grey[700],
-                                                  FontWeight.w500,
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                  body: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Expanded(
-                                        flex: 3,
-                                        child: Column(
-                                          children: <Widget>[
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  "Order Id: ",
-                                                  style: textStyle1(
-                                                    11,
-                                                    Colors.grey[700],
-                                                    FontWeight.w700,
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: Text(
-                                                    "${orders[i]['orderId']}",
-                                                    style: textStyle1(
-                                                      11,
-                                                      Colors.grey[700],
-                                                      FontWeight.w500,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  "Payment: ",
-                                                  style: textStyle1(
-                                                    11,
-                                                    Colors.grey[700],
-                                                    FontWeight.w700,
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: Text(
-                                                    "${orders[i]['merchantPaymentStatus']}",
-                                                    style: textStyle1(
-                                                      11,
-                                                      Colors.grey[700],
-                                                      FontWeight.w500,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Text(
+                                      "Date:",
+                                      style: textStyle1(
+                                        13,
+                                        Colors.black,
+                                        FontWeight.bold,
                                       ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Column(
-                                          children: <Widget>[
-                                            Text(
-                                              (orders[i]['refund'] != null &&
-                                                      orders[i]['refund']
-                                                          ['requested'])
-                                                  ? "Return Req"
-                                                  : "${orders[i]['merchantStatus']}",
-                                              style: textStyle1(
-                                                11,
-                                                Colors.grey[700],
-                                                FontWeight.w700,
-                                              ),
-                                            ),
-                                            Text(
-                                              "${DateFormat('dd-MM-yyyy').format(DateTime.now())}",
-                                              style: textStyle1(
-                                                11,
-                                                Colors.grey[700],
-                                                FontWeight.w500,
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      widget.orders[i]['createdDate']
+                                          .toString(),
+                                      style: textStyle1(
+                                        13,
+                                        Colors.black,
+                                        FontWeight.w400,
                                       ),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                                InkWell(
+                                  onTap: () {},
+                                  child: Container(
+                                    padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF811111),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      "Schedule Pickup",
+                                      style: textStyle1(
+                                        11,
+                                        Colors.white,
+                                        FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+
+                    Expanded(
+                      flex: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MerchantOrderDetail(
+                                  order: orders[i],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            height: 70,
+                            color: Color.fromRGBO(250, 210, 110, 1),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.black54,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -610,3 +418,338 @@ Row(
                   ),
 
 */
+
+/*
+
+
+// Expanded(
+                    //   flex: 1,
+                    //   child: GestureDetector(
+                    //     onTap: () {
+                    //       Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => ProductPage(
+                    //             id: (orders[i]['productId']).toString(),
+                    //           ),
+                    //         ),
+                    //       );
+                    //     },
+                    //     child: Container(
+                    //       constraints: BoxConstraints(
+                    //         maxWidth: MediaQuery.of(context).size.width * 0.2,
+                    //         maxHeight: 90,
+                    //       ),
+                    //       child: Image.asset(
+                    //         "assets/images/1.png",
+                    //         fit: BoxFit.contain,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                    // Expanded(
+                    //   flex: 4,
+                    //   child: Container(
+                    //     alignment: Alignment.topLeft,
+                    //     margin: EdgeInsets.only(left: 5),
+                    //     child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.start,
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: <Widget>[
+                    //         Row(
+                    //           children: <Widget>[
+                    //             Expanded(
+                    //               flex: 7,
+                    //               child: Column(
+                    //                 mainAxisAlignment: MainAxisAlignment.start,
+                    //                 crossAxisAlignment:
+                    //                     CrossAxisAlignment.start,
+                    //                 children: <Widget>[
+                    //                   Text(
+                    //                     orders[i]["title"],
+                    //                     maxLines: 2,
+                    //                     overflow: TextOverflow.ellipsis,
+                    //                     style: textStyle1(
+                    //                       12,
+                    //                       Colors.black,
+                    //                       FontWeight.w700,
+                    //                     ),
+                    //                   ),
+                    //                   SizedBox(height: 5),
+                    //                   Row(
+                    //                     children: <Widget>[
+                    //                       SingleChildScrollView(
+                    //                         child: Scrollbar(
+                    //                           child: Container(
+                    //                             width: MediaQuery.of(context)
+                    //                                     .size
+                    //                                     .width *
+                    //                                 0.5,
+                    //                             height: 21,
+                    //                             child: ListView.builder(
+                    //                               shrinkWrap: true,
+                    //                               scrollDirection:
+                    //                                   Axis.horizontal,
+                    //                               physics:
+                    //                                   NeverScrollableScrollPhysics(),
+                    //                               itemCount: orders[i]["colors"]
+                    //                                   .length,
+                    //                               itemBuilder:
+                    //                                   (BuildContext context,
+                    //                                       int i) {
+                    //                                 return Container(
+                    //                                   margin: EdgeInsets.only(
+                    //                                       right: 5),
+                    //                                   height: 20,
+                    //                                   width: 20,
+                    //                                   decoration: BoxDecoration(
+                    //                                     color: Colors.grey,
+                    //                                     borderRadius:
+                    //                                         BorderRadius
+                    //                                             .circular(10),
+                    //                                   ),
+                    //                                 );
+                    //                               },
+                    //                             ),
+                    //                           ),
+                    //                         ),
+                    //                       ),
+                    //                       orders[i]['colors'].length * 25 >=
+                    //                               MediaQuery.of(context)
+                    //                                       .size
+                    //                                       .width *
+                    //                                   0.5
+                    //                           ? Icon(
+                    //                               Icons.arrow_forward_ios,
+                    //                               size: 18,
+                    //                             )
+                    //                           : Container(),
+                    //                     ],
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             ),
+                    //             Expanded(
+                    //               flex: 2,
+                    //               child: Column(
+                    //                 crossAxisAlignment: CrossAxisAlignment.end,
+                    //                 children: <Widget>[
+                    //                   Text(
+                    //                     "${orders[i]['createdDate']}",
+                    //                     style: textStyle1(
+                    //                       11,
+                    //                       Colors.grey[700],
+                    //                       FontWeight.w500,
+                    //                     ),
+                    //                   ),
+                    //                   SizedBox(height: 5),
+                    //                   GestureDetector(
+                    //                     onTap: () async {
+                    //                       if (orders[i]['merchantStatus'] ==
+                    //                           "Not Seen") {
+                    //                         await showConfirmationAlert(
+                    //                             i,
+                    //                             {'merchantStatus': 'Not Ready'},
+                    //                             0);
+                    //                       } else if (orders[i]
+                    //                               ['merchantStatus'] ==
+                    //                           "Not Ready") {
+                    //                         await showConfirmationAlert(i,
+                    //                             {'merchantStatus': 'Ready'}, 1);
+                    //                       } else {
+                    //                         Toast().notifyInfo(
+                    //                             "Order already Confirmed");
+                    //                       }
+                    //                     },
+                    //                     child: Icon(
+                    //                       (orders[i]['merchantStatus'] ==
+                    //                               "Not Seen")
+                    //                           ? Icons.check
+                    //                           : ((orders[i]['merchantStatus'] ==
+                    //                                   "Not Ready")
+                    //                               ? Icons.check_box_outlined
+                    //                               : Icons.check_box),
+                    //                     ),
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //         SizedBox(height: 5),
+                    //         ExpansionPanelList(
+                    //           expansionCallback: (int index, bool expanded) {
+                    //             setState(() {
+                    //               isExpanded[i] = !expanded;
+                    //             });
+                    //           },
+                    //           expandedHeaderPadding: EdgeInsets.all(0),
+                    //           animationDuration: Duration(milliseconds: 500),
+                    //           elevation: 0,
+                    //           children: [
+                    //             ExpansionPanel(
+                    //               canTapOnHeader: true,
+                    //               isExpanded: isExpanded[i],
+                    //               backgroundColor: Colors.grey[200],
+                    //               headerBuilder:
+                    //                   (BuildContext context, bool isExpanded) {
+                    //                 return Column(
+                    //                   children: <Widget>[
+                    //                     Row(
+                    //                       crossAxisAlignment:
+                    //                           CrossAxisAlignment.start,
+                    //                       children: <Widget>[
+                    //                         Text(
+                    //                           "Prod Id: ",
+                    //                           style: textStyle1(
+                    //                             12,
+                    //                             Colors.grey[700],
+                    //                             FontWeight.w700,
+                    //                           ),
+                    //                         ),
+                    //                         Expanded(
+                    //                           child: Text(
+                    //                             "${orders[i]['productId']}",
+                    //                             style: textStyle1(
+                    //                               11,
+                    //                               Colors.grey[700],
+                    //                               FontWeight.w500,
+                    //                             ),
+                    //                             maxLines: 2,
+                    //                             overflow: TextOverflow.ellipsis,
+                    //                           ),
+                    //                         ),
+                    //                       ],
+                    //                     ),
+                    //                     Row(
+                    //                       crossAxisAlignment:
+                    //                           CrossAxisAlignment.start,
+                    //                       children: <Widget>[
+                    //                         Text(
+                    //                           "Quantity: ",
+                    //                           style: textStyle1(
+                    //                             11,
+                    //                             Colors.grey[700],
+                    //                             FontWeight.w700,
+                    //                           ),
+                    //                         ),
+                    //                         Expanded(
+                    //                           child: Text(
+                    //                             "${orders[i]['quantity']}",
+                    //                             style: textStyle1(
+                    //                               11,
+                    //                               Colors.grey[700],
+                    //                               FontWeight.w500,
+                    //                             ),
+                    //                             maxLines: 2,
+                    //                             overflow: TextOverflow.ellipsis,
+                    //                           ),
+                    //                         ),
+                    //                       ],
+                    //                     ),
+                    //                   ],
+                    //                 );
+                    //               },
+                    //               body: Row(
+                    //                 mainAxisAlignment:
+                    //                     MainAxisAlignment.spaceBetween,
+                    //                 children: <Widget>[
+                    //                   Expanded(
+                    //                     flex: 3,
+                    //                     child: Column(
+                    //                       children: <Widget>[
+                    //                         Row(
+                    //                           crossAxisAlignment:
+                    //                               CrossAxisAlignment.start,
+                    //                           children: <Widget>[
+                    //                             Text(
+                    //                               "Order Id: ",
+                    //                               style: textStyle1(
+                    //                                 11,
+                    //                                 Colors.grey[700],
+                    //                                 FontWeight.w700,
+                    //                               ),
+                    //                             ),
+                    //                             Expanded(
+                    //                               child: Text(
+                    //                                 "${orders[i]['orderId']}",
+                    //                                 style: textStyle1(
+                    //                                   11,
+                    //                                   Colors.grey[700],
+                    //                                   FontWeight.w500,
+                    //                                 ),
+                    //                                 maxLines: 2,
+                    //                                 overflow:
+                    //                                     TextOverflow.ellipsis,
+                    //                               ),
+                    //                             ),
+                    //                           ],
+                    //                         ),
+                    //                         Row(
+                    //                           crossAxisAlignment:
+                    //                               CrossAxisAlignment.start,
+                    //                           children: <Widget>[
+                    //                             Text(
+                    //                               "Payment: ",
+                    //                               style: textStyle1(
+                    //                                 11,
+                    //                                 Colors.grey[700],
+                    //                                 FontWeight.w700,
+                    //                               ),
+                    //                             ),
+                    //                             Expanded(
+                    //                               child: Text(
+                    //                                 "${orders[i]['merchantPaymentStatus']}",
+                    //                                 style: textStyle1(
+                    //                                   11,
+                    //                                   Colors.grey[700],
+                    //                                   FontWeight.w500,
+                    //                                 ),
+                    //                                 maxLines: 2,
+                    //                                 overflow:
+                    //                                     TextOverflow.ellipsis,
+                    //                               ),
+                    //                             ),
+                    //                           ],
+                    //                         ),
+                    //                       ],
+                    //                     ),
+                    //                   ),
+                    //                   Expanded(
+                    //                     flex: 1,
+                    //                     child: Column(
+                    //                       children: <Widget>[
+                    //                         Text(
+                    //                           (orders[i]['refund'] != null &&
+                    //                                   orders[i]['refund']
+                    //                                       ['requested'])
+                    //                               ? "Return Req"
+                    //                               : "${orders[i]['merchantStatus']}",
+                    //                           style: textStyle1(
+                    //                             11,
+                    //                             Colors.grey[700],
+                    //                             FontWeight.w700,
+                    //                           ),
+                    //                         ),
+                    //                         Text(
+                    //                           "${DateFormat('dd-MM-yyyy').format(DateTime.now())}",
+                    //                           style: textStyle1(
+                    //                             11,
+                    //                             Colors.grey[700],
+                    //                             FontWeight.w500,
+                    //                           ),
+                    //                         )
+                    //                       ],
+                    //                     ),
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+
+                    */

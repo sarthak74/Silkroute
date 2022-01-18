@@ -17,27 +17,32 @@ class _OrderTileState extends State<OrderTile> {
     super.initState();
   }
 
+  Map<String, Color> statusColor = {
+    "Order Placed": Color(0xFF811111),
+    "Processing": Colors.red,
+  };
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
       // height: 120,
-      constraints: BoxConstraints(maxHeight: 100),
-      color: Colors.grey[200],
+
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        border: Border(
+          left: BorderSide(
+            width: 5,
+            color: statusColor[widget.order['status']],
+          ),
+        ),
+      ),
       padding: EdgeInsets.all(10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Expanded(
-            flex: 2,
-            child: Image.asset(
-              "assets/images/1.png",
-              fit: BoxFit.contain,
-            ),
-          ),
-          SizedBox(width: 20),
-          Expanded(
-            flex: 7,
+            flex: 4,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -49,10 +54,10 @@ class _OrderTileState extends State<OrderTile> {
                   "Date: ${widget.order['createdDate'].toString().substring(0, 10)}",
                   style: textStyle(12, Colors.grey[500]),
                 ),
-                Text(
-                  "Status: ${widget.order['status']}",
-                  style: textStyle(12, Colors.grey[500]),
-                ),
+                // Text(
+                //   "Status: ${widget.order['status']}",
+                //   style: textStyle(12, Colors.grey[500]),
+                // ),
               ],
             ),
           ),

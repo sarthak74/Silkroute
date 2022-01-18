@@ -64,27 +64,27 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
             width: MediaQuery.of(context).size.width * 0.4,
             height: MediaQuery.of(context).size.width * 0.4,
             padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  ("4.2").toString(),
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.grey[200],
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.star,
-                  size: 13,
-                  color: Colors.grey[200],
-                )
-              ],
-            ),
+            // child: Row(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   mainAxisAlignment: MainAxisAlignment.start,
+            //   children: [
+            //     Text(
+            //       ("4.2").toString(),
+            //       style: GoogleFonts.poppins(
+            //         textStyle: TextStyle(
+            //           color: Colors.grey[200],
+            //           fontSize: 10,
+            //           fontWeight: FontWeight.w800,
+            //         ),
+            //       ),
+            //     ),
+            //     Icon(
+            //       Icons.star,
+            //       size: 13,
+            //       color: Colors.grey[200],
+            //     )
+            //   ],
+            // ),
           ),
 
           // SizedBox(height: 7),

@@ -143,6 +143,7 @@ class _OrderListState extends State<OrderList> {
             itemCount: orders.length,
             itemBuilder: (BuildContext context, int index) {
               return OrderTile(orders[index]);
-            });
+            },
+          );
   }
 }

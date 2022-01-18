@@ -32,8 +32,7 @@ class MerchantApi {
     }
   }
 
-  Future<List<MerchantOrderItem>> getMerchantOrders(
-      sortBy, filter, orderType) async {
+  Future<List<dynamic>> getMerchantOrders(sortBy, filter, orderType) async {
     try {
       var data = {
         "contact": await storage.getItem("contact"),
@@ -52,11 +51,12 @@ class MerchantApi {
           await http.post(url, headers: headers, body: json.encode(data));
       var decodedRes2 = jsonDecode(res.body);
       // print("mer orders: $decodedRes2");
-      List<MerchantOrderItem> resp = [];
+      List<dynamic> resp = [];
       for (var i in decodedRes2) {
-        // print("mer order: $i");
-        MerchantOrderItem r = MerchantOrderItem.fromMap(i);
-        resp.add(r);
+        var order = i;
+        order["items"] =
+            i["items"].map((item) => MerchantOrderItem.fromMap(item)).toList();
+        resp.add(order);
       }
       print("mer orders: $resp");
       return resp;

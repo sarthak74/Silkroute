@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/model/services/couponApi.dart';
 import 'package:silkroute/view/dialogBoxes/CouponDialogBox.dart';
 import 'package:silkroute/view/dialogBoxes/colorImageDialog.dart';
 import 'package:silkroute/view/dialogBoxes/editPickupAddressDialog.dart';
+import 'package:silkroute/view/dialogBoxes/offline_bank_transfer_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/price_change_alert_dialog.dart';
+import 'package:silkroute/view/dialogBoxes/request_return_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/showBankAccountDialog.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
@@ -111,13 +114,22 @@ class Helpers {
   }
 
   Future showPickupAddressDialog(context) async {
-    var user = await Methods().getUser();
+    LocalStorage storage = LocalStorage('silkroute');
+    var user = await storage.getItem('user');
     await showDialog(
       context: context,
       barrierDismissible: true,
       builder: (_) => EditPickupAddressDialog(
         info: user['pickupAdd'].toString(),
       ),
+    );
+  }
+
+  Future showOfflineBankTransferDialog(context, orderId) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => OfflineBankTransferDialog(orderId),
     );
   }
 
@@ -221,6 +233,27 @@ class Helpers {
       transitionDuration: Duration(milliseconds: 800),
       pageBuilder: (context, a1, a2) {
         return PriceChangeAlertDialog();
+      },
+    );
+  }
+
+  // reseller request return dialog helper
+  Future showRequestReturn(context, orderDetails, selected) async {
+    dynamic items = [];
+
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 800),
+      pageBuilder: (context, a1, a2) {
+        return RequestReturnDialog(orderDetails, selected);
       },
     );
   }

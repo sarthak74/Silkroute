@@ -349,11 +349,10 @@ class _ProductCounterState extends State<ProductCounter> {
       }
     }
 
-    if (selectedColorsUrl.length < widget.product['min']) {
+    if (selectedColorsUrl.length != widget.product['min']) {
       setState(() {
         addingtoCrate = false;
-        Toast()
-            .notifyErr("Select a minimum of ${widget.product["min"]} colors!");
+        Toast().notifyErr("Select any ${widget.product["min"]} colors!");
       });
       return;
     }
@@ -409,11 +408,10 @@ class _ProductCounterState extends State<ProductCounter> {
       }
     }
 
-    if (selectedColorsUrl.length < widget.product['min']) {
+    if (selectedColorsUrl.length != widget.product['min']) {
       setState(() {
         addingtoCrate = false;
-        Toast()
-            .notifyErr("Select a minimum of ${widget.product["min"]} colors!");
+        Toast().notifyErr("Select any ${widget.product["min"]} colors!");
       });
       return;
     }

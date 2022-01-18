@@ -131,22 +131,22 @@ class _ProductTileState extends State<ProductTile> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  ("4.2").toString(),
-                                  style: GoogleFonts.poppins(
-                                    textStyle: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                                Icon(Icons.star, size: 13),
-                              ],
-                            ),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.start,
+                            //   children: <Widget>[
+                            //     Text(
+                            //       ("4.2").toString(),
+                            //       style: GoogleFonts.poppins(
+                            //         textStyle: TextStyle(
+                            //           color: Colors.black,
+                            //           fontSize: 10,
+                            //           fontWeight: FontWeight.w800,
+                            //         ),
+                            //       ),
+                            //     ),
+                            //     Icon(Icons.star, size: 13),
+                            //   ],
+                            // ),
                             GestureDetector(
                               onTap: wishlistFunction,
                               child: Container(

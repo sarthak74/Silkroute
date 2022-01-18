@@ -11,6 +11,7 @@ class CrateListItem {
   final num quantity;
   final String merchantContact;
   final num stock;
+  final String orderId;
   final List<dynamic> colors;
 
   CrateListItem({
@@ -22,6 +23,7 @@ class CrateListItem {
     this.quantity,
     this.merchantContact,
     this.stock,
+    this.orderId,
     this.colors,
   });
 
@@ -35,6 +37,7 @@ class CrateListItem {
       'quantity': quantity,
       'merchantContact': merchantContact,
       'stock': stock,
+      'orderId': orderId,
       'colors': colors,
     };
   }
@@ -49,6 +52,7 @@ class CrateListItem {
       quantity: map['quantity'] ?? 0,
       merchantContact: map['merchantContact'] ?? '',
       stock: map['stock'] ?? 0,
+      orderId: map['orderId'] ?? '',
       colors: List<dynamic>.from(map['colors']),
     );
   }
@@ -60,7 +64,7 @@ class CrateListItem {
 
   @override
   String toString() {
-    return 'CrateListItem(id: $id, title: $title, discount: $discount, mrp: $mrp, discountValue: $discountValue, quantity: $quantity, merchantContact: $merchantContact, stock: $stock, colors: $colors)';
+    return 'CrateListItem(id: $id, title: $title, discount: $discount, mrp: $mrp, discountValue: $discountValue, quantity: $quantity, merchantContact: $merchantContact, stock: $stock, orderId: $orderId, colors: $colors)';
   }
 
   @override
@@ -77,6 +81,7 @@ class CrateListItem {
         other.quantity == quantity &&
         other.merchantContact == merchantContact &&
         other.stock == stock &&
+        other.orderId == orderId &&
         listEquals(other.colors, colors);
   }
 
@@ -90,6 +95,7 @@ class CrateListItem {
         quantity.hashCode ^
         merchantContact.hashCode ^
         stock.hashCode ^
+        orderId.hashCode ^
         colors.hashCode;
   }
 }

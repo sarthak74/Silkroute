@@ -91,6 +91,17 @@ class CrateApi {
       print("error - $e");
     }
   }
+
+  updateOrderId(id) async {
+    var contact = await storage.getItem('contact');
+    var data = {"contact": contact, "orderId": id};
+    var url = Uri.parse(endpoint + '/crateApi/updateOrderId');
+
+    String token = await storage.getItem('token');
+    var headers = {"Content-Type": "application/json", "Authorization": token};
+    final res = await http.post(url, headers: headers, body: json.encode(data));
+    print(res.statusCode);
+  }
 }
 
 class Tuple<T1, T2> {

@@ -10,10 +10,10 @@ import 'package:silkroute/model/services/ProductListApi.dart';
 
 class MerchantOrderProvider extends ChangeNotifier {
   final _apicaller = MerchantApi();
-  dynamic _streamController = StreamController<List<MerchantOrderItem>>();
+  dynamic _streamController = StreamController<List<dynamic>>();
   int i = 0, len, _maxLen = 5;
-  List<MerchantOrderItem> _merchantApiResult = [];
-  List<MerchantOrderItem> orders = [];
+  List<dynamic> _merchantApiResult = [];
+  List<dynamic> orders = [];
   // var dateTime = DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now());
   static dynamic _sortBy = {"createdDate": 1};
   static dynamic _filter;
@@ -40,12 +40,12 @@ class MerchantOrderProvider extends ChangeNotifier {
     _merchantApiResult = value;
   }
 
-  Stream<List<MerchantOrderItem>> get productListStream {
+  Stream<List<dynamic>> get productListStream {
     return _streamController.stream;
   }
 
   void setProductListStream(value) {
-    _streamController = StreamController<List<MerchantOrderItem>>();
+    _streamController = StreamController<List<dynamic>>();
   }
 
   void setSortBy(title, value) {

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:im_stepper/stepper.dart';
 import 'package:intl/intl.dart';
 import 'package:silkroute/constants/statusCodes.dart';
+import 'package:silkroute/methods/helpers.dart';
 
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/payment_methods.dart';
@@ -37,7 +39,7 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  dynamic orderDetails, bill;
+  dynamic orderDetails, bill, shiprocket;
   bool loading = true;
 
   dynamic price;
@@ -46,6 +48,14 @@ class _OrderPageState extends State<OrderPage> {
   void loadPrice() {
     print("order: ${widget.order}");
     setState(() {
+      shiprocket = widget.order['shiprocket'];
+      shiprocket = [
+        {
+          "id": "ship_JKB7H65H99B",
+          "weight": "5Kg",
+          "returnDate": "12-13-13",
+        }
+      ];
       bill = widget.order['bill'];
       price = [
         {"title": "Total Value", "value": bill['totalValue']},
@@ -153,11 +163,17 @@ class _OrderPageState extends State<OrderPage> {
                                     SizedBox(height: 10),
 
                                     OrderPriceDetails(
-                                        invoiceNumber:
-                                            orderDetails['invoiceNumber'],
-                                        price: price,
-                                        savings: savings,
-                                        totalCost: totalCost),
+                                      invoiceNumber:
+                                          orderDetails['invoiceNumber'],
+                                      price: price,
+                                      savings: savings,
+                                      totalCost: totalCost,
+                                    ),
+
+                                    (shiprocket != null &&
+                                            shiprocket.length > 0)
+                                        ? PackageDetails(shiprocket: shiprocket)
+                                        : SizedBox(height: 0),
                                     // CancelOrder(order: widget.order),
                                   ],
                                 ),
@@ -180,6 +196,224 @@ class _OrderPageState extends State<OrderPage> {
           ),
         ),
         // bottomNavigationBar: Footer(),
+      ),
+    );
+  }
+}
+
+class PackageDetails extends StatefulWidget {
+  const PackageDetails({Key key, this.shiprocket}) : super(key: key);
+  final dynamic shiprocket;
+
+  @override
+  _PackageDetailsState createState() => _PackageDetailsState();
+}
+
+class _PackageDetailsState extends State<PackageDetails> {
+  dynamic shiprocket;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    shiprocket = widget.shiprocket;
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+      child: Column(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              "PACKAGES:",
+              style: textStyle1(
+                13,
+                Color(0xFF811111),
+                FontWeight.w500,
+              ),
+            ),
+          ),
+          SizedBox(height: 5),
+          (shiprocket == null || shiprocket.length == 0)
+              ? Text(
+                  "No Packages",
+                  style: textStyle1(
+                    13,
+                    Colors.black54,
+                    FontWeight.w500,
+                  ),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: shiprocket.length,
+                  itemBuilder: (context, package_i) {
+                    return PackageItem(shiprocket[package_i]);
+                  },
+                ),
+        ],
+      ),
+    );
+  }
+}
+
+class PackageItem extends StatefulWidget {
+  const PackageItem(this.package, {Key key}) : super(key: key);
+  final dynamic package;
+
+  @override
+  _PackageItemState createState() => _PackageItemState();
+}
+
+class _PackageItemState extends State<PackageItem> {
+  bool isExpanded = false;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(15),
+          bottomRight: Radius.circular(15),
+        ),
+        child: ExpansionPanelList(
+          expansionCallback: (int index, bool exp) {
+            setState(() {
+              isExpanded = !exp;
+            });
+          },
+          expandedHeaderPadding: EdgeInsets.all(0),
+          animationDuration: Duration(milliseconds: 500),
+          children: [
+            ExpansionPanel(
+              backgroundColor: Colors.grey[200],
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return ListTile(
+                  title: Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            "Shipment Id: ",
+                            style: textStyle1(
+                              10,
+                              Colors.black87,
+                              FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            widget.package['id'],
+                            style: textStyle1(
+                              10,
+                              Colors.black54,
+                              FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 5),
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            "Weight: ",
+                            style: textStyle1(
+                              10,
+                              Colors.black54,
+                              FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            widget.package['weight'],
+                            style: textStyle1(
+                              10,
+                              Colors.black54,
+                              FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+              body: ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Text("timeline"),
+                        Row(
+                          children: <Widget>[
+                            Text(
+                              "Return before: ",
+                              style: textStyle1(
+                                10,
+                                Colors.black54,
+                                FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              widget.package['returnDate'],
+                              style: textStyle1(
+                                10,
+                                Colors.black54,
+                                FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF811111),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                "Details",
+                                style: textStyle1(
+                                  10,
+                                  Colors.white,
+                                  FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(width: 5),
+                              Icon(
+                                CupertinoIcons.right_chevron,
+                                size: 15,
+                                color: Colors.white,
+                              ),
+                              Icon(
+                                CupertinoIcons.right_chevron,
+                                size: 15,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              isExpanded: isExpanded,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -586,63 +820,16 @@ class OrderPageTitle extends StatefulWidget {
 
 class _OrderPageTitleState extends State<OrderPageTitle> {
   dynamic orderDetails, moreColor = true, loading = true, showReturn = false;
-
+  List<bool> selected = [];
+  int count = 0;
   void loadVars() {
     setState(() {
       orderDetails = widget.orderDetails;
+      for (var x in orderDetails['items']) {
+        selected.add(false);
+      }
       loading = false;
     });
-  }
-
-  Future<void> checkRequestReturn(int i) async {
-    dynamic item = orderDetails['items'][i];
-    if (Codes().statusDescription.indexOf(item['customerStatus']) <
-        Codes().statusDescription.indexOf("Delivered")) {
-      Toast().notifyErr("Your order has not been delivered yet");
-      return;
-    }
-    if (Codes().statusDescription.indexOf(item['customerStatus']) >
-        Codes().statusDescription.indexOf("Delivered")) {
-      Toast().notifyErr("Return has already been requested");
-      return;
-    }
-    await requestReturn(i);
-  }
-
-  num calculateRefundAmount(int i) {
-    num amt = orderDetails['items'][i]['mrp'];
-    return amt;
-  }
-
-  Future<void> requestReturn(int i) async {
-    // return requested: 1 & merchantStatus to return requested
-    var orderId = orderDetails['invoiceNumber'];
-    var productId = orderDetails['items'][i]['id'];
-    var refundAmount = calculateRefundAmount(i);
-    var requestedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    var body = {
-      'merchantStatus': 'Return Requested',
-      'customerStatus': 'Return Requested',
-      'return': {
-        'requested': 1,
-        'requestedDate': requestedDate,
-        'refundAmount': refundAmount
-      }
-    };
-    dynamic updateRes =
-        await OrderApi().updateOrderItem(orderId, productId, body);
-    if (updateRes['success'] == false) {
-      Toast().notifyErr("Some error occurred, please try again");
-      return;
-    }
-    // Done
-
-    // refundAmount: schedule refund on razorpay
-
-    var payment_id = orderDetails['razorpay']['razorpay_paymentId'];
-    // await PaymentMethods().requestReturn(payment_id, refundAmount);
-
-    // create shiprocket order(return order)
   }
 
   void initState() {
@@ -651,6 +838,12 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
     });
     super.initState();
   }
+
+  TextStyle infoStyle = textStyle1(
+    10,
+    Colors.black87,
+    FontWeight.w500,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -671,139 +864,183 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
               ],
             ),
           )
-        : ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: orderDetails['items'].length,
-            itemBuilder: (BuildContext context, int i) {
-              showReturn = Codes()
-                      .statusDescription
-                      .indexOf(orderDetails['items'][i]['customerStatus']) ==
-                  Codes().statusDescription.indexOf("Delivered");
-              // if(orderDetails['items'][i]['returnPeriod'])
-              // implement add period to delivery return
-              return Column(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width * 0.03,
-                      right: MediaQuery.of(context).size.width * 0.03,
-                      top: 5,
-                    ),
-                    padding: EdgeInsets.fromLTRB(20, 10, 20, 1),
-                    constraints: BoxConstraints(maxHeight: 100),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
+        : Column(
+            // mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 10),
+              ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: orderDetails['items'].length,
+                itemBuilder: (BuildContext context, int item_i) {
+                  // if(orderDetails['items'][i]['returnPeriod'])
+                  // implement add period to delivery return
+
+                  return InkWell(
+                    onLongPress: () {
+                      if (count > 0) {
+                        return;
+                      }
+                      setState(() {
+                        selected[item_i] =
+                            (selected[item_i] == true) ? false : true;
+                        if (selected[item_i])
+                          count++;
+                        else
+                          count--;
+                      });
+                    },
+                    onTap: () {
+                      if (count == 0) {
+                        return;
+                      }
+                      setState(() {
+                        selected[item_i] =
+                            (selected[item_i] == true) ? false : true;
+                        if (selected[item_i])
+                          count++;
+                        else
+                          count--;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.fromLTRB(15, 0, 15, 8),
+                      decoration: BoxDecoration(
+                        color: (selected.length > item_i && selected[item_i])
+                            ? Colors.grey[400]
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        // Container(
-                        //   width: MediaQuery.of(context).size.width * 0.25,
-                        Image.asset(
-                          "assets/images/1.png",
-                          fit: BoxFit.contain,
-                          width: MediaQuery.of(context).size.width * 0.2,
-                        ),
-                        // SizedBox(width: 20),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.35,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                orderDetails['items'][i]['title'],
-                                style: textStyle1(
-                                  13,
-                                  Colors.black,
-                                  FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                "MRP: ${orderDetails['items'][i]['mrp']}",
-                                style: textStyle1(
-                                  13,
-                                  Colors.black,
-                                  FontWeight.w500,
-                                ),
-                              ),
-                              Row(
+                      constraints: BoxConstraints(maxHeight: 100),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 1,
+                            child: Image.asset(
+                              "assets/images/unnamed.png",
+                              fit: BoxFit.contain,
+                              width: MediaQuery.of(context).size.width * 0.2,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 5,
+                            child: Container(
+                              padding: EdgeInsets.only(left: 15),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: <Widget>[
-                                  SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    height: 20,
+                                  Text(
+                                    orderDetails["items"][item_i]['title'],
+                                    style: textStyle1(
+                                      12,
+                                      Colors.black,
+                                      FontWeight.w700,
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 22,
                                     child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: orderDetails['items'][i]
+                                      itemCount: orderDetails["items"][item_i]
                                               ['colors']
                                           .length,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      scrollDirection: Axis.horizontal,
                                       itemBuilder:
-                                          (BuildContext context, int index) {
+                                          (BuildContext context, int color_i) {
                                         return Container(
-                                          width: 20,
+                                          margin: EdgeInsets.only(right: 5),
                                           height: 20,
-                                          margin:
-                                              EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10)),
-                                              image: DecorationImage(
-                                                // image: NetworkImage(Math().ip() +
-                                                //     "/images/616ff5ab029b95081c237c89-color-0"),
-                                                image: NetworkImage(
-                                                    "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
-                                                fit: BoxFit.fill,
-                                              )),
+                                          width: 20,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.asset(
+                                              "assets/images/unnamed.png",
+                                              fit: BoxFit.contain,
+                                              width: 20,
+                                            ),
+                                          ),
                                         );
                                       },
                                     ),
                                   ),
+                                  Text(
+                                    "${orderDetails["items"][item_i]["mrp"]}",
+                                    style: textStyle1(
+                                        11, Color(0xFF811111), FontWeight.w700),
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Text("Status: ", style: infoStyle),
+                                      Text(
+                                        orderDetails["items"][item_i]
+                                            ["customerStatus"],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: infoStyle,
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
-                              SizedBox(height: 5),
-                            ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: <Widget>[
+                                Text(
+                                  "Quantity: ${orderDetails['items'][item_i]['quantity']}",
+                                  style: infoStyle,
+                                ),
+                                GestureDetector(
+                                  child: Text(
+                                    "Rating & Review",
+                                    style: infoStyle,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: 10),
+              (count > 0)
+                  ? GestureDetector(
+                      onTap: () async {
+                        await Helpers()
+                            .showRequestReturn(context, orderDetails, selected);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF811111),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Request Return",
+                          style: textStyle1(
+                            12,
+                            Colors.white,
+                            FontWeight.w500,
                           ),
                         ),
-                        Column(
-                          children: <Widget>[
-                            Text(
-                              ("Quantity: " +
-                                      orderDetails['items'][i]['quantity']
-                                          .toString())
-                                  .toString(),
-                              style: textStyle1(
-                                13,
-                                Colors.black,
-                                FontWeight.w500,
-                              ),
-                            ),
-                            Codes().statusDescription.indexOf(
-                                        orderDetails['items'][i]
-                                            ['customerStatus']) ==
-                                    Codes()
-                                        .statusDescription
-                                        .indexOf("Delivered")
-                                ? ElevatedButton(
-                                    onPressed: () async {
-                                      checkRequestReturn(i);
-                                    },
-                                    child: Text("Request\nReturn"),
-                                  )
-                                : SizedBox(height: 0),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  OrderStatus(itemDetails: orderDetails['items'][i]),
-                ],
-              );
-            });
+                      ),
+                    )
+                  : SizedBox(height: 0),
+              SizedBox(height: 5),
+            ],
+          );
   }
 }
