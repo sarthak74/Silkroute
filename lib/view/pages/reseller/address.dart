@@ -504,6 +504,7 @@ class _AddressPageState extends State<AddressPage> {
 
   String _id, _dbid, _date;
   dynamic _merchant;
+  // razorpay key secret
   var key = "rzp_test_zbF9BwMKHoWRR6", secret = 'a4lLo5H9zbTY3PNU3ADvSWQt';
 
   Future<dynamic> getPickup() async {
@@ -793,6 +794,7 @@ class _AddressPageState extends State<AddressPage> {
 
     DateTime now = DateTime.now();
 
+    // this is notification data
     var data = {
       "title": "Order Initiated",
       "body": "Your order with id $_id has been initiated!",

@@ -78,7 +78,7 @@ class ShiprocketApi {
       };
       var _body = json.encode(_data);
 
-      var shiprocket_auth = storage.getItem('shiprocket_auth');
+      var shiprocket_auth = await storage.getItem('shiprocket_auth');
       var _token = shiprocket_auth['token'];
       var _headers = {
         "Content-Type": "application/json",
@@ -91,7 +91,7 @@ class ShiprocketApi {
       final res = await http.post(_url, headers: _headers, body: _body);
 
       var decoded = await jsonDecode(res.body);
-
+      print("dec: $decoded");
       return decoded;
     } catch (err) {
       print("getDeliveryServiceStatus err --  $err");
@@ -220,6 +220,34 @@ class ShiprocketApi {
     } catch (err) {
       print("get channels err - $err");
       return null;
+    }
+  }
+
+  // requests from backend
+
+  Future createShiprocketOrder(order) async {
+    try {
+      print("create ship order: $order");
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/shiprocketApi/createShiprocketOrderWrapper');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      var res = await http.post(url,
+          headers: headers, body: await json.encode(order));
+      var decoded = await jsonDecode(res.body);
+      if (decoded['success']) {
+        Toast().notifySuccess("Order Successfully shipped");
+      } else {
+        Toast().notifyErr("Some error occurred");
+      }
+
+      return decoded;
+    } catch (err) {
+      print("create ship err: $err");
+      return {"success": false, "err": err};
     }
   }
 }

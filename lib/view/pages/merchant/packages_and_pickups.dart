@@ -1,27 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:silkroute/methods/math.dart';
-import 'package:silkroute/model/core/MerchantOrderItem.dart';
-
-import 'package:silkroute/provider/Merchantorderprovider.dart';
-import 'package:silkroute/view/dialogBoxes/merchantOrderSortDialogBox.dart';
-import 'package:silkroute/view/pages/merchant/comingOrders.dart';
-import 'package:silkroute/view/pages/merchant/returnOrders.dart';
+import 'package:silkroute/view/pages/merchant/packages.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
-import 'package:silkroute/view/widget/merchantOrderTile.dart';
+import 'package:silkroute/view/widget/footer.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/navbar.dart';
-import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:silkroute/view/widget/topbar.dart';
-import 'package:silkroute/view/widget2/footer.dart';
 
-class MerchantOrders extends StatefulWidget {
-  const MerchantOrders({Key key}) : super(key: key);
+class PackagesAndPickups extends StatefulWidget {
+  const PackagesAndPickups({Key key}) : super(key: key);
 
   @override
-  _MerchantOrdersState createState() => _MerchantOrdersState();
+  _PackagesAndPickupsState createState() => _PackagesAndPickupsState();
 }
 
-class _MerchantOrdersState extends State<MerchantOrders> {
+class _PackagesAndPickupsState extends State<PackagesAndPickups> {
   bool loading = true;
 
   void loadVars() {
@@ -78,7 +70,7 @@ class _MerchantOrdersState extends State<MerchantOrders> {
 
               Expanded(
                 child: loading
-                    ? Text("Loading")
+                    ? MyCircularProgress(marginTop: 50)
                     : CustomScrollView(slivers: [
                         SliverList(
                           delegate: SliverChildListDelegate([
@@ -116,7 +108,7 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                                       ),
                                     ),
                                     child: Text(
-                                      "Your Orders",
+                                      "Packages",
                                       style: (page == 0)
                                           ? activePageTextStyle
                                           : inActivePageTextStyle,
@@ -145,7 +137,7 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                                       ),
                                     ),
                                     child: Text(
-                                      "Return Orders",
+                                      "Pickups",
                                       style: (page == 1)
                                           ? activePageTextStyle
                                           : inActivePageTextStyle,
@@ -156,12 +148,12 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.59,
+                              height: MediaQuery.of(context).size.height * 0.67,
                               child: PageView(
                                 controller: pageController,
                                 children: [
-                                  ComingOrders(),
-                                  ReturnOrders(),
+                                  Packages(),
+                                  Packages(),
                                 ],
                               ),
                             ),

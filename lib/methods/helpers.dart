@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:provider/provider.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/model/services/CrateApi.dart';
 import 'package:silkroute/model/services/couponApi.dart';
+import 'package:silkroute/provider/PackageProvider.dart';
 import 'package:silkroute/view/dialogBoxes/CouponDialogBox.dart';
 import 'package:silkroute/view/dialogBoxes/colorImageDialog.dart';
+import 'package:silkroute/view/dialogBoxes/confirmationDialog.dart';
 import 'package:silkroute/view/dialogBoxes/editPickupAddressDialog.dart';
 import 'package:silkroute/view/dialogBoxes/offline_bank_transfer_dialog.dart';
+import 'package:silkroute/view/dialogBoxes/package_detail.dart';
 import 'package:silkroute/view/dialogBoxes/price_change_alert_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/request_return_dialog.dart';
+import 'package:silkroute/view/dialogBoxes/schedulePickupDialog.dart';
 import 'package:silkroute/view/dialogBoxes/showBankAccountDialog.dart';
+import 'package:silkroute/view/dialogBoxes/single_select_package_dialog.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -238,9 +244,16 @@ class Helpers {
   }
 
   // reseller request return dialog helper
-  Future showRequestReturn(context, orderDetails, selected) async {
+  Future showRequestReturn(context, enterquantity,
+      {orderDetails, selected}) async {
     dynamic items = [];
-
+    print("selected: $selected");
+    if (selected == null) {
+      selected = [];
+      for (var x in orderDetails['items']) {
+        selected.add(true);
+      }
+    }
     await showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -253,7 +266,92 @@ class Helpers {
       },
       transitionDuration: Duration(milliseconds: 800),
       pageBuilder: (context, a1, a2) {
-        return RequestReturnDialog(orderDetails, selected);
+        return RequestReturnDialog(orderDetails, selected, enterquantity);
+      },
+    );
+  }
+
+  Future<bool> getConfirmationDialog(
+      context, String title, String description) async {
+    return await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 800),
+      pageBuilder: (context, a1, a2) {
+        return ConfirmationDialog(
+          title: title,
+          description: description,
+        );
+      },
+    );
+  }
+
+  Future<dynamic> showSchedulePickupDialog(context) async {
+    var dimensions = [
+      {"l": 0.0, "b": 0.0, "h": 0.0, "w": 0.0}
+    ];
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 800),
+      pageBuilder: (context, a1, a2) {
+        return SchedulePickupDialog(dimensions: dimensions);
+      },
+    );
+    return dimensions;
+  }
+
+  Future<dynamic> singleSelectPackageDialog(context) async {
+    dynamic package = await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.ease),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 400),
+      pageBuilder: (context, a1, a2) {
+        return ChangeNotifierProvider(
+          create: (context) => PackageProvider(),
+          child: SingleSelectPackageDialog(),
+        );
+      },
+    );
+    return package;
+  }
+
+  Future packageDetails(context, package, packageProvider) async {
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.ease),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 400),
+      pageBuilder: (context, a1, a2) {
+        return PackageDetail(
+            package: package, packageProvider: packageProvider);
       },
     );
   }

@@ -277,7 +277,7 @@ class _UploadButtonState extends State<UploadButton> {
                         Container(
                           width: MediaQuery.of(context).size.width * 0.6,
                           child: Text(
-                            "I agree that product is NOT already uploaded.",
+                            "I agree that product is NOT already uploaded. If uploaded, then you can increase stock by updating the product!",
                             style:
                                 textStyle1(13, Colors.black, FontWeight.w500),
                           ),
@@ -363,6 +363,11 @@ class _UploadButtonState extends State<UploadButton> {
     );
     print(
         "-->\nimages-\n${NewProductProvider.images}\ncolors\n${NewProductProvider.colors}\n");
+
+    if (NewProductProvider.reference.length == 0) {
+      Toast().notifyErr("Invalid Reference ID");
+      return false;
+    }
     if (NewProductProvider.title.length == 0) {
       Toast().notifyErr("Invalid Title");
       return false;
@@ -1408,19 +1413,22 @@ class ProductInfo extends StatefulWidget {
 
 class _ProductInfoState extends State<ProductInfo> {
   bool loading = true;
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _descController = TextEditingController();
-  TextEditingController _setSizeController = TextEditingController();
-  TextEditingController _stockAvailabilityController = TextEditingController();
+  TextEditingController _titleController = new TextEditingController();
+  TextEditingController _descController = new TextEditingController();
+  TextEditingController _setSizeController = new TextEditingController();
+  TextEditingController _stockAvailabilityController =
+      new TextEditingController();
+  TextEditingController _referenceController = new TextEditingController();
   Timer _debounce;
 
   void loadVars() {
+    _referenceController.text = NewProductProvider.reference;
+    _titleController.text = NewProductProvider.title;
+    _descController.text = NewProductProvider.description;
+    _setSizeController.text = NewProductProvider.setSize.toString();
+    _stockAvailabilityController.text =
+        NewProductProvider.stockAvailability.toString();
     setState(() {
-      _titleController.text = NewProductProvider.title;
-      _descController.text = NewProductProvider.description;
-      _setSizeController.text = NewProductProvider.setSize.toString();
-      _stockAvailabilityController.text =
-          NewProductProvider.stockAvailability.toString();
       loading = false;
     });
   }
@@ -1439,6 +1447,62 @@ class _ProductInfoState extends State<ProductInfo> {
         ? Text("Loading")
         : Column(
             children: <Widget>[
+              // PRODUCT REFERENCE
+              Theme(
+                data: new ThemeData(
+                  primaryColor: Colors.black87,
+                ),
+                child: new TextFormField(
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      NewProductProvider.reference = _referenceController.text;
+                    });
+                  },
+                  controller: _referenceController,
+                  decoration: new InputDecoration(
+                    isDense: true,
+                    border: OutlineInputBorder(
+                      borderSide: new BorderSide(
+                        color: Colors.black,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    contentPadding: new EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 8,
+                    ),
+                    labelText: "Reference ID",
+                    hintText: "Enter Reference ID",
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: new BorderSide(
+                        color: Colors.black54,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    labelStyle: textStyle(13, Colors.black54),
+                    hintStyle: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              // PRODUCT TITLE
+
               Theme(
                 data: new ThemeData(
                   primaryColor: Colors.black87,

@@ -32,7 +32,7 @@ class MerchantApi {
     }
   }
 
-  Future<List<dynamic>> getMerchantOrders(sortBy, filter, orderType) async {
+  Future<dynamic> getMerchantOrders(sortBy, filter, orderType) async {
     try {
       var data = {
         "contact": await storage.getItem("contact"),
@@ -51,18 +51,51 @@ class MerchantApi {
           await http.post(url, headers: headers, body: json.encode(data));
       var decodedRes2 = jsonDecode(res.body);
       // print("mer orders: $decodedRes2");
+      dynamic resp = decodedRes2;
+      // for (var i in decodedRes2) {
+      //   var order = i;
+      //   order["items"] =
+      //       i["items"].map((item) => MerchantOrderItem.fromMap(item)).toList();
+      //   resp.add(order);
+      // }
+      print("mer orders: $resp");
+      return resp;
+    } catch (e) {
+      print("error - $e");
+      return null;
+    }
+  }
+
+  Future<dynamic> getMerchantReturnOrders() async {
+    try {
+      var data = {
+        "contact": await storage.getItem("contact"),
+        "sortBy": {"createdDate": 1},
+        "orderType": true
+      };
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/manufacturerApi/getMerchantOrders');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
+      var decodedRes2 = jsonDecode(res.body);
+      // print("mer orders: $decodedRes2");
       List<dynamic> resp = [];
       for (var i in decodedRes2) {
         var order = i;
-        order["items"] =
-            i["items"].map((item) => MerchantOrderItem.fromMap(item)).toList();
+        // order["items"] =
+        //     i["items"].map((item) => MerchantOrderItem.fromMap(item)).toList();
         resp.add(order);
       }
       print("mer orders: $resp");
       return resp;
     } catch (e) {
       print("error - $e");
-      return e;
+      return null;
     }
   }
 

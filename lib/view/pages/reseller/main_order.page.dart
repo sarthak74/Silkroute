@@ -1,27 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:silkroute/methods/math.dart';
-import 'package:silkroute/model/core/MerchantOrderItem.dart';
-
-import 'package:silkroute/provider/Merchantorderprovider.dart';
-import 'package:silkroute/view/dialogBoxes/merchantOrderSortDialogBox.dart';
-import 'package:silkroute/view/pages/merchant/comingOrders.dart';
-import 'package:silkroute/view/pages/merchant/returnOrders.dart';
+import 'package:silkroute/view/pages/reseller/order_page.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
-import 'package:silkroute/view/widget/merchantOrderTile.dart';
+import 'package:silkroute/view/pages/reseller/reseller_return_orders.dart';
+import 'package:silkroute/view/widget/footer.dart';
 import 'package:silkroute/view/widget/navbar.dart';
-import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:silkroute/view/widget/topbar.dart';
-import 'package:silkroute/view/widget2/footer.dart';
 
-class MerchantOrders extends StatefulWidget {
-  const MerchantOrders({Key key}) : super(key: key);
+class MainOrders extends StatefulWidget {
+  const MainOrders({Key key}) : super(key: key);
 
   @override
-  _MerchantOrdersState createState() => _MerchantOrdersState();
+  _MainOrdersState createState() => _MainOrdersState();
 }
 
-class _MerchantOrdersState extends State<MerchantOrders> {
+class _MainOrdersState extends State<MainOrders> {
   bool loading = true;
 
   void loadVars() {
@@ -160,8 +152,8 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                               child: PageView(
                                 controller: pageController,
                                 children: [
-                                  ComingOrders(),
-                                  ReturnOrders(),
+                                  Orders(),
+                                  ResellerReturnOrders(),
                                 ],
                               ),
                             ),

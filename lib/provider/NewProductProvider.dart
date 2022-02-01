@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 class NewProductProvider {
+  static String reference = "";
   static String title = "";
   static String subCat = "";
   static String description = "";
