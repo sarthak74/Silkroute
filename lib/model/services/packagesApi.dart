@@ -34,7 +34,7 @@ class PackagesApi {
     }
   }
 
-  create() async {
+  Future create() async {
     try {
       print("create pack");
       var contact = await storage.getItem('contact');
@@ -52,7 +52,7 @@ class PackagesApi {
     }
   }
 
-  addItem(packageId, items) async {
+  Future addItem(packageId, items) async {
     try {
       print("add Item to pack");
       var data = {"packageId": packageId, "items": items};
@@ -73,7 +73,7 @@ class PackagesApi {
     }
   }
 
-  removeItem(data) async {
+  Future removeItem(data) async {
     try {
       print("rmv item from pack $data");
       String token = await storage.getItem('token');
@@ -89,6 +89,44 @@ class PackagesApi {
       return decoded['success'];
     } catch (err) {
       print("rmv Item from pack err $err");
+      return false;
+    }
+  }
+
+  Future clear(id) async {
+    try {
+      print("clear pack $id");
+      String token = await storage.getItem('token');
+      var headers = {
+        "Authorization": token,
+        "Content-type": "application/json"
+      };
+      var url = Uri.parse(endPoint + '/clear/' + id);
+      final res = await http.post(url, headers: headers);
+      var decoded = jsonDecode(res.body);
+      // Toast().notifyInfo(decoded['msg']);
+      return decoded;
+    } catch (err) {
+      print("rmv Item from pack err $err");
+      return false;
+    }
+  }
+
+  Future delete(id) async {
+    try {
+      print("delete pack $id");
+      String token = await storage.getItem('token');
+      var headers = {
+        "Authorization": token,
+        "Content-type": "application/json"
+      };
+      var url = Uri.parse(endPoint + '/delete/' + id);
+      final res = await http.post(url, headers: headers);
+      var decoded = jsonDecode(res.body);
+      Toast().notifyInfo(decoded['msg']);
+      return decoded;
+    } catch (err) {
+      print("delete pack err $err");
       return false;
     }
   }

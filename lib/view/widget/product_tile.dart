@@ -217,7 +217,7 @@ class _ProductTileState extends State<ProductTile> {
                             textStyle: TextStyle(
                               color: Colors.black,
                               fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -230,7 +230,7 @@ class _ProductTileState extends State<ProductTile> {
                                       textStyle: TextStyle(
                                         color: Color(0xFF5B0D1B),
                                         fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w500,
                                         decoration: TextDecoration.lineThrough,
                                         decorationThickness: 3,
                                       ),
@@ -243,7 +243,7 @@ class _ProductTileState extends State<ProductTile> {
                                       textStyle: TextStyle(
                                         color: Color(0xFF5B0D1B),
                                         fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
@@ -255,7 +255,7 @@ class _ProductTileState extends State<ProductTile> {
                                       textStyle: TextStyle(
                                         color: Colors.green,
                                         fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
@@ -269,7 +269,7 @@ class _ProductTileState extends State<ProductTile> {
                                       textStyle: TextStyle(
                                         color: Color(0xFF5B0D1B),
                                         fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),

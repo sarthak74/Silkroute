@@ -10,20 +10,16 @@ class PackageProvider extends ChangeNotifier {
   Future<List<Package>> futurePacks;
 
   Future<List<Package>> fetchAllPackages() async {
-    print("fetching packages:");
     futurePacks = PackagesApi().getAllPackages();
-    print("fetched packages:");
     _packages = await futurePacks;
     return futurePacks;
   }
 
   Future<List<Package>> getAllPackages() async {
-    print("pro getAllPacks $_packages");
     if (_packages == [] || _packages.length == 0 || _packages == null) {
-      print("packs null || [] || len = 0");
       return fetchAllPackages();
     }
-    print("pro getAllPacks got $_packages");
+
     return futurePacks;
   }
 
@@ -96,5 +92,35 @@ class PackageProvider extends ChangeNotifier {
         break;
       }
     }
+  }
+
+  void clear(id) async {
+    print("clearing $id");
+    var res = await PackagesApi().clear(id);
+    if (res['success'] == false) {
+      print("failed clearing $id");
+      return;
+    }
+    for (int i = 0; i < _packages.length; i++) {
+      if (_packages[i].id == id) {
+        _packages[i].items.clear();
+      }
+    }
+    print("success clearing $id");
+    notifyListeners();
+  }
+
+  void delete(Package package) async {
+    print("deleting ${package.id}");
+    var res = await PackagesApi().delete(package.id);
+    if (res['success'] == false) {
+      print("failed deleting ${package.id}");
+      return;
+    }
+    print("packages: $_packages");
+    await _packages.remove(package);
+    print("packages: $_packages");
+    print("success clearing ${package.id}");
+    // notifyListeners();
   }
 }

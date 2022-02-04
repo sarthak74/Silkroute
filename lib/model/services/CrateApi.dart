@@ -49,7 +49,7 @@ class CrateApi {
         "Authorization": token
       };
       final res =
-          await http.post(url, headers: headers, body: json.encode(data));
+          await http.post(url, headers: headers, body: await json.encode(data));
       print(res.statusCode);
     } catch (e) {
       print("Set crate items error - $e");

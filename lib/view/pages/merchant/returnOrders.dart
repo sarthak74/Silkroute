@@ -7,6 +7,7 @@ import 'package:silkroute/view/dialogBoxes/merchantOrderSortDialogBox.dart';
 import 'package:silkroute/view/pages/reseller/product.dart';
 import 'package:silkroute/view/widget/merchantOrderTile.dart';
 import 'package:silkroute/view/widget/merchantReturnOrderTile.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
 
 class ReturnOrders extends StatefulWidget {
@@ -24,8 +25,12 @@ class _ReturnOrdersState extends State<ReturnOrders> {
   bool _filterShow = false;
 
   void loadVars() async {
+    setState(() {
+      loading = true;
+    });
     // List orderss = await MerchantReturnOrderProvider().getTwentyOrders();
     _orders = await MerchantApi().getMerchantReturnOrders();
+    print("_return orders: $_orders");
     setState(() {
       // orders = orderss;
       _btnShow = false;
@@ -114,15 +119,17 @@ class _ReturnOrdersState extends State<ReturnOrders> {
 
           //// ORDER LIST
 
-          Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.03,
-            ),
-            height: MediaQuery.of(context).size.height * 0.58,
-            child: SingleChildScrollView(
-              child: MerchantReturnOrderTile(orders: _orders),
-            ),
-          ),
+          loading
+              ? MyCircularProgress()
+              : Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.03,
+                  ),
+                  height: MediaQuery.of(context).size.height * 0.58,
+                  child: SingleChildScrollView(
+                    child: MerchantReturnOrderTile(orders: _orders),
+                  ),
+                ),
         ],
       ),
     );

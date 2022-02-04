@@ -250,4 +250,31 @@ class ShiprocketApi {
       return {"success": false, "err": err};
     }
   }
+
+  Future createOrderFromPackage(packages) async {
+    try {
+      print("create pack order : $packages");
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/shiprocketApi/createPackageOrder');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      print("headers: $headers");
+      var res = await http.post(url,
+          headers: headers, body: await json.encode(packages));
+      var decoded = await jsonDecode(res.body);
+      if (decoded['success']) {
+        Toast().notifySuccess("Order Successfully shipped");
+      } else {
+        Toast().notifyErr("Some error occurred");
+      }
+      print("d: $decoded");
+      return decoded;
+    } catch (err) {
+      print("create pack order err: $err");
+      return {"success": false, "err": err};
+    }
+  }
 }

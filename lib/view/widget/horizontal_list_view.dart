@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/provider/ProductListProvider.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 
 class HorizontalListView extends StatefulWidget {
   HorizontalListView(this.title, this.productList);
@@ -31,10 +32,10 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                 alignment: Alignment.topLeft,
                 child: Text(
                   widget.title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
+                  style: textStyle1(
+                    15,
+                    Colors.black54,
+                    FontWeight.w500,
                   ),
                 ),
               ),
@@ -94,7 +95,15 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                         ),
                       ),
                       SizedBox(height: 5),
-                      Center(child: Text(product["title"])),
+                      Center(
+                          child: Text(
+                        product["title"],
+                        style: textStyle1(
+                          12,
+                          Colors.black54,
+                          FontWeight.w500,
+                        ),
+                      )),
                     ],
                   ),
                 );

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +18,7 @@ import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
 import 'package:silkroute/model/services/aws.dart';
 import 'package:silkroute/model/services/uploadImageApi.dart';
-import 'package:silkroute/provider/NewProductProvider.dart';
+import 'package:silkroute/provider/EditProductProvider.dart';
 import 'package:silkroute/view/pages/merchant/merchant_home.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/navbar.dart';
@@ -51,7 +52,7 @@ InputDecoration textFormFieldInputDecorator(String labelText, String hintText,
       ),
       borderRadius: BorderRadius.all(Radius.circular(30)),
     ),
-    labelStyle: textStyle(11, Colors.black54),
+    labelStyle: textStyle1(11, Colors.black54, FontWeight.normal),
     hintStyle: textStyle1(11, Colors.black54, FontWeight.w300),
   );
 }
@@ -71,31 +72,33 @@ class _EditProductState extends State<EditProduct> {
 
   void loadVars() {
     setState(() {
-      NewProductProvider.title = widget.product.title;
+      EditProductProvider.reference = widget.product.reference;
+      EditProductProvider.title = widget.product.title;
 
-      NewProductProvider.category = widget.product.category;
-      // NewProductProvider.specifications[0]["value"] = widget.product.subCat;
-      NewProductProvider.fullSetPrice =
+      EditProductProvider.category = widget.product.category;
+      // EditProductProvider.specifications[0]["value"] = widget.product.subCat;
+      EditProductProvider.fullSetPrice =
           double.parse(widget.product.mrp.toString());
 
-      NewProductProvider.description = widget.product.description;
-      NewProductProvider.setSize = widget.product.setSize;
-      NewProductProvider.min = widget.product.min;
-      NewProductProvider.stockAvailability = widget.product.stockAvailability;
+      EditProductProvider.description = widget.product.description;
+      EditProductProvider.setSize = widget.product.setSize;
+      EditProductProvider.min = widget.product.min;
+      EditProductProvider.stockAvailability = widget.product.stockAvailability;
 
-      NewProductProvider.fullSetPrice = widget.product.fullSetPrice;
-      NewProductProvider.category = "";
-      NewProductProvider.fullSetSize = widget.product.fullSetSize;
-      NewProductProvider.editColors = widget.product.colors;
-      NewProductProvider.editImages = widget.product.images;
-      NewProductProvider.specifications = [];
+      EditProductProvider.category = "";
+      EditProductProvider.fullSetSize = widget.product.fullSetSize;
+      EditProductProvider.editColors = widget.product.colors;
+      EditProductProvider.editImages = widget.product.images;
+      EditProductProvider.specifications = widget.product.specifications;
       print("ppp: ${widget.product}");
-      NewProductProvider.specifications
-          .add({"title": "Type", "value": widget.product.subCat});
-      for (var x in widget.product.specifications) {
-        NewProductProvider.specifications.add(x);
-      }
-      print("${NewProductProvider.specifications}");
+      EditProductProvider.specifications
+          .insert(0, {"title": "Type", "value": widget.product.subCat});
+      // for (var x in widget.product.specifications) {
+      //   EditProductProvider.specifications.add(x);
+      // }
+      // print("zz${EditProductProvider.specifications}");
+      // print(
+      //     "zzz: ${EditProductProvider.fullSetPrice} ${double.parse(widget.product.mrp.toString())}");
       loading = false;
     });
   }
@@ -168,22 +171,22 @@ class _EditProductState extends State<EditProduct> {
                                     //////// PRODUCT INFO
 
                                     ProductInfo(),
-                                    SizedBox(height: 15),
+                                    SizedBox(height: 8),
 
                                     ///// Different Color images of PRODUCT
 
-                                    ((NewProductProvider.setSize != null) &&
-                                            (NewProductProvider.setSize > 0))
+                                    ((EditProductProvider.editColors != null) &&
+                                            (EditProductProvider
+                                                    .editColors.length >
+                                                0))
                                         ? DifferentColorImage()
                                         : Container(),
 
-                                    SizedBox(height: 5),
-
                                     //// MIN ORDER AMOUNT and PRICE
 
-                                    if ((NewProductProvider.setSize != null) &&
-                                        (NewProductProvider.setSize >= 4) &&
-                                        (NewProductProvider.setSize <= 24))
+                                    if ((EditProductProvider.setSize != null) &&
+                                        (EditProductProvider.setSize >= 4) &&
+                                        (EditProductProvider.setSize <= 24))
                                       MinOrderAmountAndPrice(),
 
                                     SizedBox(height: 5),
@@ -248,7 +251,7 @@ class _UploadButtonState extends State<UploadButton> {
 
   loadparameters() async {
     for (dynamic x in MerchantHome.categoriess) {
-      if (x == NewProductProvider.category) {
+      if (x == EditProductProvider.category) {
         s = x["parameters"];
         break;
       }
@@ -258,13 +261,13 @@ class _UploadButtonState extends State<UploadButton> {
   Future<bool> validateSpecs() async {
     await loadparameters();
     for (int i = 0; i < s.length; i++) {
-      if (NewProductProvider.specifications[i]["value"].length == 0) {
+      if (EditProductProvider.specifications[i]["value"].length == 0) {
         Toast().notifyErr("Invalid ${s[i]} in Specifications");
         return false;
       }
     }
-    if (NewProductProvider.specifications[0]["value"] == null ||
-        NewProductProvider.specifications[0]["value"].length == 0) {
+    if (EditProductProvider.specifications[0]["value"] == null ||
+        EditProductProvider.specifications[0]["value"].length == 0) {
       Toast().notifyErr("Select at least one Type in");
     }
     print("Specs validated");
@@ -299,7 +302,7 @@ class _UploadButtonState extends State<UploadButton> {
                     //       child: Text(
                     //         "I agree that product is NOT already uploaded.",
                     //         style:
-                    //             textStyle1(13, Colors.black, FontWeight.w500),
+                    //             textStyle1(13, Colors.black, FontWeight.normal),
                     //       ),
                     //       // Text("All the info is correct and sufficient quatity is available."),
                     //     ),
@@ -330,8 +333,8 @@ class _UploadButtonState extends State<UploadButton> {
                             width: MediaQuery.of(context).size.width * 0.6,
                             child: Text(
                               "All the info is correct and sufficient quatity is available.",
-                              style:
-                                  textStyle1(13, Colors.black, FontWeight.w500),
+                              style: textStyle1(
+                                  13, Colors.black, FontWeight.normal),
                             ),
                             // Text("All the info is correct and sufficient quatity is available."),
                           ),
@@ -366,12 +369,13 @@ class _UploadButtonState extends State<UploadButton> {
                       child: Container(
                         padding: EdgeInsets.fromLTRB(30, 5, 30, 5),
                         decoration: BoxDecoration(
-                          color: Color(0xFF5B0D1B),
+                          color: Color(0xFF811111),
                           borderRadius: BorderRadius.all(Radius.circular(8)),
                         ),
                         child: Text(
                           "Confirm",
-                          style: textStyle(15, Colors.white),
+                          style:
+                              textStyle1(13, Colors.white, FontWeight.normal),
                         ),
                       ),
                     ),
@@ -384,45 +388,45 @@ class _UploadButtonState extends State<UploadButton> {
       },
     );
     print(
-        "-->\nimages-\n${NewProductProvider.editImages}\ncolors\n${NewProductProvider.editColors}\n");
-    if (NewProductProvider.title.length == 0) {
+        "-->\nimages-\n${EditProductProvider.editImages}\ncolors\n${EditProductProvider.editColors}\n");
+    if (EditProductProvider.title.length == 0) {
       Toast().notifyErr("Invalid Title");
       return false;
     }
-    if (NewProductProvider.category.length == 0) {
+    if (EditProductProvider.category.length == 0) {
       Toast().notifyErr("Invalid Category");
       return false;
     }
-    if (NewProductProvider.setSize < 4 || NewProductProvider.setSize > 24) {
+    if (EditProductProvider.setSize < 4 || EditProductProvider.setSize > 24) {
       Toast().notifyErr("Invalid Number of Colors");
       return false;
     }
-    if (NewProductProvider.description.length == 0) {
+    if (EditProductProvider.description.length == 0) {
       Toast().notifyErr("Invalid Description");
       return false;
     }
-    if (NewProductProvider.editImages.contains(null) ||
-        NewProductProvider.editImages.length < 4) {
+    if (EditProductProvider.editImages.contains(null) ||
+        EditProductProvider.editImages.length < 4) {
       Toast().notifyErr("Choose all main images");
       return false;
     }
-    if (NewProductProvider.editColors.contains(null) ||
-        NewProductProvider.editColors.length < NewProductProvider.setSize) {
+    if (EditProductProvider.editColors.contains(null) ||
+        EditProductProvider.editColors.length < EditProductProvider.setSize) {
       Toast().notifyErr("Choose all set images");
       return false;
     }
-    if (NewProductProvider.stockAvailability == 0) {
+    if (EditProductProvider.stockAvailability == 0) {
       Toast().notifyErr("Invalid Stock Availability");
       return false;
     }
-    if (NewProductProvider.min > NewProductProvider.setSize ||
-        NewProductProvider.min <= 0) {
+    if (EditProductProvider.min > EditProductProvider.setSize ||
+        EditProductProvider.min <= 0) {
       Toast().notifyErr("Invalid Set Size");
       return false;
     }
 
     for (var d in ['L', 'B', 'H']) {
-      if (NewProductProvider.fullSetSize[d] < 1) {
+      if (EditProductProvider.fullSetSize[d] < 1) {
         Toast().notifyErr("Invalid Set $d");
         return false;
       }
@@ -447,31 +451,31 @@ class _UploadButtonState extends State<UploadButton> {
           List<String> imageUrls = [], colorUrls = [];
 
           var specs = [];
-          print("specs: ${NewProductProvider.specifications}");
-          for (var x in NewProductProvider.specifications) {
+          print("specs: ${EditProductProvider.specifications}");
+          for (var x in EditProductProvider.specifications) {
             if (x["title"] == "Type") continue;
             specs.add(x);
           }
 
           Map<String, dynamic> data = {
-            "title": NewProductProvider.title,
-            "category": NewProductProvider.category,
-            // "subCat": NewProductProvider.specifications[0]["value"],
-            "mrp": NewProductProvider.fullSetPrice,
+            "title": EditProductProvider.title,
+            "category": EditProductProvider.category,
+            // "subCat": EditProductProvider.specifications[0]["value"],
+            "mrp": EditProductProvider.fullSetPrice,
             'discount': false,
             'discountValue': 0,
             'userContact': contact,
-            'description': NewProductProvider.description,
-            // 'totalSet': NewProductProvider.setSize,
-            'min': NewProductProvider.min,
-            'stockAvailability': NewProductProvider.stockAvailability,
+            'description': EditProductProvider.description,
+            // 'totalSet': EditProductProvider.setSize,
+            'min': EditProductProvider.min,
+            'stockAvailability': EditProductProvider.stockAvailability,
             'resellerCrateAvailability': 0,
-            // 'images': NewProductProvider.editImages,
+            // 'images': EditProductProvider.editImages,
 
-            'fullSetPrice': NewProductProvider.fullSetPrice,
+            'fullSetPrice': EditProductProvider.fullSetPrice,
 
-            'fullSetSize': NewProductProvider.fullSetSize,
-            // 'colors': NewProductProvider.editColors,
+            'fullSetSize': EditProductProvider.fullSetSize,
+            // 'colors': EditProductProvider.editColors,
             'specifications': specs,
           };
           print("newP-> $data");
@@ -490,9 +494,9 @@ class _UploadButtonState extends State<UploadButton> {
           //   _uploadingImage = true;
           //   _imageCounter = 0;
           // });
-          // for (int i = 0; i < NewProductProvider.editImages.length; i++) {
-          //   print("uploading main image ${NewProductProvider.editImages[i]}");
-          //   String ex = NewProductProvider.editImages[i].absolute
+          // for (int i = 0; i < EditProductProvider.editImages.length; i++) {
+          //   print("uploading main image ${EditProductProvider.editImages[i]}");
+          //   String ex = EditProductProvider.editImages[i].absolute
           //       .toString()
           //       .split('.')
           //       .last
@@ -500,7 +504,7 @@ class _UploadButtonState extends State<UploadButton> {
           //   String name = (id + "-main-" + i.toString() + "." + ex).toString();
 
           //   var urls =
-          //       await AWS().uploadImage(NewProductProvider.editImages[i], name);
+          //       await AWS().uploadImage(EditProductProvider.editImages[i], name);
           //   if (urls['success'] == false) {
           //     Toast().notifyErr("Error in uploading images.\nUpload again");
           //     await MerchantApi().deleteProduct({'_id': id});
@@ -513,16 +517,16 @@ class _UploadButtonState extends State<UploadButton> {
           //     _imageCounter = _imageCounter + 1;
           //   });
           // }
-          // for (int i = 0; i < NewProductProvider.editColors.length; i++) {
-          //   String ex = NewProductProvider.editColors[i].absolute
+          // for (int i = 0; i < EditProductProvider.editColors.length; i++) {
+          //   String ex = EditProductProvider.editColors[i].absolute
           //       .toString()
           //       .split('.')
           //       .last
           //       .split("'")[0];
           //   String name = (id + "-color-" + i.toString() + "." + ex).toString();
-          //   print("uploading color image ${NewProductProvider.editColors[i]}");
+          //   print("uploading color image ${EditProductProvider.editColors[i]}");
           //   var urls =
-          //       await AWS().uploadImage(NewProductProvider.editColors[i], name);
+          //       await AWS().uploadImage(EditProductProvider.editColors[i], name);
           //   if (urls['success'] == false) {
           //     Toast().notifyErr("Error in uploading images.\nUpload again");
           //     await MerchantApi().deleteProduct({'_id': id});
@@ -600,10 +604,10 @@ class _UploadButtonState extends State<UploadButton> {
                     "Uploading images: " +
                         _imageCounter.toString() +
                         "/" +
-                        (NewProductProvider.setSize +
-                                NewProductProvider.editImages.length)
+                        (EditProductProvider.setSize +
+                                EditProductProvider.editImages.length)
                             .toString(),
-                    style: textStyle(13, Colors.black54),
+                    style: textStyle1(13, Colors.black54, FontWeight.normal),
                   )
                 : Container(),
             SizedBox(height: 10),
@@ -613,7 +617,7 @@ class _UploadButtonState extends State<UploadButton> {
                 margin: EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(20)),
-                  color: Color(0xFF5B0D1B),
+                  color: Color(0xFF811111),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                 child: Text(
@@ -622,8 +626,8 @@ class _UploadButtonState extends State<UploadButton> {
                   style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                 ),
@@ -648,7 +652,7 @@ class _FinalPriceState extends State<FinalPrice> {
   bool less = false, loading = true;
   void getPrice() {
     setState(() {
-      less = (NewProductProvider.min < NewProductProvider.setSize);
+      less = (EditProductProvider.min < EditProductProvider.setSize);
       if (less) {
         halfSetPrice = Math().getHalfSetPrice().toString();
       }
@@ -683,7 +687,8 @@ class _FinalPriceState extends State<FinalPrice> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text("Final price to Customer",
-                        style: textStyle(18, Color(0xFF5B0D1B))),
+                        style: textStyle1(
+                            18, Color(0xFF811111), FontWeight.normal)),
                     GestureDetector(
                       onTap: () {
                         getPrice();
@@ -694,8 +699,11 @@ class _FinalPriceState extends State<FinalPrice> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                             color: Colors.grey[200]),
-                        child: Text("Get Price",
-                            style: textStyle(10, Colors.black54)),
+                        child: Text(
+                          "Get Price",
+                          style:
+                              textStyle1(10, Colors.black54, FontWeight.normal),
+                        ),
                       ),
                     ),
                   ],
@@ -719,11 +727,13 @@ class _FinalPriceState extends State<FinalPrice> {
                           children: <Widget>[
                             Text(
                               "Half set Price",
-                              style: textStyle(13, Colors.black87),
+                              style: textStyle1(
+                                  13, Colors.black54, FontWeight.normal),
                             ),
                             Text(
                               halfSetPrice,
-                              style: textStyle(13, Colors.black87),
+                              style: textStyle1(
+                                  13, Colors.black54, FontWeight.normal),
                             ),
                           ],
                         ),
@@ -732,11 +742,13 @@ class _FinalPriceState extends State<FinalPrice> {
                         children: <Widget>[
                           Text(
                             "Full Set Price",
-                            style: textStyle(13, Colors.black87),
+                            style: textStyle1(
+                                13, Colors.black54, FontWeight.normal),
                           ),
                           Text(
                             fullSetPrice,
-                            style: textStyle(13, Colors.black87),
+                            style: textStyle1(
+                                13, Colors.black54, FontWeight.normal),
                           ),
                         ],
                       ),
@@ -746,6 +758,78 @@ class _FinalPriceState extends State<FinalPrice> {
               ],
             ),
           );
+  }
+}
+
+class PreviousSelectedTypes extends StatefulWidget {
+  const PreviousSelectedTypes({Key key, this.types}) : super(key: key);
+  final types;
+
+  @override
+  _PreviousSelectedTypesState createState() => _PreviousSelectedTypesState();
+}
+
+class _PreviousSelectedTypesState extends State<PreviousSelectedTypes> {
+  bool loading = true;
+  List<Widget> widgets = [];
+  void loadVars() {
+    setState(() {
+      loading = true;
+    });
+    widgets = [];
+    widget.types.forEach((type) {
+      widgets.add(
+        Container(
+          decoration: BoxDecoration(
+            color: Color(0xff811111).withOpacity(0.4),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: EdgeInsets.fromLTRB(14, 7, 14, 7),
+          child: Text(
+            type.toString(),
+            style: textStyle1(
+              12,
+              Color(0xff811111),
+              FontWeight.normal,
+            ),
+          ),
+        ),
+      );
+    });
+
+    setState(() {
+      loading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // loadVars();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    loadVars();
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        children: <Widget>[
+          Container(
+            alignment: Alignment.centerLeft,
+            child: Text("Selected Types:",
+                style: textStyle1(13, Colors.black, FontWeight.normal)),
+          ),
+          SizedBox(height: 5),
+          loading
+              ? Text("Loading")
+              : Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(children: widgets),
+                ),
+        ],
+      ),
+    );
   }
 }
 
@@ -763,17 +847,19 @@ class _SpecificationsState extends State<Specifications>
   List _parameters = [];
   List<String> _typeData = [], _categories = [];
   String _category;
-  List<TextEditingController> _textControllers = new List();
+  List<TextEditingController> _textControllers = [];
   AnimationController _controller;
   Animation _animation;
 
   List<FocusNode> _focusNodes = new List();
-
+  List<dynamic> subcats = [];
   bool hasSpecs = true;
 
   void loadVars() {
     setState(() {
-      _category = NewProductProvider.category;
+      subcats = EditProductProvider.specifications[0]["value"];
+      print("subcats: $subcats");
+      _category = EditProductProvider.category;
       Set<String> _data = {};
       List mechantHomeCategories =
           (MerchantHome.categoriess != null) ? MerchantHome.categoriess : [];
@@ -796,7 +882,7 @@ class _SpecificationsState extends State<Specifications>
       }
       if (_category.length == 0) {
         _category = _categories[0];
-        NewProductProvider.category = _category;
+        EditProductProvider.category = _category;
         _parameters = mechantHomeCategories[0]["parameters"];
       }
 
@@ -809,12 +895,12 @@ class _SpecificationsState extends State<Specifications>
 
       // print("type $_typeData");
 
-      _specs = NewProductProvider.specifications;
+      _specs = EditProductProvider.specifications;
 
       // print("specs $_specs");
 
       dynamic tempSpecs = {};
-      for (dynamic x in NewProductProvider.specifications) {
+      for (dynamic x in EditProductProvider.specifications) {
         tempSpecs[x["title"]] = x["value"];
       }
 
@@ -825,12 +911,12 @@ class _SpecificationsState extends State<Specifications>
           },
         ).toList();
 
-        NewProductProvider.specifications.add({"title": "Type", "value": []});
+        EditProductProvider.specifications.add({"title": "Type", "value": []});
         for (var x in _specs) {
-          NewProductProvider.specifications.add(x);
+          EditProductProvider.specifications.add(x);
         }
 
-        // print("specs2: $_specs ${NewProductProvider.specifications}");
+        // print("specs2: $_specs ${EditProductProvider.specifications}");
       } else {
         _specs.removeAt(0);
         // print("specs3: $_specs");
@@ -844,7 +930,7 @@ class _SpecificationsState extends State<Specifications>
 
       // print("specs $_specs");
 
-      // print("specs ${NewProductProvider.specifications}");
+      // print("specs ${EditProductProvider.specifications}");
 
       _controller = AnimationController(
           vsync: this, duration: Duration(milliseconds: 300));
@@ -890,10 +976,10 @@ class _SpecificationsState extends State<Specifications>
             (parameter) => {"title": parameter, "value": ""},
           )
           .toList();
-      NewProductProvider.specifications = [];
-      NewProductProvider.specifications.add({"title": "Type", "value": []});
+      EditProductProvider.specifications = [];
+      EditProductProvider.specifications.add({"title": "Type", "value": []});
       for (var x in _specs) {
-        NewProductProvider.specifications.add(x);
+        EditProductProvider.specifications.add(x);
       }
     });
 
@@ -929,6 +1015,7 @@ class _SpecificationsState extends State<Specifications>
 
   @override
   Widget build(BuildContext context) {
+    // print("${EditProductProvider.specifications}");
     return loading
         ? Text("Loading")
         : Container(
@@ -937,9 +1024,12 @@ class _SpecificationsState extends State<Specifications>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  "Specifications",
-                  style: textStyle(18, Color(0xFF5B0D1B)),
+                Container(
+                  padding: EdgeInsets.only(left: 5),
+                  child: Text(
+                    "Details",
+                    style: textStyle1(15, Color(0xFF811111), FontWeight.normal),
+                  ),
                 ),
                 SizedBox(height: 10),
                 hasSpecs
@@ -960,65 +1050,178 @@ class _SpecificationsState extends State<Specifications>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  "Category",
-                                  style: textStyle(13, Colors.black),
+                                  "Category: ",
+                                  style: textStyle1(
+                                      13, Colors.black, FontWeight.normal),
                                 ),
-                                DropdownButton<String>(
-                                  style: TextStyle(color: Colors.black),
-                                  underline: Container(
-                                    height: 2,
-                                    color: Colors.black,
+                                SizedBox(width: 20),
+                                Expanded(
+                                  child: DropdownSearch<String>(
+                                    mode: Mode.MENU,
+
+                                    showSelectedItems: true,
+                                    items: _categories.map((e) {
+                                      return e.toString();
+                                    }).toList(),
+                                    // label: "Category",
+                                    selectedItem: EditProductProvider.category,
+                                    // selectedItem: pincodeAddress[0]["Name"],
+                                    onChanged: (val) async {
+                                      setState(() {
+                                        print("object $val");
+                                        _category = val;
+                                        EditProductProvider.category =
+                                            _category;
+                                      });
+                                      await buildSpecs();
+                                    },
+                                    dropdownSearchBaseStyle: textStyle1(
+                                      11,
+                                      Colors.black,
+                                      FontWeight.normal,
+                                    ),
+                                    dropdownButtonBuilder:
+                                        (BuildContext context) {
+                                      return Padding(
+                                        padding:
+                                            EdgeInsets.fromLTRB(0, 10, 15, 10),
+                                        child: Icon(Icons.arrow_downward,
+                                            size: 20),
+                                      );
+                                    },
+
+                                    popupItemBuilder: (BuildContext context,
+                                        String s, bool sel) {
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              width: 1,
+                                              color: Colors.black12,
+                                            ),
+                                          ),
+                                        ),
+                                        margin: EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        padding:
+                                            EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                        child: Text(
+                                          s,
+                                          style: textStyle1(
+                                            13,
+                                            sel
+                                                ? Color(0xFF811111)
+                                                : Colors.black,
+                                            FontWeight.w500,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    dropdownBuilder:
+                                        (BuildContext context, String val) {
+                                      return Container(
+                                        child: Text(
+                                          (val ?? "Select"),
+                                          style: textStyle1(
+                                            13,
+                                            Colors.black,
+                                            FontWeight.normal,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    dropdownSearchDecoration: InputDecoration(
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          width: 1,
+                                          color: Colors.black54,
+                                        ),
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          width: 1,
+                                          color: Colors.black54,
+                                        ),
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      labelStyle: textStyle1(
+                                        13,
+                                        Colors.black,
+                                        FontWeight.normal,
+                                      ),
+                                      hintStyle: textStyle1(
+                                          13, Colors.black, FontWeight.w500),
+                                      isDense: true,
+                                      contentPadding:
+                                          EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                    ),
                                   ),
-                                  items: _categories.map((String e) {
-                                    return DropdownMenuItem<String>(
-                                      value: e,
-                                      child: Text(e),
-                                    );
-                                  }).toList(),
-                                  onChanged: (val) async {
-                                    setState(() {
-                                      print("object $val");
-                                      _category = val;
-                                      NewProductProvider.category = _category;
-                                    });
-                                    await buildSpecs();
-                                  },
-                                  value: _category,
                                 ),
                               ],
                             ),
                             SizedBox(height: 10),
-                            Align(
+                            Container(
+                              padding: EdgeInsets.only(top: 10),
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                "Type",
-                                style: textStyle(13, Colors.black),
+                                "Tags:",
+                                style: textStyle1(
+                                    13, Colors.black, FontWeight.normal),
                               ),
                             ),
                             SizedBox(height: 10),
                             MultiSelectDialogField(
-                              selectedItemsTextStyle:
-                                  textStyle(13, Colors.white),
-                              searchTextStyle: textStyle(13, Colors.black),
+                              selectedItemsTextStyle: textStyle1(
+                                  13, Colors.white, FontWeight.normal),
+                              searchTextStyle: textStyle1(
+                                  13, Colors.black, FontWeight.normal),
                               items: _typeData
                                   .map((e) => MultiSelectItem(e, e))
                                   .toList(),
                               listType: MultiSelectListType.CHIP,
-                              selectedColor: Color(0xFF5B0D1B),
+                              selectedColor: Color(0xFF811111),
                               searchable: true,
                               decoration: BoxDecoration(
-                                color: Color(0xFF5B0D1B).withOpacity(0.1),
+                                color: Colors.transparent,
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(40)),
                                 border: Border.all(
-                                  color: Color(0xFF5B0D1B),
-                                  width: 2,
+                                  color: Colors.black54,
+                                  width: 1,
                                 ),
                               ),
+                              title: Text(
+                                "Styles",
+                                style: textStyle1(
+                                  15,
+                                  Colors.black,
+                                  FontWeight.w500,
+                                ),
+                              ),
+                              itemsTextStyle: textStyle1(
+                                12,
+                                Color(0xFF811111),
+                                FontWeight.w500,
+                              ),
+                              buttonText: Text(
+                                "Select",
+                                style: textStyle1(
+                                  13,
+                                  Colors.black54,
+                                  FontWeight.w500,
+                                ),
+                              ),
+                              searchHint: "Style",
+                              searchHintStyle: textStyle1(
+                                  13, Colors.black54, FontWeight.w500),
+                              initialValue: (subcats ?? []).map((e) {
+                                return e.toString();
+                              }).toList(),
                               onConfirm: (values) {
                                 setState(() {
                                   print("values $values");
-                                  NewProductProvider.specifications[0]
+                                  EditProductProvider.specifications[0]
                                       ["value"] = values;
                                 });
                               },
@@ -1037,7 +1240,8 @@ class _SpecificationsState extends State<Specifications>
                                         children: <Widget>[
                                           Text(
                                             _specs[i]["title"],
-                                            style: textStyle(13, Colors.black),
+                                            style: textStyle1(13, Colors.black,
+                                                FontWeight.normal),
                                           ),
                                           Container(
                                             margin: EdgeInsets.only(bottom: 10),
@@ -1053,7 +1257,7 @@ class _SpecificationsState extends State<Specifications>
                                               },
                                               child: Theme(
                                                 data: new ThemeData(
-                                                  primaryColor: Colors.black87,
+                                                  primaryColor: Colors.black54,
                                                 ),
                                                 child: new TextFormField(
                                                   controller:
@@ -1062,19 +1266,19 @@ class _SpecificationsState extends State<Specifications>
                                                   style: textStyle1(
                                                       13,
                                                       Colors.black,
-                                                      FontWeight.w500),
+                                                      FontWeight.normal),
                                                   onChanged: (val) {
                                                     setState(() {
                                                       _specs[i]["value"] =
                                                           _textControllers[i]
                                                               .text;
-                                                      NewProductProvider
+                                                      EditProductProvider
                                                                   .specifications[
                                                               i + 1]["value"] =
                                                           _textControllers[i]
                                                               .text;
                                                       print(
-                                                          "nrep: ${NewProductProvider.specifications}");
+                                                          "nrep: ${EditProductProvider.specifications}");
                                                     });
                                                   },
                                                   decoration:
@@ -1094,7 +1298,7 @@ class _SpecificationsState extends State<Specifications>
                         ),
                       )
                     : Text("No Specifications",
-                        style: textStyle(15, Colors.grey)),
+                        style: textStyle1(13, Colors.grey, FontWeight.normal)),
               ],
             ),
           );
@@ -1119,18 +1323,18 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
 
   void loadVars() {
     setState(() {
-      // _counter = NewProductProvider.setSize;
-      _setSizeController.text = NewProductProvider.min.toString();
-      _fullController.text = NewProductProvider.fullSetPrice.toString();
+      // _counter = EditProductProvider.setSize;
+      _setSizeController.text = EditProductProvider.min.toString();
+      _fullController.text = EditProductProvider.fullSetPrice.toString();
       for (int i = 0; i < 3; i++) {
         _dimensionsController.add(new TextEditingController());
       }
       _dimensionsController[0].text =
-          NewProductProvider.fullSetSize["L"].toString();
+          EditProductProvider.fullSetSize["L"].toString();
       _dimensionsController[1].text =
-          NewProductProvider.fullSetSize["B"].toString();
+          EditProductProvider.fullSetSize["B"].toString();
       _dimensionsController[2].text =
-          NewProductProvider.fullSetSize["H"].toString();
+          EditProductProvider.fullSetSize["H"].toString();
       loading = false;
     });
   }
@@ -1153,7 +1357,6 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 SizedBox(height: 10),
-                SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -1161,20 +1364,21 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: Theme(
                         data: new ThemeData(
-                          primaryColor: Colors.black87,
+                          primaryColor: Colors.black54,
                         ),
                         child: new TextFormField(
                           keyboardType:
                               TextInputType.numberWithOptions(decimal: false),
-                          style: textStyle1(15, Colors.black, FontWeight.w500),
+                          style:
+                              textStyle1(13, Colors.black, FontWeight.normal),
                           onChanged: (val) {
                             if (val.length > 0) {
                               setState(() {
-                                NewProductProvider.min = int.parse(val);
+                                EditProductProvider.min = int.parse(val);
                               });
                             } else {
                               setState(() {
-                                NewProductProvider.min = 0;
+                                EditProductProvider.min = 0;
                               });
                             }
                           },
@@ -1189,125 +1393,28 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: Theme(
                         data: new ThemeData(
-                          primaryColor: Colors.black87,
+                          primaryColor: Colors.black54,
                         ),
                         child: new TextFormField(
                           keyboardType:
                               TextInputType.numberWithOptions(decimal: true),
-                          style: textStyle1(15, Colors.black, FontWeight.w500),
+                          style:
+                              textStyle1(13, Colors.black, FontWeight.normal),
                           onChanged: (val) {
                             if (_fullController.text.length > 0) {
                               setState(() {
-                                NewProductProvider.fullSetPrice =
+                                EditProductProvider.fullSetPrice =
                                     double.parse(_fullController.text);
                               });
                             } else {
                               setState(() {
-                                NewProductProvider.fullSetPrice = 0.0;
+                                EditProductProvider.fullSetPrice = 0.0;
                               });
                             }
                           },
                           controller: _fullController,
                           decoration: textFormFieldInputDecorator(
                               "Set price", "Rupee (₹)"),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  children: <Widget>[
-                    Text(
-                      "Package Size: ",
-                      style: textStyle1(13, Colors.black87, FontWeight.w500),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Theme(
-                        data: new ThemeData(
-                          primaryColor: Colors.black87,
-                        ),
-                        child: new TextFormField(
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                          style: textStyle1(15, Colors.black, FontWeight.w500),
-                          onChanged: (val) {
-                            print("val L: $val");
-                            if (val.length > 0) {
-                              setState(() {
-                                NewProductProvider.fullSetSize['L'] =
-                                    double.parse(val);
-                              });
-                            } else {
-                              setState(() {
-                                NewProductProvider.fullSetSize['L'] = 0.0;
-                              });
-                            }
-                          },
-                          controller: _dimensionsController[0],
-                          decoration: textFormFieldInputDecorator("L", "cm",
-                              hpadding: 15),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 5),
-                    Expanded(
-                      flex: 1,
-                      child: Theme(
-                        data: new ThemeData(
-                          primaryColor: Colors.black87,
-                        ),
-                        child: new TextFormField(
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                          style: textStyle1(15, Colors.black, FontWeight.w500),
-                          onChanged: (val) {
-                            print("val B: $val");
-                            if (val.length > 0) {
-                              setState(() {
-                                NewProductProvider.fullSetSize['B'] =
-                                    double.parse(val);
-                              });
-                            } else {
-                              setState(() {
-                                NewProductProvider.fullSetSize['B'] = 0.0;
-                              });
-                            }
-                          },
-                          controller: _dimensionsController[1],
-                          decoration: textFormFieldInputDecorator("B", "cm",
-                              hpadding: 15),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 5),
-                    Expanded(
-                      flex: 1,
-                      child: Theme(
-                        data: new ThemeData(
-                          primaryColor: Colors.black87,
-                        ),
-                        child: new TextFormField(
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                          style: textStyle1(15, Colors.black, FontWeight.w500),
-                          onChanged: (val) {
-                            print("val H: $val");
-                            if (val.length > 0) {
-                              setState(() {
-                                NewProductProvider.fullSetSize['H'] =
-                                    double.parse(val);
-                              });
-                            } else {
-                              setState(() {
-                                NewProductProvider.fullSetSize['H'] = 0.0;
-                              });
-                            }
-                          },
-                          controller: _dimensionsController[2],
-                          decoration: textFormFieldInputDecorator("H", "cm",
-                              hpadding: 15),
                         ),
                       ),
                     ),
@@ -1355,20 +1462,13 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
         : Column(
             children: <Widget>[
               Container(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  "Choose pictures of ${NewProductProvider.setSize} colors:",
-                  style: textStyle(13, Colors.black54),
-                ),
-              ),
-              Container(
                 margin: EdgeInsets.symmetric(
                     vertical: MediaQuery.of(context).size.height * 0.01),
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height * 0.05,
                 child: ListView.builder(
-                  itemCount: NewProductProvider.editColors.length,
+                  itemCount: EditProductProvider.editColors.length,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
@@ -1387,7 +1487,7 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
                               width: (_selected == index) ? 2 : 0),
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
-                        child: (NewProductProvider.editColors[index] == null)
+                        child: (EditProductProvider.editColors[index] == null)
                             ? FittedBox(
                                 child: Icon(
                                   Icons.file_upload,
@@ -1398,7 +1498,7 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
                                 decoration: BoxDecoration(
                                   image: DecorationImage(
                                     // image: FileImage(File(
-                                    //     NewProductProvider.editColors[index].path)),
+                                    //     EditProductProvider.editColors[index].path)),
                                     image: CachedNetworkImageProvider(
                                         "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
                                   ),
@@ -1425,17 +1525,18 @@ class _ProductInfoState extends State<ProductInfo> {
   bool loading = true;
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descController = TextEditingController();
-  TextEditingController _setSizeController = TextEditingController();
+  TextEditingController _noOfColorsController = TextEditingController();
   TextEditingController _stockAvailabilityController = TextEditingController();
   Timer _debounce;
 
   void loadVars() {
     setState(() {
-      _titleController.text = NewProductProvider.title;
-      _descController.text = NewProductProvider.description;
-      _setSizeController.text = NewProductProvider.setSize.toString();
+      _titleController.text = EditProductProvider.title;
+      _descController.text = EditProductProvider.description;
+      _noOfColorsController.text =
+          EditProductProvider.editColors.length.toString();
       _stockAvailabilityController.text =
-          NewProductProvider.stockAvailability.toString();
+          EditProductProvider.stockAvailability.toString();
       loading = false;
     });
   }
@@ -1454,22 +1555,78 @@ class _ProductInfoState extends State<ProductInfo> {
         ? Text("Loading")
         : Column(
             children: <Widget>[
+              // PRODUCT REFERENCE
               Theme(
                 data: new ThemeData(
-                  primaryColor: Colors.black87,
+                  primaryColor: Colors.black54,
                 ),
                 child: new TextFormField(
                   style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                       color: Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  initialValue: EditProductProvider.reference,
+                  enabled: false,
+                  decoration: new InputDecoration(
+                    isDense: true,
+                    border: OutlineInputBorder(
+                      borderSide: new BorderSide(
+                        color: Colors.black,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    contentPadding: new EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 8,
+                    ),
+                    labelText: "Reference ID",
+                    hintText: "Enter Reference ID",
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: new BorderSide(
+                        color: Colors.black54,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    labelStyle:
+                        textStyle1(13, Colors.black54, FontWeight.normal),
+                    hintStyle: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 15),
+              Theme(
+                data: new ThemeData(
+                  primaryColor: Colors.black54,
+                ),
+                child: new TextFormField(
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 13,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                   onChanged: (val) {
-                    setState(() {
-                      NewProductProvider.title = _titleController.text;
-                    });
+                    if (val.length > 25) {
+                      Toast().notifyErr("Character limit 25");
+                      val = val.substring(0, 25);
+
+                      _titleController.text = val;
+                      _titleController.selection =
+                          TextSelection.collapsed(offset: val.length);
+                    } else {
+                      EditProductProvider.title = _titleController.text;
+                    }
                   },
                   controller: _titleController,
                   decoration: new InputDecoration(
@@ -1493,7 +1650,8 @@ class _ProductInfoState extends State<ProductInfo> {
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(30)),
                     ),
-                    labelStyle: textStyle(13, Colors.black54),
+                    labelStyle:
+                        textStyle1(13, Colors.black54, FontWeight.normal),
                     hintStyle: GoogleFonts.poppins(
                       textStyle: TextStyle(
                         color: Colors.black54,
@@ -1505,25 +1663,27 @@ class _ProductInfoState extends State<ProductInfo> {
                 ),
               ),
 
-              SizedBox(height: 10),
+              SizedBox(height: 15),
 
               // DESCRIPTION
 
               Theme(
                 data: new ThemeData(
-                  primaryColor: Colors.black87,
+                  primaryColor: Colors.black54,
                 ),
                 child: new TextFormField(
+                  minLines: 1,
+                  maxLines: 3,
                   style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                       color: Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                   onChanged: (val) {
                     setState(() {
-                      NewProductProvider.description = _descController.text;
+                      EditProductProvider.description = _descController.text;
                     });
                   },
                   controller: _descController,
@@ -1548,19 +1708,20 @@ class _ProductInfoState extends State<ProductInfo> {
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(30)),
                     ),
-                    labelStyle: textStyle(13, Colors.black54),
+                    labelStyle:
+                        textStyle1(13, Colors.black54, FontWeight.normal),
                     hintStyle: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w300,
+                      textStyle: textStyle1(
+                        13,
+                        Colors.black54,
+                        FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
               ),
 
-              SizedBox(height: 10),
+              SizedBox(height: 15),
 
               // SET SIZE
 
@@ -1571,7 +1732,7 @@ class _ProductInfoState extends State<ProductInfo> {
                     width: MediaQuery.of(context).size.width * 0.4,
                     child: Theme(
                       data: new ThemeData(
-                        primaryColor: Colors.black87,
+                        primaryColor: Colors.black54,
                       ),
                       child: new TextFormField(
                         keyboardType:
@@ -1579,33 +1740,33 @@ class _ProductInfoState extends State<ProductInfo> {
                         style: GoogleFonts.poppins(
                           textStyle: TextStyle(
                             color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                         onChanged: (val) {
                           setState(() {
-                            if (_setSizeController.text.length > 0) {
-                              NewProductProvider.setSize =
-                                  int.parse(_setSizeController.text);
-                              if (NewProductProvider.setSize > 24) {
-                                NewProductProvider.setSize = 24;
-                                _setSizeController.text = "24";
+                            if (_noOfColorsController.text.length > 0) {
+                              EditProductProvider.setSize =
+                                  int.parse(_noOfColorsController.text);
+                              if (EditProductProvider.setSize > 24) {
+                                EditProductProvider.setSize = 24;
+                                _noOfColorsController.text = "24";
                               }
-                              NewProductProvider.editColors = [];
+                              EditProductProvider.editColors = [];
                               for (int i = 0;
-                                  i < NewProductProvider.setSize;
+                                  i < EditProductProvider.setSize;
                                   i++) {
-                                NewProductProvider.editColors.add(null);
+                                EditProductProvider.editColors.add(null);
                               }
                             }
                           });
                         },
-                        controller: _setSizeController,
+                        controller: _noOfColorsController,
                         decoration: new InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: new BorderSide(
-                              color: Colors.black,
+                              color: Colors.black54,
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(30)),
                           ),
@@ -1624,7 +1785,8 @@ class _ProductInfoState extends State<ProductInfo> {
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(30)),
                           ),
-                          labelStyle: textStyle(13, Colors.black54),
+                          labelStyle:
+                              textStyle1(13, Colors.black54, FontWeight.normal),
                           hintStyle: GoogleFonts.poppins(
                             textStyle: TextStyle(
                               color: Colors.black54,
@@ -1640,7 +1802,7 @@ class _ProductInfoState extends State<ProductInfo> {
                     width: MediaQuery.of(context).size.width * 0.4,
                     child: Theme(
                       data: new ThemeData(
-                        primaryColor: Colors.black87,
+                        primaryColor: Colors.black54,
                       ),
                       child: new TextFormField(
                         keyboardType:
@@ -1648,14 +1810,14 @@ class _ProductInfoState extends State<ProductInfo> {
                         style: GoogleFonts.poppins(
                           textStyle: TextStyle(
                             color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                         onChanged: (val) {
                           setState(() {
                             if (_stockAvailabilityController.text.length > 0) {
-                              NewProductProvider.stockAvailability =
+                              EditProductProvider.stockAvailability =
                                   int.parse(_stockAvailabilityController.text);
                             }
                           });
@@ -1680,7 +1842,8 @@ class _ProductInfoState extends State<ProductInfo> {
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(30)),
                           ),
-                          labelStyle: textStyle(13, Colors.black54),
+                          labelStyle:
+                              textStyle1(13, Colors.black54, FontWeight.normal),
                           hintStyle: GoogleFonts.poppins(
                             textStyle: TextStyle(
                               color: Colors.black54,
@@ -1730,7 +1893,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
   void initState() {
     super.initState();
     setState(() {
-      _image = NewProductProvider.editImages;
+      _image = EditProductProvider.editImages;
     });
   }
 
@@ -1874,7 +2037,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
                       margin: EdgeInsets.symmetric(horizontal: 5),
                       child: Icon(
                         Icons.circle,
-                        size: (imagePageIndex == index) ? 15 : 10,
+                        size: (imagePageIndex == index) ? 13 : 10,
                         color: Colors.grey,
                       ),
                     );
@@ -1938,7 +2101,7 @@ class _TempState extends State<Temp> {
       _image = resultImage;
 
       // im = image;
-      // NewProductProvider.editImages = _image;
+      // EditProductProvider.editImages = _image;
     });
   }
 

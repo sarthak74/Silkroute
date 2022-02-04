@@ -44,27 +44,30 @@ class _AllProductsState extends State<AllProducts> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                "YOUR PRODUCTS",
-                style: textStyle1(
-                  18,
-                  Colors.black54,
-                  FontWeight.bold,
+          Container(
+            padding: EdgeInsets.only(left: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "YOUR PRODUCTS",
+                  style: textStyle1(
+                    14,
+                    Colors.black54,
+                    FontWeight.w500,
+                  ),
                 ),
-              ),
-              SizedBox(width: 10),
-              GestureDetector(
-                onTap: null,
-                child: Icon(
-                  Icons.arrow_downward,
-                  size: 20,
-                  color: Colors.black54,
+                SizedBox(width: 10),
+                GestureDetector(
+                  onTap: null,
+                  child: Icon(
+                    Icons.arrow_downward,
+                    size: 20,
+                    color: Colors.black54,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(
             height: ((_products == null || _products.length == 0) &&

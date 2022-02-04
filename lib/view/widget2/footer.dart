@@ -78,14 +78,17 @@ class _FooterState extends State<Footer> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context)
-                              .pushNamed("/merchant_dashboard");
+                          Navigator.of(context).pushNamed("/merchant_packages");
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.dashboard),
-                            Text("Dashboard"),
+                            Image.asset(
+                              'assets/images/crateicon.png',
+                              width: 25,
+                              height: 25,
+                            ),
+                            Text("Shipping"),
                           ],
                         ),
                       ),

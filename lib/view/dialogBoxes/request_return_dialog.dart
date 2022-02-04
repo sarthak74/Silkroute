@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/constants/values.dart';
 import 'package:silkroute/main.dart';
 import 'package:silkroute/methods/toast.dart';
@@ -7,6 +8,8 @@ import 'package:silkroute/model/services/OrderApi.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
 import 'package:silkroute/view/widget/text_field.dart';
+
+var userType;
 
 class RequestReturnDialog extends StatefulWidget {
   const RequestReturnDialog(this.orderDetails, this.selected,
@@ -23,9 +26,17 @@ class RequestReturnDialog extends StatefulWidget {
 
 class _RequestReturnDialogState extends State<RequestReturnDialog> {
   bool loading = true, requesting = false;
-  dynamic items = [], bill = {}, price = [], quantity = [];
+  dynamic items = [],
+      bill = {},
+      price = [],
+      quantity = [],
+      merchantBill = {},
+      merchantPrice = [];
 
-  void loadVars() {
+  void loadVars() async {
+    LocalStorage storage = await LocalStorage('silkroute');
+    userType = (await storage.getItem('userType')).toString();
+    // print("det: ${widget.orderDetails['items'][0]}");
     setState(() {
       bill['totalValue'] = 0;
       for (int i = 0; i < widget.selected.length; i++) {
@@ -48,6 +59,39 @@ class _RequestReturnDialogState extends State<RequestReturnDialog> {
       for (int i = 0; i < title.length; i++) {
         price.add({"title": title[i], "value": bill[keys[i]]});
       }
+
+      /*** Merchant Bill ***/
+      merchantBill['totalValue'] = 0;
+      merchantBill['gst'] = 0;
+      int df = widget.orderDetails['items'][0]['merchantPaymentAmount'] -
+          widget.orderDetails['items'][0]['merchantInputAmount'];
+      int gstp =
+          ((df * 100) / widget.orderDetails['items'][0]['merchantInputAmount'])
+              .round();
+
+      for (int i = 0; i < widget.orderDetails['items'].length; i++) {
+        merchantBill['totalValue'] += (widget.orderDetails['items'][i]
+                ['merchantInputAmount'] *
+            widget.orderDetails['items'][i]['quantity']);
+      }
+
+      merchantBill['gst'] = ((merchantBill['totalValue'] * gstp) / 100).round();
+      merchantBill['totalCost'] =
+          merchantBill['gst'] + merchantBill['totalValue'];
+      // print("userType: ${merchantBill['gst']} $");
+      if (userType.toString() == "Manufacturer") {
+        merchantPrice = [
+          {
+            "title": "Total Value",
+            "value": merchantBill['totalValue'],
+          },
+          {
+            "title": "GST",
+            "value": merchantBill['gst'],
+          }
+        ];
+      }
+
       loading = false;
     });
   }
@@ -118,7 +162,11 @@ class _RequestReturnDialogState extends State<RequestReturnDialog> {
                   Container(
                     padding: EdgeInsets.only(left: 10),
                     child: Text(
-                      "Request Return",
+                      userType == "Reseller"
+                          ? (widget.enterQuantity
+                              ? "Request Return"
+                              : "Return Details")
+                          : "Refund Details",
                       style: textStyle1(
                         13,
                         Colors.black,
@@ -136,7 +184,7 @@ class _RequestReturnDialogState extends State<RequestReturnDialog> {
                         child: Icon(
                           Icons.close,
                           color: Colors.black87,
-                          size: 30,
+                          size: 20,
                         ),
                       ),
                     ),
@@ -159,9 +207,12 @@ class _RequestReturnDialogState extends State<RequestReturnDialog> {
                         if (widget.enterQuantity)
                           GetDimensions(dimensions: dimensions),
                         if (widget.enterQuantity) SizedBox(height: 20),
-                        OrderPriceDetailsList(price, bill['totalCost']),
+                        (userType == "Reseller")
+                            ? OrderPriceDetailsList(price, bill['totalCost'])
+                            : OrderPriceDetailsList(
+                                merchantPrice, merchantBill['totalCost']),
                         SizedBox(height: 10),
-                        widget.enterQuantity
+                        ((userType == "Reseller") && widget.enterQuantity)
                             ? GestureDetector(
                                 onTap: () async {
                                   await requestReturnHandler();
@@ -183,6 +234,9 @@ class _RequestReturnDialogState extends State<RequestReturnDialog> {
                                 ),
                               )
                             : SizedBox(height: 5),
+                        (userType == "Manufacturer")
+                            ? RefundButton()
+                            : SizedBox(height: 0),
                       ],
                     ),
             ],
@@ -190,6 +244,39 @@ class _RequestReturnDialogState extends State<RequestReturnDialog> {
         ),
       ),
     );
+  }
+}
+
+class RefundButton extends StatefulWidget {
+  const RefundButton({Key key}) : super(key: key);
+
+  @override
+  _RefundButtonState createState() => _RefundButtonState();
+}
+
+class _RefundButtonState extends State<RefundButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: <Widget>[
+      InkWell(
+        onTap: () {},
+        child: Container(
+          padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+          decoration: BoxDecoration(
+            color: Color(0xff811111),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            "Refund Now",
+            style: textStyle1(
+              12,
+              Colors.white,
+              FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    ]);
   }
 }
 
@@ -298,44 +385,64 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
   @override
   Widget build(BuildContext context) {
     price = widget.price;
-    return Container(
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: <Widget>[
-          ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: price.length,
-            padding: EdgeInsets.all(10),
-            itemBuilder: (BuildContext context, int index) {
-              return PriceRow(
-                title: price[index]['title'],
-                value: ("₹" + (price[index]['value']).toString()).toString(),
-              );
-            },
-          ),
-          Dash(
-            length: MediaQuery.of(context).size.width * 0.58,
-            dashColor: Colors.grey[700],
-          ),
-          Container(
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-            child: PriceRow(
-              title: "Refund Amount",
-              value: "₹" + widget.totalCost.toString(),
-              boldFlag: true,
+    return Column(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.only(left: 10),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              "BILL:",
+              style: textStyle1(
+                13,
+                Colors.black,
+                FontWeight.w500,
+              ),
             ),
           ),
-          Dash(
-            length: MediaQuery.of(context).size.width * 0.58,
-            dashColor: Colors.grey[700],
+        ),
+        SizedBox(height: 5),
+        Container(
+          padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(20),
           ),
-        ],
-      ),
+          child: Column(
+            children: <Widget>[
+              ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: price.length,
+                padding: EdgeInsets.all(10),
+                itemBuilder: (BuildContext context, int index) {
+                  return PriceRow(
+                    title: price[index]['title'],
+                    value:
+                        ("₹" + (price[index]['value']).toString()).toString(),
+                  );
+                },
+              ),
+              Dash(
+                length: MediaQuery.of(context).size.width * 0.58,
+                dashColor: Colors.grey[700],
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                child: PriceRow(
+                  title: "Refund Amount",
+                  value: "₹" + widget.totalCost.toString(),
+                  boldFlag: true,
+                ),
+              ),
+              Dash(
+                length: MediaQuery.of(context).size.width * 0.58,
+                dashColor: Colors.grey[700],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -441,9 +548,12 @@ class _OrderItemsState extends State<OrderItems> {
             padding: EdgeInsets.only(top: 10),
             itemCount: widget.items.length,
             itemBuilder: (context, item_i) {
-              int mrp = int.parse(cost[item_i].toString());
+              int mrp = userType == "Manufacturer"
+                  ? int.parse(
+                      widget.items[item_i]['merchantInputAmount'].toString())
+                  : int.parse(cost[item_i].toString());
               int qty = int.parse(widget.quantity[item_i].toString());
-              int tc = mrp * qty;
+              int tc = mrp;
               return Container(
                 padding: EdgeInsets.all(10),
                 // margin: EdgeInsets.only(top: 8),
@@ -509,7 +619,9 @@ class _OrderItemsState extends State<OrderItems> {
                             ),
                             SizedBox(height: 2),
                             Text(
-                              "${ConstantValues().rupee()}${tc.toString()}",
+                              userType == "Reseller"
+                                  ? "${ConstantValues().rupee()}${tc.toString()}"
+                                  : "${ConstantValues().rupee()}${tc.toString()}",
                               style: textStyle1(
                                   11, Color(0xFF811111), FontWeight.w700),
                             ),

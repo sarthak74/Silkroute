@@ -201,53 +201,53 @@ class _MerchantOrderListItemState extends State<MerchantOrderListItem> {
                           ),
                         ],
                       ),
-                      InkWell(
-                        onTap: () async {
-                          var dimensions =
-                              await Helpers().showSchedulePickupDialog(context);
+                      // InkWell(
+                      //   onTap: () async {
+                      //     // var dimensions =
+                      //     //     await Helpers().showSchedulePickupDialog(context);
 
-                          setState(() {
-                            shipping = true;
-                          });
-                          var shipres = await ShiprocketApi()
-                              .createShiprocketOrder(widget.order);
-                          setState(() {
-                            shipping = false;
-                          });
-                          if (shipres != null && shipres['success']) {
-                            Navigator.popAndPushNamed(
-                                context, "/merchant_orders");
-                          }
-                        },
-                        child: shipping
-                            ? Container(
-                                width: 20,
-                                height: 20,
-                                child: Center(
-                                  widthFactor: 1,
-                                  heightFactor: 1,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 3,
-                                    color: Color(0xFF811111),
-                                  ),
-                                ),
-                              )
-                            : Container(
-                                padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFF811111),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  "Schedule Pickup",
-                                  style: textStyle1(
-                                    11,
-                                    Colors.white,
-                                    FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                      ),
+                      //     // setState(() {
+                      //     //   shipping = true;
+                      //     // });
+                      //     // var shipres = await ShiprocketApi()
+                      //     //     .createShiprocketOrder(widget.order);
+                      //     // setState(() {
+                      //     //   shipping = false;
+                      //     // });
+                      //     // if (shipres != null && shipres['success']) {
+                      //     //   Navigator.popAndPushNamed(
+                      //     //       context, "/merchant_orders");
+                      //     // }
+                      //   },
+                      //   child: shipping
+                      //       ? Container(
+                      //           width: 20,
+                      //           height: 20,
+                      //           child: Center(
+                      //             widthFactor: 1,
+                      //             heightFactor: 1,
+                      //             child: CircularProgressIndicator(
+                      //               strokeWidth: 3,
+                      //               color: Color(0xFF811111),
+                      //             ),
+                      //           ),
+                      //         )
+                      //       : Container(
+                      //           padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
+                      //           decoration: BoxDecoration(
+                      //             color: Color(0xFF811111),
+                      //             borderRadius: BorderRadius.circular(10),
+                      //           ),
+                      //           child: Text(
+                      //             "Schedule Pickup",
+                      //             style: textStyle1(
+                      //               11,
+                      //               Colors.white,
+                      //               FontWeight.w500,
+                      //             ),
+                      //           ),
+                      //         ),
+                      // ),
                     ],
                   ),
                 ],
@@ -275,9 +275,9 @@ class _MerchantOrderListItemState extends State<MerchantOrderListItem> {
                 },
                 child: Container(
                   height: 70,
-                  color: Color.fromRGBO(250, 210, 110, 1),
+                  color: Colors.transparent,
                   child: Icon(
-                    Icons.arrow_forward_ios,
+                    Icons.double_arrow_rounded,
                     color: Colors.black54,
                   ),
                 ),

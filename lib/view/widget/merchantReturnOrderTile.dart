@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:silkroute/constants/values.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/payment_methods.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
@@ -49,7 +51,7 @@ class _MerchantOrderTileState extends State<MerchantReturnOrderTile> {
   }
 
   void loadVars() {
-    // print("order list item ${widget.orders}");
+    print("order list item ${widget.orders}");
     setState(() {
       orders = widget.orders;
       for (var order in widget.orders) {
@@ -76,13 +78,14 @@ class _MerchantOrderTileState extends State<MerchantReturnOrderTile> {
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: orders.length,
                 itemBuilder: (BuildContext context, int i) {
-                  dynamic date = orders[i]['refund']['requestedDate']
-                      .toString()
-                      .split(":");
-                  print(date);
-                  dynamic left = date[0].split("T");
-                  dynamic reqDate = left[0] + " " + left[1] + ":" + date[1];
-                  orders[i]['refund']['requestedDate'] = reqDate.toString();
+                  // print("order-i$i : ${orders[i]}");
+                  // dynamic date = orders[i]['return']['requestedDate']
+                  //     .toString()
+                  //     .split(":");
+                  // print(date);
+                  // dynamic left = date[0].split("T");
+                  // dynamic reqDate = left[0] + " " + left[1] + ":" + date[1];
+                  // orders[i]['return']['requestedDate'] = reqDate.toString();
                   return ReturnOrderItem(orders[i]);
                 },
               )
@@ -111,7 +114,7 @@ class _ReturnOrderItemState extends State<ReturnOrderItem> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(10),
-      margin: EdgeInsets.fromLTRB(15, 0, 15, 10),
+      margin: EdgeInsets.fromLTRB(5, 0, 5, 10),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(20),
@@ -139,18 +142,18 @@ class _ReturnOrderItemState extends State<ReturnOrderItem> {
                       Row(
                         children: <Widget>[
                           Text(
-                            "Id: ",
+                            "ID: ",
                             style: textStyle1(
-                              10,
-                              Colors.black87,
-                              FontWeight.w500,
+                              11,
+                              Colors.black,
+                              FontWeight.bold,
                             ),
                           ),
                           Text(
-                            widget.item['id'].toString(),
+                            widget.item['invoiceNumber'].toString(),
                             style: textStyle1(
-                              10,
-                              Colors.black54,
+                              11,
+                              Colors.black,
                               FontWeight.w500,
                             ),
                           ),
@@ -164,11 +167,12 @@ class _ReturnOrderItemState extends State<ReturnOrderItem> {
                             style: textStyle1(
                               10,
                               Colors.black54,
-                              FontWeight.w500,
+                              FontWeight.bold,
                             ),
                           ),
                           Text(
-                            widget.item['return']['requestedDate'].toString(),
+                            widget.item['items'][0]['return']['requestedDate']
+                                .toString(),
                             style: textStyle1(
                               10,
                               Colors.black54,
@@ -184,15 +188,16 @@ class _ReturnOrderItemState extends State<ReturnOrderItem> {
                             "Refund Amount: ",
                             style: textStyle1(
                               10,
-                              Colors.black54,
-                              FontWeight.w500,
+                              Color(0xFF811111),
+                              FontWeight.bold,
                             ),
                           ),
                           Text(
-                            widget.item['return']['refundAmount'].toString(),
+                            ConstantValues().rupee() +
+                                widget.item['refundAmount'].toString(),
                             style: textStyle1(
                               10,
-                              Colors.black54,
+                              Color(0xFF811111),
                               FontWeight.w500,
                             ),
                           ),
@@ -206,24 +211,36 @@ class _ReturnOrderItemState extends State<ReturnOrderItem> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    TimelineBuilder(
-                      list: [
-                        "Return Requested",
-                        "Warehouse",
-                        "On the way",
-                        "Delivered"
-                      ],
-                      currentStatus: widget.item['merchantStatus'],
+                    Expanded(
+                      flex: 2,
+                      child: TimelineBuilder(
+                        list: [
+                          "Return Requested",
+                          "Warehouse",
+                          "On the way",
+                          "Delivered"
+                        ],
+                        currentStatus: widget.item['items'][0]
+                            ['merchantStatus'],
+                      ),
                     ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF811111),
-                          borderRadius: BorderRadius.circular(20),
+                    Expanded(
+                      flex: 1,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // if 2nd argument false, then it acts as return details
+                          await Helpers().showRequestReturn(context, false,
+                              orderDetails: widget.item);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Color(0xFF811111),
+                          padding: EdgeInsets.fromLTRB(15, 1, 15, 1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
                               "Details",
@@ -236,12 +253,7 @@ class _ReturnOrderItemState extends State<ReturnOrderItem> {
                             SizedBox(width: 5),
                             Icon(
                               CupertinoIcons.right_chevron,
-                              size: 15,
-                              color: Colors.white,
-                            ),
-                            Icon(
-                              CupertinoIcons.right_chevron,
-                              size: 15,
+                              size: 13,
                               color: Colors.white,
                             ),
                           ],

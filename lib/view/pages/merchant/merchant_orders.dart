@@ -9,6 +9,7 @@ import 'package:silkroute/view/pages/merchant/comingOrders.dart';
 import 'package:silkroute/view/pages/merchant/returnOrders.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/merchantOrderTile.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:silkroute/view/widget/topbar.dart';
@@ -78,7 +79,7 @@ class _MerchantOrdersState extends State<MerchantOrders> {
 
               Expanded(
                 child: loading
-                    ? Text("Loading")
+                    ? MyCircularProgress()
                     : CustomScrollView(slivers: [
                         SliverList(
                           delegate: SliverChildListDelegate([

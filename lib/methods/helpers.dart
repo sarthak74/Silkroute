@@ -12,6 +12,7 @@ import 'package:silkroute/view/dialogBoxes/confirmationDialog.dart';
 import 'package:silkroute/view/dialogBoxes/editPickupAddressDialog.dart';
 import 'package:silkroute/view/dialogBoxes/offline_bank_transfer_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/package_detail.dart';
+import 'package:silkroute/view/dialogBoxes/pickup_details_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/price_change_alert_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/request_return_dialog.dart';
 import 'package:silkroute/view/dialogBoxes/schedulePickupDialog.dart';
@@ -233,10 +234,10 @@ class Helpers {
       transitionBuilder: (context, _a1, _a2, _child) {
         return ScaleTransition(
           child: _child,
-          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+          scale: CurvedAnimation(parent: _a1, curve: Curves.ease),
         );
       },
-      transitionDuration: Duration(milliseconds: 800),
+      transitionDuration: Duration(milliseconds: 400),
       pageBuilder: (context, a1, a2) {
         return PriceChangeAlertDialog();
       },
@@ -261,10 +262,10 @@ class Helpers {
       transitionBuilder: (context, _a1, _a2, _child) {
         return ScaleTransition(
           child: _child,
-          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+          scale: CurvedAnimation(parent: _a1, curve: Curves.ease),
         );
       },
-      transitionDuration: Duration(milliseconds: 800),
+      transitionDuration: Duration(milliseconds: 400),
       pageBuilder: (context, a1, a2) {
         return RequestReturnDialog(orderDetails, selected, enterquantity);
       },
@@ -274,45 +275,43 @@ class Helpers {
   Future<bool> getConfirmationDialog(
       context, String title, String description) async {
     return await showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: "",
-      transitionBuilder: (context, _a1, _a2, _child) {
-        return ScaleTransition(
-          child: _child,
-          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
-        );
-      },
-      transitionDuration: Duration(milliseconds: 800),
-      pageBuilder: (context, a1, a2) {
-        return ConfirmationDialog(
-          title: title,
-          description: description,
-        );
-      },
-    );
+          context: context,
+          barrierDismissible: true,
+          barrierLabel: "",
+          transitionBuilder: (context, _a1, _a2, _child) {
+            return ScaleTransition(
+              child: _child,
+              scale: CurvedAnimation(parent: _a1, curve: Curves.ease),
+            );
+          },
+          transitionDuration: Duration(milliseconds: 400),
+          pageBuilder: (context, a1, a2) {
+            return ConfirmationDialog(
+              title: title,
+              description: description,
+            );
+          },
+        ) ??
+        false;
   }
 
-  Future<dynamic> showSchedulePickupDialog(context) async {
-    var dimensions = [
-      {"l": 0.0, "b": 0.0, "h": 0.0, "w": 0.0}
-    ];
-    await showGeneralDialog(
+  Future<dynamic> showSchedulePickupDialog(context, orderpackages) async {
+    var res = await showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: "",
       transitionBuilder: (context, _a1, _a2, _child) {
         return ScaleTransition(
           child: _child,
-          scale: CurvedAnimation(parent: _a1, curve: Curves.bounceOut),
+          scale: CurvedAnimation(parent: _a1, curve: Curves.ease),
         );
       },
-      transitionDuration: Duration(milliseconds: 800),
+      transitionDuration: Duration(milliseconds: 400),
       pageBuilder: (context, a1, a2) {
-        return SchedulePickupDialog(dimensions: dimensions);
+        return SchedulePickupDialog(dimensions: orderpackages);
       },
     );
-    return dimensions;
+    return res;
   }
 
   Future<dynamic> singleSelectPackageDialog(context) async {
@@ -352,6 +351,25 @@ class Helpers {
       pageBuilder: (context, a1, a2) {
         return PackageDetail(
             package: package, packageProvider: packageProvider);
+      },
+    );
+  }
+
+  Future pickupDetails(context, orders, docs, wt) async {
+    print("dialog orders: $orders");
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionBuilder: (context, _a1, _a2, _child) {
+        return ScaleTransition(
+          child: _child,
+          scale: CurvedAnimation(parent: _a1, curve: Curves.ease),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 400),
+      pageBuilder: (context, a1, a2) {
+        return PickupDetailsDialog(orders: orders, docs: docs, wt: wt);
       },
     );
   }

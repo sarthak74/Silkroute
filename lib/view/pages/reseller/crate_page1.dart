@@ -565,7 +565,7 @@ class _CratePage1State extends State<CratePage1> {
                         padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                         decoration: BoxDecoration(
                           color: (products.length > 0)
-                              ? Color(0xFF5B0D1B)
+                              ? Color(0xFF811111)
                               : Colors.grey[200],
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                           boxShadow: [

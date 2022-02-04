@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/core/MerchantOrderItem.dart';
 import 'package:silkroute/model/core/OrderListItem.dart';
 import 'package:silkroute/model/core/ProductList.dart';
@@ -178,9 +179,31 @@ class MerchantApi {
 
       print("update product result: $decodedRes2");
       return decodedRes2;
-    } catch (e) {
-      print("update product err: $e");
-      return e;
+    } catch (err) {
+      print("update product err: $err");
+      return err;
+    }
+  }
+
+  Future<dynamic> getAllPickups() async {
+    try {
+      print("get all pickups");
+      String token = await storage.getItem('token');
+      var contact = await storage.getItem('contact');
+      var headers = {"Authorization": token};
+      var url =
+          Uri.parse(Math().ip() + '/manufacturerApi/getAllPickups/${contact}');
+      final res = await http.get(
+        url,
+        headers: headers,
+      );
+      var decodedRes2 = jsonDecode(res.body);
+      print("update product result: $decodedRes2");
+      Toast().notifyInfo(decodedRes2['msg']);
+      return decodedRes2['data'];
+    } catch (err) {
+      print("get all pickups error: $err");
+      return err;
     }
   }
 }

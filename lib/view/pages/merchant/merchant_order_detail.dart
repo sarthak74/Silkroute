@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:im_stepper/stepper.dart';
 import 'package:intl/intl.dart';
+import 'package:silkroute/constants/values.dart';
 import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/core/package.dart';
@@ -36,14 +37,11 @@ class _MerchantOrderDetailState extends State<MerchantOrderDetail> {
       bill = widget.order['bill'];
       price = [
         {"title": "Total Value", "value": bill['totalValue']},
-        {"title": "Discount", "value": bill['implicitDiscount']},
-        {"title": "Coupon Discount", "value": bill['couponDiscount']},
-        {"title": "Price After Discount", "value": bill['priceAfterDiscount']},
         {"title": "GST", "value": bill['gst']},
-        {"title": "Logistics Cost", "value": bill['logistic']},
       ];
 
-      totalCost = int.parse(bill['totalCost'].toString());
+      totalCost = int.parse(bill['totalValue'].toString()) +
+          int.parse(bill['gst'].toString());
 
       savings = int.parse(
           ((bill['totalValue'] - bill['priceAfterDiscount']).toString())
@@ -157,9 +155,13 @@ class _MerchantOrderDetailState extends State<MerchantOrderDetail> {
                                       price: price,
                                       savings: savings,
                                       totalCost: totalCost,
+                                    ),
+
+                                    OrderPaymentStatus(
                                       paymentStatus: orderDetails['items'][0]
                                           ['merchantPaymentStatus'],
                                     ),
+
                                     // CancelOrder(order: widget.order),
                                   ],
                                 ),
@@ -187,155 +189,55 @@ class _MerchantOrderDetailState extends State<MerchantOrderDetail> {
   }
 }
 
-class OrderPickups extends StatefulWidget {
-  const OrderPickups({Key key, this.pickups}) : super(key: key);
-  final dynamic pickups;
+class OrderPaymentStatus extends StatefulWidget {
+  const OrderPaymentStatus({Key key, this.paymentStatus}) : super(key: key);
+  final dynamic paymentStatus;
 
   @override
-  _OrderPickupsState createState() => _OrderPickupsState();
+  _OrderPaymentStatusState createState() => _OrderPaymentStatusState();
 }
 
-class _OrderPickupsState extends State<OrderPickups> {
+class _OrderPaymentStatusState extends State<OrderPaymentStatus> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      margin: EdgeInsets.symmetric(vertical: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            "PICKUPS:",
-            style: textStyle1(
-              13,
-              Color(0xFF811111),
-              FontWeight.w700,
+          Container(
+            padding: EdgeInsets.only(left: 20),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                "Payment:",
+                style: textStyle1(
+                  13,
+                  Color(0xFF811111),
+                  FontWeight.w500,
+                ),
+              ),
             ),
           ),
-          SizedBox(height: 10),
-          (widget.pickups == null)
-              ? Center(
-                  child: Text(
-                    "No pickups scheduled",
-                    style: textStyle1(
-                      15,
-                      Colors.grey,
-                      FontWeight.w500,
-                    ),
-                  ),
-                )
-              : Container(
-                  padding: EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Text(
-                                "Shipment ID: ",
-                                style: textStyle1(
-                                    11, Colors.black, FontWeight.w500),
-                              ),
-                              Text(
-                                widget.pickups['id'],
-                                style: textStyle1(
-                                    10, Colors.black, FontWeight.normal),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: <Widget>[
-                              Text(
-                                "Dispatched: ",
-                                style: textStyle1(
-                                    9, Colors.black87, FontWeight.w500),
-                              ),
-                              Text(
-                                widget.pickups['dispatchDate'],
-                                style: textStyle1(
-                                    9, Colors.black87, FontWeight.normal),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Text(
-                                "Weight: ",
-                                style: textStyle1(
-                                    11, Colors.black87, FontWeight.w500),
-                              ),
-                              Text(
-                                widget.pickups['weight'],
-                                style: textStyle1(
-                                    11, Colors.black87, FontWeight.normal),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Row(
-                              children: <Widget>[
-                                Text(
-                                  "Label ",
-                                  style: textStyle1(
-                                      11, Color(0xFF811111), FontWeight.w500),
-                                ),
-                                Icon(Icons.download,
-                                    color: Color(0xFF811111), size: 15),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 2),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Text(
-                                "Size: ",
-                                style: textStyle1(
-                                    11, Colors.black87, FontWeight.w500),
-                              ),
-                              Text(
-                                "${widget.pickups['length']} x ${widget.pickups['breadth']} x ${widget.pickups['height']}",
-                                style: textStyle1(
-                                    11, Colors.black87, FontWeight.normal),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Row(
-                              children: <Widget>[
-                                Text(
-                                  "Invoice ",
-                                  style: textStyle1(
-                                      11, Color(0xFF811111), FontWeight.w500),
-                                ),
-                                Icon(Icons.download,
-                                    color: Color(0xFF811111), size: 15),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Color(0xfff6f6f6),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: <Widget>[
+                Text(
+                  "Payment: ",
+                  style: textStyle1(11, Colors.black, FontWeight.w500),
                 ),
+                Text(
+                  "${widget.paymentStatus}",
+                  style: textStyle1(11, Colors.black, FontWeight.normal),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -343,15 +245,15 @@ class _OrderPickupsState extends State<OrderPickups> {
 }
 
 class OrderPriceDetails extends StatefulWidget {
-  OrderPriceDetails(
-      {this.price,
-      this.savings,
-      this.totalCost,
-      this.invoiceNumber,
-      this.paymentStatus});
+  OrderPriceDetails({
+    this.price,
+    this.savings,
+    this.totalCost,
+    this.invoiceNumber,
+  });
   final dynamic price;
   final num savings, totalCost;
-  final String invoiceNumber, paymentStatus;
+  final String invoiceNumber;
   @override
   _OrderPriceDetailsState createState() => _OrderPriceDetailsState();
 }
@@ -380,83 +282,19 @@ class _OrderPriceDetailsState extends State<OrderPriceDetails> {
           margin: EdgeInsets.symmetric(
               horizontal: MediaQuery.of(context).size.width * 0.03),
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            color: Color(0xfff6f6f6),
             borderRadius: BorderRadius.all(Radius.circular(20)),
           ),
           width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+          padding: EdgeInsets.fromLTRB(20, 5, 20, 20),
           child: Column(
             children: <Widget>[
-              Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                padding: EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        "Id: ${widget.invoiceNumber}",
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        "View Invoice",
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            color: Colors.transparent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                            decoration: TextDecoration.underline,
-                            decorationThickness: 2,
-                            decorationColor: Colors.grey[700],
-                            shadows: [
-                              Shadow(
-                                  color: Colors.grey[700],
-                                  offset: Offset(0, -2))
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.only(left: 10),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Payment: ${widget.paymentStatus}",
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              SizedBox(height: 10),
+              SizedBox(height: 1),
               OrderPriceDetailsList(
-                  price: widget.price,
-                  savings: widget.savings,
-                  totalCost: widget.totalCost),
+                price: widget.price,
+                savings: widget.savings,
+                totalCost: widget.totalCost,
+              ),
             ],
           ),
         ),
@@ -491,7 +329,7 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
         ListView.builder(
           physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: 6,
+          itemCount: 2,
           padding: EdgeInsets.all(10),
           itemBuilder: (BuildContext context, int index) {
             return PriceRow(
@@ -507,7 +345,7 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
         Container(
           padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
           child: PriceRow(
-            title: "Total Cost",
+            title: "Amount",
             value: "₹" + widget.totalCost.toString(),
           ),
         ),
@@ -515,20 +353,6 @@ class _OrderPriceDetailsListState extends State<OrderPriceDetailsList> {
           length: MediaQuery.of(context).size.width * 0.8,
           dashColor: Colors.grey[700],
         ),
-        SizedBox(height: 10),
-        (savings > 0)
-            ? Text(
-                ("You saved ₹" + savings.toString() + " on this order")
-                    .toString(),
-                style: GoogleFonts.poppins(
-                  textStyle: TextStyle(
-                    color: Colors.green,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
-            : Text(""),
       ],
     );
   }
@@ -553,7 +377,7 @@ class _PriceRowState extends State<PriceRow> {
             textStyle: TextStyle(
               color: Colors.black87,
               fontSize: 12,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -561,9 +385,9 @@ class _PriceRowState extends State<PriceRow> {
           widget.value,
           style: GoogleFonts.poppins(
             textStyle: TextStyle(
-              color: Color(0xFF5B0D1B),
+              color: Color(0xFF811111),
               fontSize: 12,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -695,7 +519,18 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                 itemBuilder: (BuildContext context, int item_i) {
                   // if(orderDetails['items'][i]['returnPeriod'])
                   // implement add period to delivery return
-
+                  var titleStatus;
+                  titleStatus =
+                      (orderDetails["items"][item_i]['package'] == "Not Added"
+                          ? " --- "
+                          : orderDetails["items"][item_i]['package']
+                              .toString()
+                              .toUpperCase());
+                  if (orderDetails["items"][item_i]["merchantStatus"] !=
+                      "Processing") {
+                    titleStatus =
+                        orderDetails["items"][item_i]["merchantStatus"];
+                  }
                   return InkWell(
                     onLongPress: () {
                       if (orderDetails['items'][item_i]['package'] !=
@@ -804,7 +639,7 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                                   Row(
                                     children: <Widget>[
                                       Text(
-                                        "Prod Id: ",
+                                        "Prod ID: ",
                                         style: textStyle1(
                                           10,
                                           Colors.black,
@@ -813,7 +648,7 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                                       ),
                                       Text(
                                         orderDetails["items"][item_i]
-                                            ["productId"],
+                                            ["reference"],
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: textStyle1(
@@ -827,7 +662,7 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                                   Row(
                                     children: <Widget>[
                                       Text(
-                                        "Package: ",
+                                        "Status: ",
                                         style: textStyle1(
                                           10,
                                           Colors.black,
@@ -835,7 +670,7 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                                         ),
                                       ),
                                       Text(
-                                        "${(orderDetails["items"][item_i]['package'] == "Not Added" ? " --- " : orderDetails["items"][item_i]['package'].toString().toUpperCase())}",
+                                        "$titleStatus",
                                         style: textStyle1(
                                           10,
                                           Color(0xFF646464),
@@ -863,11 +698,10 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                                   ),
                                 ),
                                 Text(
-                                  orderDetails["items"][item_i]
-                                      ["merchantStatus"],
+                                  "${ConstantValues().rupee()}${orderDetails["items"][item_i]["mrp"]}",
                                   style: textStyle1(
                                     10,
-                                    Color(0xFF646464),
+                                    Color(0xFF811111),
                                     FontWeight.normal,
                                   ),
                                 ),

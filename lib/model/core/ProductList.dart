@@ -21,6 +21,7 @@ colors: Object
 */
 class ProductList {
   final String id;
+  final String reference;
   final String title;
   final bool discount;
   final num mrp;
@@ -42,6 +43,7 @@ class ProductList {
   final dynamic specifications;
   ProductList({
     this.id,
+    this.reference,
     this.title,
     this.discount,
     this.mrp,
@@ -66,6 +68,7 @@ class ProductList {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'reference': reference,
       'title': title,
       'discount': discount,
       'mrp': mrp,
@@ -91,6 +94,7 @@ class ProductList {
   factory ProductList.fromMap(Map<String, dynamic> map) {
     return ProductList(
       id: map['id'] ?? '',
+      reference: map['reference'] ?? '',
       title: map['title'] ?? '',
       discount: map['discount'] ?? false,
       mrp: map['mrp'] ?? 0,
@@ -107,7 +111,7 @@ class ProductList {
       resellerCrateAvailability: map['resellerCrateAvailability'] ?? 0,
       images: map['images'] ?? null,
       fullSetSize: map['fullSetSize'] ?? null,
-      fullSetPrice: map['mrp']?.toDouble() ?? 0.0,
+      fullSetPrice: map['fullSetPrice']?.toDouble() ?? 0.0,
       colors: map['colors'] ?? null,
       specifications: map['specifications'] ?? null,
     );
@@ -120,7 +124,7 @@ class ProductList {
 
   @override
   String toString() {
-    return 'ProductList(id: $id, title: $title, discount: $discount, mrp: $mrp, sp: $sp, discountValue: $discountValue, category: $category, subCat: $subCat, userContact: $userContact, dateAdded: $dateAdded, description: $description, setSize: $setSize, min: $min, stockAvailability: $stockAvailability, resellerCrateAvailability: $resellerCrateAvailability, images: $images, fullSetSize: $fullSetSize, fullSetPrice: $fullSetPrice, colors: $colors, specifications: $specifications)';
+    return 'ProductList(id: $id, reference: $reference, title: $title, discount: $discount, mrp: $mrp, sp: $sp, discountValue: $discountValue, category: $category, subCat: $subCat, userContact: $userContact, dateAdded: $dateAdded, description: $description, setSize: $setSize, min: $min, stockAvailability: $stockAvailability, resellerCrateAvailability: $resellerCrateAvailability, images: $images, fullSetSize: $fullSetSize, fullSetPrice: $fullSetPrice, colors: $colors, specifications: $specifications)';
   }
 
   @override
@@ -129,6 +133,7 @@ class ProductList {
 
     return other is ProductList &&
         other.id == id &&
+        other.reference == reference &&
         other.title == title &&
         other.discount == discount &&
         other.mrp == mrp &&
@@ -153,6 +158,7 @@ class ProductList {
   @override
   int get hashCode {
     return id.hashCode ^
+        reference.hashCode ^
         title.hashCode ^
         discount.hashCode ^
         mrp.hashCode ^

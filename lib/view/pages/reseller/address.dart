@@ -775,7 +775,7 @@ class _AddressPageState extends State<AddressPage> {
       // item['shipment_id'] = data['shipment_id'];
       // item['shiprocket_order_id'] = data['shiprocket_order_id'];
       item['customerStatus'] = "Order Placed";
-      item['merchantStatus'] = 'Not Seen';
+      item['merchantStatus'] = 'Processing';
       item['merchantPaymentStatus'] = "Incomplete";
       await OrderApi().addOrderItem(_id, item);
 

@@ -20,7 +20,7 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
   @override
   Widget build(BuildContext context) {
     num mrp = widget.product.mrp;
-
+    String ti = widget.product.title;
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -45,10 +45,11 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
               boxShadow: [
                 BoxShadow(
                   color: Color(0xFFC6C2C2),
-                  offset: Offset(3.0, 4.0),
+                  offset: Offset(0.0, 4.0),
                   blurRadius: 4.0,
                 ),
               ],
+              // shape: BoxShape.rectangle,
               color: Color.fromRGBO(0, 0, 0, 0.3),
               image: DecorationImage(
                 image: CachedNetworkImageProvider(
@@ -61,8 +62,8 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
               horizontal: MediaQuery.of(context).size.width * 0.015,
               vertical: 5,
             ),
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.width * 0.4,
+            width: MediaQuery.of(context).size.width * 0.42,
+            height: MediaQuery.of(context).size.width * 0.42,
             padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
             // child: Row(
             //   crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,7 +102,7 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey[400],
-                  offset: Offset(3.0, 4.0),
+                  offset: Offset(0, 4.0),
                   blurRadius: 4.0,
                 )
               ],
@@ -111,48 +112,62 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
             margin: EdgeInsets.symmetric(
               horizontal: MediaQuery.of(context).size.width * 0.015,
             ),
-            height: 60,
+            height: 50,
+            // constraints: BoxConstraints(maxHeight: 60, minHeight: 40),
             // width: MediaQuery.of(context).size.width * 0.41,
             padding: EdgeInsets.all(5),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Flexible(
-                  child: Text(
-                    widget.product.title +
-                        " asjcn sajn ajscn askcn aslcn kslc ks",
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        color: Colors.black,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Text(
+                  widget.product.title +
+                      (ti[0] == "V" ? " asjckn jsdn asjk asjkn asjc sdds" : ""),
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.normal,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                SizedBox(height: 5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text(
-                      "Stock: ${widget.product.stockAvailability}",
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 10,
-                          fontWeight: FontWeight.normal,
+                    Row(
+                      children: <Widget>[
+                        Text(
+                          "Stock: ",
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 10,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
                         ),
-                      ),
+                        Text(
+                          "${widget.product.stockAvailability}",
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 10,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
                       ("₹" + mrp.toString()).toString(),
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                          color: Color(0xFF5B0D1B),
+                          color: Color(0xFF811111),
                           fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),

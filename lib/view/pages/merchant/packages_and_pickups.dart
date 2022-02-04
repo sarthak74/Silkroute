@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:silkroute/view/pages/merchant/merchant_pickups.dart';
 import 'package:silkroute/view/pages/merchant/packages.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
-import 'package:silkroute/view/widget/footer.dart';
+import 'package:silkroute/view/widget2/footer.dart';
 import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
@@ -153,7 +154,7 @@ class _PackagesAndPickupsState extends State<PackagesAndPickups> {
                                 controller: pageController,
                                 children: [
                                   Packages(),
-                                  Packages(),
+                                  MerchantPickups(),
                                 ],
                               ),
                             ),
