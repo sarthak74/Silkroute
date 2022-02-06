@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 
-class NewProductProvider {
-  // setSize = num of colors
-  // min = num of set they sell
+class NewProductProvider1 {
   static String reference = "";
   static String title = "";
   static dynamic subCat = [];

@@ -6,17 +6,21 @@ import 'package:silkroute/view/widget/show_dialog.dart';
 
 class Agreements extends StatefulWidget {
   Agreements(
-      this.agreementCheck, this.agreementCheckFunction, this.checkboxColor);
+      this.agreementCheck, this.agreementCheckFunction, this.checkboxColor,
+      {this.title, this.dialogFn, this.userType});
   final bool agreementCheck;
   final agreementCheckFunction;
   final checkboxColor;
+  final title;
+  final dialogFn;
+  final userType;
   @override
   _AgreementsState createState() => _AgreementsState();
 }
 
 class _AgreementsState extends State<Agreements> {
-  void showTermsAndConditions() {
-    showGeneralDialog(
+  Future showTermsAndConditions(context) async {
+    return await showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: "",
@@ -28,7 +32,7 @@ class _AgreementsState extends State<Agreements> {
       },
       transitionDuration: Duration(milliseconds: 800),
       pageBuilder: (context, a1, a2) {
-        return ShowDialog(AgreementsDialogBox(), 0);
+        return ShowDialog(AgreementsDialogBox(userType: widget.userType), 0);
       },
     );
   }
@@ -43,18 +47,17 @@ class _AgreementsState extends State<Agreements> {
           fillColor: MaterialStateProperty.resolveWith(widget.checkboxColor),
           onChanged: widget.agreementCheckFunction,
         ),
-        new Padding(
-          padding: EdgeInsets.only(right: 10.0),
-        ),
         GestureDetector(
-          onTap: () {
-            showTermsAndConditions();
-          },
+          onTap: (widget.dialogFn == true)
+              ? () async {
+                  await showTermsAndConditions(context);
+                }
+              : () {},
           child: new Text(
-            "Terms and Conditions",
+            (widget.title ?? "Terms and Conditions"),
             style: TextStyle(
-              fontSize: 15.0,
-              color: Color(0xFF530000),
+              fontSize: 13.0,
+              color: Color(0xFF811111),
             ),
           ),
         ),

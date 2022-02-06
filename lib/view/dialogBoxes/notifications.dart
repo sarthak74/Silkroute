@@ -17,7 +17,7 @@ class NotificationDialogBoxState extends State<NotificationDialogBox> {
         decoration: BoxDecoration(
           border: Border.all(
             color: Color(0xFF5B0D1B),
-            width: 5,
+            width: 3,
           ),
           borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
@@ -136,11 +136,15 @@ class _NotificationListState extends State<NotificationList> {
                     itemBuilder: (_, int i) {
                       return NotificationItem(
                         title: notificationList[i]["title"] ??
-                            notificationList[i]["data"]["title"],
+                            notificationList[i]["data"]["title"] ??
+                            "",
                         body: notificationList[i]["body"] ??
-                            notificationList[i]["data"]["body"],
+                            notificationList[i]["data"]["body"] ??
+                            "",
                         sentTime: notificationList[i]["sentTime"] ??
-                            notificationList[i]["data"]["sentTime"],
+                            notificationList[i]["data"]["sentTime"] ??
+                            "",
+                        index: i,
                       );
                     },
                   ),
@@ -150,9 +154,11 @@ class _NotificationListState extends State<NotificationList> {
 }
 
 class NotificationItem extends StatefulWidget {
-  const NotificationItem({Key key, this.title, this.body, this.sentTime})
+  const NotificationItem(
+      {Key key, this.title, this.body, this.sentTime, this.index})
       : super(key: key);
   final String title, body, sentTime;
+  final int index;
 
   @override
   _NotificationItemState createState() => _NotificationItemState();
@@ -162,51 +168,46 @@ class _NotificationItemState extends State<NotificationItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(15, 0, 32, 10),
-      padding: EdgeInsets.all(8),
-      height: 90,
+      margin: EdgeInsets.fromLTRB(3, 0, 0, 0),
+      padding: EdgeInsets.fromLTRB(8, 8, 40, 8),
+      height: 70,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey[300],
-            spreadRadius: 0,
-            blurRadius: 3,
-            offset: Offset(1, 1),
-          ),
-        ],
-        color: Color(0xFFFFEBCD),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(width: 3, color: Color(0xFFEFE9E1)),
+        color: widget.index % 2 == 0 ? Color(0xFFEFE9E1) : Colors.white,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
+          // Expanded(
+          //   flex: 1,
+          //   child: Text(
+          //     widget.title,
+          //     style: textStyle1(13, Colors.black, FontWeight.w500),
+          //   ),
+          // ),
           Expanded(
             flex: 1,
-            child: Text(
-              widget.title,
-              style: textStyle1(13, Colors.black, FontWeight.w500),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              widget.body,
-              style: textStyle1(12, Colors.black54, FontWeight.w500),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Align(
-              alignment: Alignment.topRight,
+            child: Center(
               child: Text(
-                widget.sentTime,
-                textAlign: TextAlign.right,
+                widget.body,
                 style: textStyle1(12, Colors.black54, FontWeight.w500),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
+          // Expanded(
+          //   flex: 1,
+          //   child: Align(
+          //     alignment: Alignment.topRight,
+          //     child: Text(
+          //       widget.sentTime,
+          //       textAlign: TextAlign.right,
+          //       style: textStyle1(12, Colors.black54, FontWeight.w500),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

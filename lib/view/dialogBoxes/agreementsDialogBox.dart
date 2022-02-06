@@ -3,6 +3,8 @@ import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 
 class AgreementsDialogBox extends StatefulWidget {
+  AgreementsDialogBox({this.userType});
+  final String userType;
   @override
   _AgreementsDialogBoxState createState() => _AgreementsDialogBoxState();
 }
@@ -13,7 +15,7 @@ class _AgreementsDialogBoxState extends State<AgreementsDialogBox> {
 
   void loadVars() {
     setState(() {
-      _agreements = Helpers().getAgreements();
+      _agreements = Helpers().getAgreements(widget.userType);
       loading = false;
     });
   }

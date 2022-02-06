@@ -19,7 +19,7 @@ import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
 import 'package:silkroute/model/services/aws.dart';
 import 'package:silkroute/model/services/uploadImageApi.dart';
-import 'package:silkroute/provider/NewProductProvider.dart';
+import 'package:silkroute/provider/NewProductProvider1.dart';
 import 'package:silkroute/view/dialogBoxes/editAccountDetailsBottomsheet.dart';
 import 'package:silkroute/view/pages/merchant/merchant_home.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -60,13 +60,13 @@ InputDecoration textFormFieldInputDecorator(String labelText, String hintText,
   );
 }
 
-class AddNewProductPage extends StatefulWidget {
-  const AddNewProductPage({Key key}) : super(key: key);
+class Temp extends StatefulWidget {
+  const Temp({Key key}) : super(key: key);
   @override
-  _AddNewProductPageState createState() => _AddNewProductPageState();
+  _TempState createState() => _TempState();
 }
 
-class _AddNewProductPageState extends State<AddNewProductPage> {
+class _TempState extends State<Temp> {
   LocalStorage storage = LocalStorage('silkroute');
   bool loading = true;
 
@@ -154,8 +154,8 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
 
                                     ///// Different Color images of PRODUCT
 
-                                    ((NewProductProvider.setSize != null) &&
-                                            (NewProductProvider.setSize > 0))
+                                    ((NewProductProvider1.setSize != null) &&
+                                            (NewProductProvider1.setSize > 0))
                                         ? DifferentColorImage()
                                         : Container(),
 
@@ -163,9 +163,9 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
 
                                     //// MIN ORDER AMOUNT and PRICE
 
-                                    if ((NewProductProvider.setSize != null) &&
-                                        (NewProductProvider.setSize >= 1) &&
-                                        (NewProductProvider.setSize <= 24))
+                                    if ((NewProductProvider1.setSize != null) &&
+                                        (NewProductProvider1.setSize >= 4) &&
+                                        (NewProductProvider1.setSize <= 24))
                                       MinOrderAmountAndPrice(),
 
                                     SizedBox(height: 5),
@@ -228,62 +228,30 @@ class _UploadButtonState extends State<UploadButton> {
   int _imageCounter = 0;
   bool _uploadingImage = false;
 
-  loadparameters(cspecs) async {
-    s = {};
+  loadparameters() async {
     for (dynamic x in MerchantHome.categoriess) {
-      print("title:: ${x['title']} ${NewProductProvider.category} \n $cspecs");
-      if (x["title"] == NewProductProvider.category) {
-        List<String> keys = Helpers().getKeys(x['parameters']);
-        print("pre keys: ${keys}");
-        for (String key in keys) {
-          var param = x['parameters'][key];
-          var parent = param["parent"];
-          var parentVals = param["parentVals"];
-          if (parentVals == null) {
-            parentVals = [];
-          }
-
-          print("paren: $param\n$parent\n$parentVals");
-          bool ok = true;
-          for (int i = 0; i < parent.length; i++) {
-            if (((cspecs[parent[i]] ?? {})["value"] ?? "").toString() !=
-                parentVals[i].toString()) {
-              ok = false;
-              break;
-            }
-          }
-          if (ok)
-            s[key] = {
-              "title": param["title"],
-              "value": NewProductProvider
-                  .specifications[NewProductProvider.category][key]["value"]
-            };
-        }
+      if (x == NewProductProvider1.category) {
+        s = x["parameters"];
         break;
       }
     }
   }
 
   Future<bool> validateSpecs() async {
-    print("validate specs\n${NewProductProvider.specifications}");
-    var cspecs = NewProductProvider.specifications[NewProductProvider.category];
-    await loadparameters(cspecs);
+    await loadparameters();
     var keys = Helpers().getKeys(s);
-    print("valid keys $keys");
-    // print("specs keys $keys");
+    NewProductProvider1.specifications =
+        NewProductProvider1.specifications[NewProductProvider1.category];
     for (int i = 0; i < keys.length; i++) {
-      print(
-          "${keys[i]} ${cspecs[keys[i]]["title"]} ${cspecs[keys[i]]["value"]}");
-      if (s[keys[i]]["value"].length == 0) {
-        Toast()
-            .notifyErr("Invalid ${cspecs[keys[i]]["title"]} in Specifications");
+      if (NewProductProvider1.specifications[keys[i]]["value"].length == 0) {
+        Toast().notifyErr(
+            "Invalid ${NewProductProvider1.specifications[keys[i]]["title"]} in Specifications");
         return false;
       }
     }
-    if (NewProductProvider.subCat == null ||
-        NewProductProvider.subCat.length == 0) {
+    if (NewProductProvider1.subCat == null ||
+        NewProductProvider1.subCat.length == 0) {
       Toast().notifyErr("Select at least one Tag");
-      return false;
     }
     print("Specs validated");
     return true;
@@ -301,102 +269,97 @@ class _UploadButtonState extends State<UploadButton> {
                   borderRadius: BorderRadius.circular(10)),
               elevation: 16,
               content: Container(
-                // height: MediaQuery.of(context).size.height * 0.5,
-                padding: EdgeInsets.symmetric(vertical: 20),
-                constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.5),
+                height: MediaQuery.of(context).size.height * 0.5,
                 width: MediaQuery.of(context).size.height * 0.9,
                 // padding: EdgeInsets.symmetric(
                 //     horizontal: MediaQuery.of(context).size.width * 0.05),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _agree1 = !_agree1;
-                                });
-                              },
-                              child: Icon(
-                                !_agree1
-                                    ? Icons.check_box_outline_blank
-                                    : Icons.check_box,
-                                size: 25,
-                              ),
-                            ),
-                            // Text("All the info is correct and sufficient quatity is available."),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            child: Text(
-                              "I agree that product is NOT already uploaded. If uploaded, then you can increase stock by updating the product!",
-                              style: textStyle1(
-                                  13, Colors.black, FontWeight.normal),
-                            ),
-                            // Text("All the info is correct and sufficient quatity is available."),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _agree2 = !_agree2;
-                                });
-                              },
-                              child: Icon(
-                                !_agree2
-                                    ? Icons.check_box_outline_blank
-                                    : Icons.check_box,
-                                size: 25,
-                              ),
-                            ),
-                            // Text("All the info is correct and sufficient quatity is available."),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            child: Text(
-                              "All the info is correct and sufficient quatity is available.",
-                              style: textStyle1(
-                                  13, Colors.black, FontWeight.normal),
-                            ),
-                            // Text("All the info is correct and sufficient quatity is available."),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: () {
-                          if (_agree1 && _agree2) {
-                            Navigator.pop(context);
-                          } else {
-                            Toast().notifyErr("Check agreement");
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.fromLTRB(30, 5, 30, 5),
-                          decoration: BoxDecoration(
-                            color: Color(0xFF5B0D1B),
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.6,
                           child: Text(
-                            "Confirm",
+                            "I agree that product is NOT already uploaded. If uploaded, then you can increase stock by updating the product!",
                             style:
-                                textStyle1(15, Colors.white, FontWeight.normal),
+                                textStyle1(13, Colors.black, FontWeight.normal),
                           ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                        Container(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _agree1 = !_agree1;
+                              });
+                            },
+                            child: Icon(
+                              !_agree1
+                                  ? Icons.check_box_outline_blank
+                                  : Icons.check_box,
+                              size: 25,
+                            ),
+                          ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: Text(
+                            "All the info is correct and sufficient quatity is available.",
+                            style:
+                                textStyle1(13, Colors.black, FontWeight.normal),
+                          ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                        Container(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _agree2 = !_agree2;
+                              });
+                            },
+                            child: Icon(
+                              !_agree2
+                                  ? Icons.check_box_outline_blank
+                                  : Icons.check_box,
+                              size: 25,
+                            ),
+                          ),
+                          // Text("All the info is correct and sufficient quatity is available."),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        if (_agree1 && _agree2) {
+                          Navigator.pop(context);
+                        } else {
+                          Toast().notifyErr("Check agreement");
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(30, 5, 30, 5),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF5B0D1B),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: Text(
+                          "Confirm",
+                          style:
+                              textStyle1(15, Colors.white, FontWeight.normal),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -405,56 +368,58 @@ class _UploadButtonState extends State<UploadButton> {
       },
     );
     print(
-        "-->\nimages-\n${NewProductProvider.images}\ncolors\n${NewProductProvider.colors}\n");
+        "-->\nimages-\n${NewProductProvider1.images}\ncolors\n${NewProductProvider1.colors}\n");
 
-    if (NewProductProvider.reference.length == 0) {
+    if (NewProductProvider1.reference.length == 0) {
       Toast().notifyErr("Invalid Reference ID");
       return false;
     }
-    if (NewProductProvider.title.length == 0) {
+    if (NewProductProvider1.title.length == 0) {
       Toast().notifyErr("Invalid Title");
       return false;
     }
-    if (NewProductProvider.category.length == 0) {
+    if (NewProductProvider1.category.length == 0) {
       Toast().notifyErr("Invalid Category");
       return false;
     }
-    if (NewProductProvider.setSize < 1 || NewProductProvider.setSize > 24) {
+    if (NewProductProvider1.setSize < 4 || NewProductProvider1.setSize > 24) {
       Toast().notifyErr("Invalid Number of Colors");
       return false;
     }
-    if (NewProductProvider.description.length == 0) {
+    if (NewProductProvider1.description.length == 0) {
       Toast().notifyErr("Invalid Description");
       return false;
     }
-    if (NewProductProvider.images.contains(null) ||
-        NewProductProvider.images.length < 4) {
+    if (NewProductProvider1.images.contains(null) ||
+        NewProductProvider1.images.length < 4) {
       Toast().notifyErr("Choose all main images");
       return false;
     }
-    if (NewProductProvider.colors.contains(null) ||
-        NewProductProvider.colors.length < NewProductProvider.setSize) {
+    if (NewProductProvider1.colors.contains(null) ||
+        NewProductProvider1.colors.length < NewProductProvider1.setSize) {
       Toast().notifyErr("Choose all set images");
       return false;
     }
-    if (NewProductProvider.stockAvailability == 0) {
+    if (NewProductProvider1.stockAvailability == 0) {
       Toast().notifyErr("Invalid Stock Availability");
       return false;
     }
-    if (NewProductProvider.min > NewProductProvider.setSize ||
-        NewProductProvider.min <= 0) {
+    if (NewProductProvider1.min > NewProductProvider1.setSize ||
+        NewProductProvider1.min <= 0) {
       Toast().notifyErr("Invalid Set Size");
       return false;
     }
 
-    print("texts and images validated");
-
-    bool ok = await validateSpecs();
-    if (!ok) {
-      Toast().notifyErr("Something wrong in specifications");
+    for (var d in ['L', 'B', 'H']) {
+      if (NewProductProvider1.fullSetSize[d] < 1) {
+        Toast().notifyErr("Invalid Set $d");
+        return false;
+      }
     }
 
-    return ok;
+    print("texts and images validated");
+
+    return await validateSpecs();
   }
 
   void uploadHandler() async {
@@ -472,38 +437,36 @@ class _UploadButtonState extends State<UploadButton> {
           var contact = await storage.getItem('contact');
           List<String> imageUrls = [], colorUrls = [];
           var specs = [];
-          var cat = NewProductProvider.category;
-          print("specs: ${NewProductProvider.specifications[cat]}");
+          print("specs: ${NewProductProvider1.specifications}");
 
           List<String> keys =
-              Helpers().getKeys(NewProductProvider.specifications[cat]);
+              Helpers().getKeys(NewProductProvider1.specifications);
           for (var x in keys) {
             specs.add({
-              "title": NewProductProvider.specifications[cat][x]["title"],
-              "value": NewProductProvider.specifications[cat][x]["value"]
+              "title": NewProductProvider1.specifications[x]["title"],
+              "value": NewProductProvider1.specifications[x]["value"]
             });
           }
 
           Map<String, dynamic> data = {
-            'reference': NewProductProvider.reference,
-            "title": NewProductProvider.title,
-            "category": NewProductProvider.category,
-            "subCat": NewProductProvider.subCat,
-            "mrp": NewProductProvider.fullSetPrice,
+            "title": NewProductProvider1.title,
+            "category": NewProductProvider1.category,
+            "subCat": NewProductProvider1.specifications[0]["value"],
+            "mrp": NewProductProvider1.fullSetPrice,
             'discount': false,
             'discountValue': 0,
             'userContact': contact,
-            'description': NewProductProvider.description,
-            'totalSet': NewProductProvider.setSize,
-            'min': NewProductProvider.min,
-            'stockAvailability': NewProductProvider.stockAvailability,
+            'description': NewProductProvider1.description,
+            'totalSet': NewProductProvider1.setSize,
+            'min': NewProductProvider1.min,
+            'stockAvailability': NewProductProvider1.stockAvailability,
             'resellerCrateAvailability': 0,
-            // 'images': NewProductProvider.images,
+            // 'images': NewProductProvider1.images,
 
-            'fullSetPrice': NewProductProvider.fullSetPrice,
+            'fullSetPrice': NewProductProvider1.fullSetPrice,
 
-            'fullSetSize': NewProductProvider.fullSetSize,
-            // 'colors': NewProductProvider.colors,
+            'fullSetSize': NewProductProvider1.fullSetSize,
+            // 'colors': NewProductProvider1.colors,
             'specifications': specs,
           };
           print("newP-> $data");
@@ -522,9 +485,9 @@ class _UploadButtonState extends State<UploadButton> {
             _uploadingImage = true;
             _imageCounter = 0;
           });
-          for (int i = 0; i < NewProductProvider.images.length; i++) {
-            print("uploading main image ${NewProductProvider.images[i]}");
-            String ex = NewProductProvider.images[i].absolute
+          for (int i = 0; i < NewProductProvider1.images.length; i++) {
+            print("uploading main image ${NewProductProvider1.images[i]}");
+            String ex = NewProductProvider1.images[i].absolute
                 .toString()
                 .split('.')
                 .last
@@ -532,7 +495,7 @@ class _UploadButtonState extends State<UploadButton> {
             String name = (id + "-main-" + i.toString() + "." + ex).toString();
 
             var urls =
-                await AWS().uploadImage(NewProductProvider.images[i], name);
+                await AWS().uploadImage(NewProductProvider1.images[i], name);
             if (urls['success'] == false) {
               Toast().notifyErr("Error in uploading images.\nUpload again");
               await MerchantApi().deleteProduct({'_id': id});
@@ -545,16 +508,16 @@ class _UploadButtonState extends State<UploadButton> {
               _imageCounter = _imageCounter + 1;
             });
           }
-          for (int i = 0; i < NewProductProvider.colors.length; i++) {
-            String ex = NewProductProvider.colors[i].absolute
+          for (int i = 0; i < NewProductProvider1.colors.length; i++) {
+            String ex = NewProductProvider1.colors[i].absolute
                 .toString()
                 .split('.')
                 .last
                 .split("'")[0];
             String name = (id + "-color-" + i.toString() + "." + ex).toString();
-            print("uploading color image ${NewProductProvider.colors[i]}");
+            print("uploading color image ${NewProductProvider1.colors[i]}");
             var urls =
-                await AWS().uploadImage(NewProductProvider.colors[i], name);
+                await AWS().uploadImage(NewProductProvider1.colors[i], name);
             if (urls['success'] == false) {
               Toast().notifyErr("Error in uploading images.\nUpload again");
               await MerchantApi().deleteProduct({'_id': id});
@@ -578,11 +541,11 @@ class _UploadButtonState extends State<UploadButton> {
           var res = await MerchantApi().updateProduct(body);
           if (res["success"] == true) {
             Toast().notifySuccess("Product Uploaded Successfully");
-            Navigator.of(context).popAndPushNamed('/merchant_home');
-            print("\nupdated\n");
           } else {
-            Toast().notifyErr((res['message'] ?? "Some error occurred"));
+            Toast().notifyErr("Some error occurred");
           }
+          Navigator.of(context).pushNamed('/merchant_home');
+          print("\nupdated\n");
         } catch (err) {
           print("err $err");
           Toast().notifyErr(
@@ -617,8 +580,8 @@ class _UploadButtonState extends State<UploadButton> {
                     "Uploading images: " +
                         _imageCounter.toString() +
                         "/" +
-                        (NewProductProvider.setSize +
-                                NewProductProvider.images.length)
+                        (NewProductProvider1.setSize +
+                                NewProductProvider1.images.length)
                             .toString(),
                     style: textStyle1(13, Colors.black54, FontWeight.normal),
                   )
@@ -664,7 +627,7 @@ class _FinalPriceState extends State<FinalPrice> {
   bool less = false, loading = true;
   void getPrice() {
     setState(() {
-      less = (NewProductProvider.min < NewProductProvider.setSize);
+      less = (NewProductProvider1.min < NewProductProvider1.setSize);
       if (less) {
         halfSetPrice = Math().getHalfSetPrice().toString();
       }
@@ -801,7 +764,7 @@ class _SpecificationsState extends State<Specifications>
     setState(() {
       loading = true;
     });
-    _category = NewProductProvider.category;
+    _category = NewProductProvider1.category;
     Set<String> _data = {};
     List mechantHomeCategories =
         (MerchantHome.categoriess != null) ? MerchantHome.categoriess : [];
@@ -825,7 +788,7 @@ class _SpecificationsState extends State<Specifications>
 
     if (_category.length == 0) {
       _category = _categories[0];
-      NewProductProvider.category = _category;
+      NewProductProvider1.category = _category;
       _parameters = mechantHomeCategories[0]["parameters"];
     }
 
@@ -839,37 +802,38 @@ class _SpecificationsState extends State<Specifications>
     }
 
     // print("type $_typeData");
-    if (NewProductProvider.specifications == null)
-      NewProductProvider.specifications = {};
-    if (NewProductProvider.specifications[_category] == null)
-      NewProductProvider.specifications[_category] = new Map<String, dynamic>();
-    _specs = NewProductProvider.specifications[_category];
+    if (NewProductProvider1.specifications == null)
+      NewProductProvider1.specifications = {};
+    if (NewProductProvider1.specifications[_category] == null)
+      NewProductProvider1.specifications[_category] =
+          new Map<String, dynamic>();
+    _specs = NewProductProvider1.specifications[_category];
 
     // print("specs $_specs");
 
     dynamic tempSpecs = {};
     List<String> keys =
-        Helpers().getKeys(NewProductProvider.specifications[_category]) ?? [];
+        Helpers().getKeys(NewProductProvider1.specifications[_category]) ?? [];
     for (dynamic x in keys) {
-      tempSpecs[x] = NewProductProvider.specifications[_category][x];
+      tempSpecs[x] = NewProductProvider1.specifications[_category][x];
     }
 
     if ((Helpers().getKeys(_specs) ?? []).length == 0) {
       for (String x in Helpers().getKeys(_parameters)) {
         if (_specs[x] == null) _specs[x] = {};
         _specs[x] = {"title": _parameters[x]["title"], "value": ""};
-        NewProductProvider.specifications[_category]
+        NewProductProvider1.specifications[_category]
             [x] = {"title": _parameters[x]["title"], "value": ""};
       }
 
-      // NewProductProvider.specifications.add({"title": "Type", "value": []});
+      // NewProductProvider1.specifications.add({"title": "Type", "value": []});
 
-      // print("specs2: $_specs ${NewProductProvider.specifications}");
+      // print("specs2: $_specs ${NewProductProvider1.specifications}");
     }
 
     // print("specs $_specs");
 
-    // print("specs ${NewProductProvider.specifications}");
+    // print("specs ${NewProductProvider1.specifications}");
 
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
@@ -899,17 +863,18 @@ class _SpecificationsState extends State<Specifications>
         break;
       }
     }
-    if (NewProductProvider.specifications == null)
-      NewProductProvider.specifications = {};
-    if (NewProductProvider.specifications[_category] == null)
-      NewProductProvider.specifications[_category] = new Map<String, dynamic>();
+    if (NewProductProvider1.specifications == null)
+      NewProductProvider1.specifications = {};
+    if (NewProductProvider1.specifications[_category] == null)
+      NewProductProvider1.specifications[_category] =
+          new Map<String, dynamic>();
     print(
-        "Newprod- $_category\n${NewProductProvider.specifications[_category]}");
+        "Newprod- $_category\n${NewProductProvider1.specifications[_category]}");
     specsWidget = Helpers().buildparams(
         context,
         _parameters,
         _textControllers,
-        NewProductProvider.specifications[_category],
+        NewProductProvider1.specifications[_category],
         _focusNodes,
         buildSpecs,
         _controller);
@@ -999,13 +964,14 @@ class _SpecificationsState extends State<Specifications>
                                       return e.toString();
                                     }).toList(),
                                     // label: "Category",
-                                    // selectedItem: NewProductProvider.category,
+                                    // selectedItem: NewProductProvider1.category,
                                     // selectedItem: pincodeAddress[0]["Name"],
                                     onChanged: (val) async {
                                       setState(() {
                                         print("object $val");
                                         _category = val;
-                                        NewProductProvider.category = _category;
+                                        NewProductProvider1.category =
+                                            _category;
                                       });
                                       await buildSpecs();
                                     },
@@ -1160,10 +1126,9 @@ class _SpecificationsState extends State<Specifications>
                               onConfirm: (values) {
                                 setState(() {
                                   print("values $values");
-                                  NewProductProvider.subCat = values;
+                                  NewProductProvider1.subCat = values;
                                 });
                               },
-                              initialValue: (NewProductProvider.subCat ?? []),
                             ),
                             SizedBox(height: 10),
                             if (loadingSpecs)
@@ -1200,9 +1165,9 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
 
   void loadVars() {
     setState(() {
-      // _counter = NewProductProvider.setSize;
-      _setSizeController.text = NewProductProvider.min.toString();
-      _fullController.text = NewProductProvider.fullSetPrice.toString();
+      // _counter = NewProductProvider1.setSize;
+      _setSizeController.text = NewProductProvider1.min.toString();
+      _fullController.text = NewProductProvider1.fullSetPrice.toString();
       loading = false;
     });
   }
@@ -1242,11 +1207,11 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
                           onChanged: (val) {
                             if (val.length > 0) {
                               setState(() {
-                                NewProductProvider.min = int.parse(val);
+                                NewProductProvider1.min = int.parse(val);
                               });
                             } else {
                               setState(() {
-                                NewProductProvider.min = 0;
+                                NewProductProvider1.min = 0;
                               });
                             }
                           },
@@ -1271,12 +1236,12 @@ class _MinOrderAmountAndPriceState extends State<MinOrderAmountAndPrice> {
                           onChanged: (val) {
                             if (_fullController.text.length > 0) {
                               setState(() {
-                                NewProductProvider.fullSetPrice =
+                                NewProductProvider1.fullSetPrice =
                                     double.parse(_fullController.text);
                               });
                             } else {
                               setState(() {
-                                NewProductProvider.fullSetPrice = 0.0;
+                                NewProductProvider1.fullSetPrice = 0.0;
                               });
                             }
                           },
@@ -1340,7 +1305,7 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
     print("kb: $kb");
 
     setState(() {
-      NewProductProvider.colors[index] = File(image.path);
+      NewProductProvider1.colors[index] = File(image.path);
       _selected = index;
     });
   }
@@ -1360,7 +1325,7 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
               Container(
                 alignment: Alignment.topLeft,
                 child: Text(
-                  "Choose pictures of ${NewProductProvider.setSize} colors:",
+                  "Choose pictures of ${NewProductProvider1.setSize} colors:",
                   style: textStyle1(13, Colors.black54, FontWeight.normal),
                 ),
               ),
@@ -1371,7 +1336,7 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height * 0.05,
                 child: ListView.builder(
-                  itemCount: NewProductProvider.colors.length,
+                  itemCount: NewProductProvider1.colors.length,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
@@ -1392,7 +1357,7 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
                                 width: (_selected == index) ? 1 : 0),
                             borderRadius: BorderRadius.all(Radius.circular(5)),
                           ),
-                          child: (NewProductProvider.colors[index] == null)
+                          child: (NewProductProvider1.colors[index] == null)
                               ? Container(
                                   child: Icon(
                                     Icons.file_upload,
@@ -1406,8 +1371,9 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       image: DecorationImage(
-                                        image: FileImage(File(NewProductProvider
-                                            .colors[index].path)),
+                                        image: FileImage(File(
+                                            NewProductProvider1
+                                                .colors[index].path)),
                                       ),
                                     ),
                                   ),
@@ -1441,12 +1407,12 @@ class _ProductInfoState extends State<ProductInfo> {
   Timer _debounce;
 
   void loadVars() {
-    _referenceController.text = NewProductProvider.reference;
-    _titleController.text = NewProductProvider.title;
-    _descController.text = NewProductProvider.description;
-    _setSizeController.text = NewProductProvider.setSize.toString();
+    _referenceController.text = NewProductProvider1.reference;
+    _titleController.text = NewProductProvider1.title;
+    _descController.text = NewProductProvider1.description;
+    _setSizeController.text = NewProductProvider1.setSize.toString();
     _stockAvailabilityController.text =
-        NewProductProvider.stockAvailability.toString();
+        NewProductProvider1.stockAvailability.toString();
     setState(() {
       loading = false;
     });
@@ -1481,7 +1447,7 @@ class _ProductInfoState extends State<ProductInfo> {
                   ),
                   onChanged: (val) {
                     setState(() {
-                      NewProductProvider.reference = _referenceController.text;
+                      NewProductProvider1.reference = _referenceController.text;
                     });
                   },
                   controller: _referenceController,
@@ -1544,7 +1510,7 @@ class _ProductInfoState extends State<ProductInfo> {
                       _titleController.selection =
                           TextSelection.collapsed(offset: val.length);
                     } else {
-                      NewProductProvider.title = _titleController.text;
+                      NewProductProvider1.title = _titleController.text;
                     }
                   },
                   controller: _titleController,
@@ -1602,7 +1568,7 @@ class _ProductInfoState extends State<ProductInfo> {
                   ),
                   onChanged: (val) {
                     setState(() {
-                      NewProductProvider.description = _descController.text;
+                      NewProductProvider1.description = _descController.text;
                     });
                   },
                   controller: _descController,
@@ -1666,17 +1632,17 @@ class _ProductInfoState extends State<ProductInfo> {
                         onChanged: (val) {
                           setState(() {
                             if (_setSizeController.text.length > 0) {
-                              NewProductProvider.setSize =
+                              NewProductProvider1.setSize =
                                   int.parse(_setSizeController.text);
-                              if (NewProductProvider.setSize > 24) {
-                                NewProductProvider.setSize = 24;
+                              if (NewProductProvider1.setSize > 24) {
+                                NewProductProvider1.setSize = 24;
                                 _setSizeController.text = "24";
                               }
-                              NewProductProvider.colors = [];
+                              NewProductProvider1.colors = [];
                               for (int i = 0;
-                                  i < NewProductProvider.setSize;
+                                  i < NewProductProvider1.setSize;
                                   i++) {
-                                NewProductProvider.colors.add(null);
+                                NewProductProvider1.colors.add(null);
                               }
                             }
                           });
@@ -1735,7 +1701,7 @@ class _ProductInfoState extends State<ProductInfo> {
                         onChanged: (val) {
                           setState(() {
                             if (_stockAvailabilityController.text.length > 0) {
-                              NewProductProvider.stockAvailability =
+                              NewProductProvider1.stockAvailability =
                                   int.parse(_stockAvailabilityController.text);
                             }
                           });
@@ -1823,7 +1789,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
     setState(() {
       _image[index] = File(resultImage.path);
       _selected = index;
-      NewProductProvider.images = _image;
+      NewProductProvider1.images = _image;
     });
   }
 
@@ -1841,8 +1807,8 @@ class _UploadProductImagesState extends State<UploadProductImages> {
   void initState() {
     super.initState();
     setState(() {
-      if (NewProductProvider.images.length > 0) {
-        _image = NewProductProvider.images;
+      if (NewProductProvider1.images.length > 0) {
+        _image = NewProductProvider1.images;
       }
     });
   }
