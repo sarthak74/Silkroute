@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:silkroute/methods/toast.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 
 import 'package:silkroute/view/widget/top_banner.dart';
 import 'package:silkroute/model/services/authservice.dart';
@@ -163,24 +164,31 @@ class EnterContactState extends State<EnterContactPage> {
                       height: 20,
                     ),
 
-                    new ElevatedButton(
-                      onPressed:
-                          (disabled || sending) ? null : navigatorFunction,
-                      style: ElevatedButton.styleFrom(
-                        primary: (sending || disabled)
-                            ? Colors.grey
-                            : Color(0xFF811111),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new ElevatedButton(
+                          onPressed:
+                              (disabled || sending) ? null : navigatorFunction,
+                          style: ElevatedButton.styleFrom(
+                            primary: (sending || disabled)
+                                ? Colors.grey
+                                : Color(0xFF811111),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                            child: Text(
+                              "Get Otp",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                        child: Text(
-                          "Get Otp",
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
+                        if (sending) SizedBox(width: 10),
+                        sending ? MyCircularProgress() : SizedBox(width: 0),
+                      ],
                     ),
                   ],
                 ),

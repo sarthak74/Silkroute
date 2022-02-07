@@ -68,18 +68,8 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
       }
     }
 
-    if (agreementCheck == false) {
-      Fluttertoast.showToast(
-        msg: "You have to accept terms and conditions",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.grey[100],
-        textColor: Colors.red[800],
-        fontSize: 10,
-      );
-    }
     print("validation: $agreementCheck");
-    return (agreementCheck == true);
+    return true;
   }
 
   void check() {
@@ -257,203 +247,255 @@ class _MechantAccountDetailsState extends State<MechantAccountDetails> {
                                   ),
                                 )
                               : SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      SizedBox(height: 20),
-                                      CustomTextField(
-                                        "Email",
-                                        "Email",
-                                        false,
-                                        (val) async {
-                                          setState(() {
-                                            data["email"] = val;
-                                          });
-                                        },
-                                        initialValue: data["email"],
-                                      ),
-                                      SizedBox(height: 20),
-                                      CustomTextField(
-                                        "Account Number",
-                                        "Account Number",
-                                        false,
-                                        (val) async {
-                                          setState(() {
-                                            data["bankAccountNo"] = val;
-                                          });
-                                        },
-                                        initialValue: data["bankAccountNo"],
-                                      ),
-                                      SizedBox(height: 20),
-                                      CustomTextField(
-                                        "IFSC Code",
-                                        "IFSC Code",
-                                        false,
-                                        (val) async {
-                                          setState(() {
-                                            data["ifsc"] = val;
-                                          });
-                                        },
-                                        initialValue: data["ifsc"],
-                                      ),
-                                      SizedBox(height: 20),
-                                      CustomTextField(
-                                        "Account Holder Name",
-                                        "Account Holder",
-                                        false,
-                                        (val) async {
-                                          setState(() {
-                                            data["accountHolderName"] = val;
-                                          });
-                                        },
-                                        initialValue: data["accountHolderName"],
-                                      ),
-                                      SizedBox(height: 20),
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.8,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Expanded(
+                                          flex: 4,
+                                          child: Column(
+                                            children: <Widget>[
+                                              SizedBox(height: 20),
+                                              CustomTextField(
+                                                "Email",
+                                                "Email",
+                                                false,
+                                                (val) async {
+                                                  setState(() {
+                                                    data["email"] = val;
+                                                  });
+                                                },
+                                                initialValue: data["email"],
+                                              ),
+                                              SizedBox(height: 20),
+                                              CustomTextField(
+                                                "Account Number",
+                                                "Account Number",
+                                                false,
+                                                (val) async {
+                                                  setState(() {
+                                                    data["bankAccountNo"] = val;
+                                                  });
+                                                },
+                                                initialValue:
+                                                    data["bankAccountNo"],
+                                              ),
+                                              SizedBox(height: 20),
+                                              CustomTextField(
+                                                "IFSC Code",
+                                                "IFSC Code",
+                                                false,
+                                                (val) async {
+                                                  setState(() {
+                                                    data["ifsc"] = val;
+                                                  });
+                                                },
+                                                initialValue: data["ifsc"],
+                                              ),
+                                              SizedBox(height: 20),
+                                              CustomTextField(
+                                                "Account Holder Name",
+                                                "Account Holder",
+                                                false,
+                                                (val) async {
+                                                  setState(() {
+                                                    data["accountHolderName"] =
+                                                        val;
+                                                  });
+                                                },
+                                                initialValue:
+                                                    data["accountHolderName"],
+                                              ),
+                                              SizedBox(height: 20),
 
-                                      ///// PICKUPP ADDRESS
+                                              ///// PICKUPP ADDRESS
 
-                                      new Theme(
-                                        data: new ThemeData(
-                                          primaryColor: Colors.black87,
+                                              new Theme(
+                                                data: new ThemeData(
+                                                  primaryColor: Colors.black87,
+                                                ),
+                                                child: new TextFormField(
+                                                  obscureText: false,
+                                                  onChanged: (val) async {
+                                                    setState(() {
+                                                      data["pickupAdd"] =
+                                                          pickupController.text;
+                                                    });
+                                                  },
+                                                  decoration:
+                                                      new InputDecoration(
+                                                    isDense: true,
+                                                    border: OutlineInputBorder(
+                                                      borderSide:
+                                                          new BorderSide(
+                                                        color: Colors.black,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  30)),
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                      borderSide:
+                                                          new BorderSide(
+                                                        color: Colors.black,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  30)),
+                                                    ),
+                                                    contentPadding:
+                                                        new EdgeInsets
+                                                            .symmetric(
+                                                      horizontal: 20.0,
+                                                      vertical: 10,
+                                                    ),
+                                                    labelText: "Pickup Address",
+                                                    labelStyle: textStyle1(
+                                                        13,
+                                                        Colors.black54,
+                                                        FontWeight.w500),
+                                                    prefixStyle: textStyle1(
+                                                        13,
+                                                        Colors.black,
+                                                        FontWeight.w500),
+                                                    hintStyle: textStyle1(
+                                                        13,
+                                                        Colors.black45,
+                                                        FontWeight.w500),
+                                                    hintText: "Pickup Address",
+                                                  ),
+                                                  controller: pickupController,
+                                                ),
+                                              ),
+
+                                              SizedBox(height: 10),
+
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  // print("clicked");
+                                                  setState(() {
+                                                    pickupController.text =
+                                                        businessAdd;
+                                                    data["pickupAdd"] =
+                                                        businessAdd;
+                                                  });
+                                                },
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xFF5B0D1B),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                10)),
+                                                  ),
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      20, 5, 20, 5),
+                                                  child: Text(
+                                                    "Same as business Address?",
+                                                    style: textStyle1(
+                                                      14,
+                                                      Colors.white,
+                                                      FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+
+                                              SizedBox(height: 20),
+                                            ],
+                                          ),
                                         ),
-                                        child: new TextFormField(
-                                          obscureText: false,
-                                          onChanged: (val) async {
-                                            setState(() {
-                                              data["pickupAdd"] =
-                                                  pickupController.text;
-                                            });
-                                          },
-                                          decoration: new InputDecoration(
-                                            isDense: true,
-                                            border: OutlineInputBorder(
-                                              borderSide: new BorderSide(
-                                                color: Colors.black,
-                                              ),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(30)),
+
+                                        // navigator
+
+                                        Expanded(
+                                          flex: 1,
+                                          child: Container(
+                                            alignment: Alignment.bottomCenter,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                InkWell(
+                                                  onTap: () {
+                                                    Navigator.pop(context);
+                                                    Navigator.of(context)
+                                                        .pushNamed(
+                                                            "/merchant_home");
+                                                  },
+                                                  child: Container(
+                                                    padding:
+                                                        EdgeInsets.fromLTRB(
+                                                            20, 5, 20, 5),
+                                                    decoration: BoxDecoration(
+                                                      color: Color.fromRGBO(
+                                                          0, 0, 0, 0.1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5),
+                                                    ),
+                                                    child: Text(
+                                                      "Skip",
+                                                      style: textStyle(
+                                                          13, Colors.black),
+                                                    ),
+                                                  ),
+                                                ),
+                                                new Container(
+                                                  width: 70,
+                                                  height: 70,
+                                                  margin: EdgeInsets.fromLTRB(
+                                                      0, 0, 0, 10),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                70)),
+                                                    gradient: LinearGradient(
+                                                      begin:
+                                                          Alignment.topCenter,
+                                                      end: Alignment
+                                                          .bottomCenter,
+                                                      colors: [
+                                                        Color(0xFF530000),
+                                                        Color.fromRGBO(
+                                                            129, 20, 20, 1),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  child: new IconButton(
+                                                    icon: Icon(
+                                                      Icons
+                                                          .keyboard_arrow_right,
+                                                      color: Colors.white,
+                                                    ),
+                                                    iconSize: 40.0,
+                                                    onPressed: () async {
+                                                      if (await validForm())
+                                                        await navigatorFuntion();
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            contentPadding:
-                                                new EdgeInsets.symmetric(
-                                              horizontal: 20.0,
-                                              vertical: 10,
-                                            ),
-                                            labelText: "Pickup Address",
-                                            prefixStyle: new TextStyle(
-                                              color: Colors.black,
-                                            ),
-                                            hintText: "Pickup Address",
                                           ),
-                                          controller: pickupController,
                                         ),
-                                      ),
-
-                                      SizedBox(height: 10),
-
-                                      GestureDetector(
-                                        onTap: () async {
-                                          // print("clicked");
-                                          setState(() {
-                                            pickupController.text = businessAdd;
-                                            data["pickupAdd"] = businessAdd;
-                                          });
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFF5B0D1B),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10)),
-                                          ),
-                                          padding:
-                                              EdgeInsets.fromLTRB(20, 5, 20, 5),
-                                          child: Text(
-                                            "Same as business Address?",
-                                            style: textStyle1(
-                                              14,
-                                              Colors.white,
-                                              FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-
-                                      SizedBox(height: 20),
-
-                                      // Terms and Conditions
-
-                                      Agreements(
-                                          agreementCheck,
-                                          agreementCheckFunction,
-                                          checkboxColor),
-
-                                      // navigator
-
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          InkWell(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                              Navigator.of(context)
-                                                  .pushNamed("/merchant_home");
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  20, 5, 20, 5),
-                                              decoration: BoxDecoration(
-                                                color: Color.fromRGBO(
-                                                    0, 0, 0, 0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                              child: Text(
-                                                "Skip",
-                                                style:
-                                                    textStyle(13, Colors.black),
-                                              ),
-                                            ),
-                                          ),
-                                          new Container(
-                                            width: 70,
-                                            height: 70,
-                                            margin: EdgeInsets.fromLTRB(
-                                                0, 0, 0, 10),
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(70)),
-                                              gradient: LinearGradient(
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter,
-                                                colors: [
-                                                  Color(0xFF530000),
-                                                  Color.fromRGBO(
-                                                      129, 20, 20, 1),
-                                                ],
-                                              ),
-                                            ),
-                                            child: new IconButton(
-                                              icon: Icon(
-                                                Icons.keyboard_arrow_right,
-                                                color: Colors.white,
-                                              ),
-                                              iconSize: 40.0,
-                                              onPressed: () async {
-                                                if (await validForm())
-                                                  await navigatorFuntion();
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                          bottom: MediaQuery.of(context)
-                                              .viewInsets
-                                              .bottom,
-                                        ),
-                                      ),
-                                    ],
+                                        // Padding(
+                                        //   padding: EdgeInsets.only(
+                                        //     bottom: MediaQuery.of(context)
+                                        //         .viewInsets
+                                        //         .bottom,
+                                        //   ),
+                                        // ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                         ]),

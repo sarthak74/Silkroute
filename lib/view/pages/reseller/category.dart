@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/subcategory_head.dart';
 import 'package:silkroute/view/widget/category_tile.dart';
 import 'package:silkroute/view/widget/footer.dart';
@@ -61,7 +62,7 @@ class _CategoryPageState extends State<CategoryPage> {
               //////////////////////////////
 
               TopBar(),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
               Expanded(
                 child: loading
@@ -95,20 +96,41 @@ class _CategoryPageState extends State<CategoryPage> {
                                     MediaQuery.of(context).size.height * 0.55,
                                 child: loading
                                     ? Text("Loading Loading")
-                                    : GridView.count(
-                                        crossAxisCount: 2,
-                                        children: List.generate(
-                                          (category['subCat'] == [])
-                                              ? 0
-                                              : category['subCat'].length,
-                                          (index) {
-                                            return CategoryTile(
-                                              category: category["title"],
-                                              subCat: category['subCat'][index],
-                                            );
-                                          },
-                                        ),
-                                      ),
+                                    : (category['subCat'].length == 0 ||
+                                            (category['subCat'] ?? []) == [])
+                                        ? Container(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.5,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              "No Items",
+                                              style: textStyle1(
+                                                  13,
+                                                  Colors.black54,
+                                                  FontWeight.w500),
+                                            ),
+                                          )
+                                        : GridView.count(
+                                            crossAxisCount: 2,
+                                            childAspectRatio: 175 / 114,
+                                            children: List.generate(
+                                              (category['subCat'].length == 0 ||
+                                                      (category['subCat'] ??
+                                                              []) ==
+                                                          [])
+                                                  ? 0
+                                                  : category['subCat'].length,
+                                              (index) {
+                                                return CategoryTile(
+                                                  category: category["title"],
+                                                  subCat: category['subCat']
+                                                      [index],
+                                                );
+                                              },
+                                            ),
+                                          ),
                               ),
                             ),
                           ]),

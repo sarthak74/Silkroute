@@ -14,7 +14,7 @@ class _EditAccountDetailsBottomSheetState
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 30),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 15),
       width: double.infinity,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -34,7 +34,7 @@ class _EditAccountDetailsBottomSheetState
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                "Please update your account details ",
+                "Please update your bank details ",
                 style: textStyle1(
                   13,
                   Colors.black,

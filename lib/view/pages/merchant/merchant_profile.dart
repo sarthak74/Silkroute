@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/helpers.dart';
@@ -22,9 +23,26 @@ class MerchantProfile extends StatefulWidget {
 class _MerchantProfileState extends State<MerchantProfile> {
   LocalStorage storage = LocalStorage('silkroute');
 
+  bool userType = true;
+  var ut;
+
+  void loadVars() async {
+    setState(() {
+      userType = true;
+    });
+    LocalStorage storage = await LocalStorage('silkroute');
+    ut = storage.getItem('userType');
+
+    setState(() {
+      userType = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+
+    loadVars();
   }
 
   @override
@@ -72,8 +90,41 @@ class _MerchantProfileState extends State<MerchantProfile> {
                       // PROFILE DETAIL CONTAINER
                       ProfileDetailContainer(),
 
-                      // LOGOUT BUTTON
-                      LogoutButton(),
+                      // DONE BUTTON
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          userType
+                              ? Text("Loading...")
+                              : GestureDetector(
+                                  onTap: () {
+                                    var route = (ut == "Reseller")
+                                        ? "/reseller_home"
+                                        : "/merchant_home";
+                                    Navigator.of(context)
+                                        .popAndPushNamed(route);
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    margin: EdgeInsets.fromLTRB(0, 20, 0, 10),
+                                    padding:
+                                        EdgeInsets.fromLTRB(30, 10, 30, 10),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xff5b0d1b),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "Done",
+                                      style: textStyle1(
+                                        15,
+                                        Colors.white,
+                                        FontWeight.normal,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
                     ]),
                   ),
                   SliverFillRemaining(hasScrollBody: false, child: Container()),
@@ -94,34 +145,37 @@ class _MerchantProfileState extends State<MerchantProfile> {
   }
 }
 
-class LogoutButton extends StatefulWidget {
-  @override
-  _LogoutButtonState createState() => _LogoutButtonState();
-}
+// class LogoutButton extends StatefulWidget {
+//   @override
+//   _LogoutButtonState createState() => _LogoutButtonState();
+// }
 
-class _LogoutButtonState extends State<LogoutButton> {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Methods().logout(context);
-      },
-      child: Container(
-        alignment: Alignment.center,
-        margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
-        padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-          color: Color(0xFF5B0D1B),
-        ),
-        child: Text(
-          "Logout",
-          style: textStyle1(15, Colors.white, FontWeight.bold),
-        ),
-      ),
-    );
-  }
-}
+// class _LogoutButtonState extends State<LogoutButton> {
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+
+//       onTap: () {
+//         Navigator.of(context).popAndPushNamed('/');
+//       },
+//       child: Container(
+//         alignment: Alignment.center,
+//         margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
+//         // width: MediaQuery.of(context).size.width * 0.5,
+//         padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.all(Radius.circular(20)),
+//           color: Color(0xFF5B0D1B),
+//         ),
+//         child: Text(
+//           "Logout",
+//           style: textStyle1(15, Colors.white, FontWeight.normal),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class ProfileImageBar extends StatefulWidget {
   @override
@@ -155,7 +209,7 @@ class _ProfileImageBarState extends State<ProfileImageBar> {
             margin: EdgeInsets.only(
                 left: MediaQuery.of(context).size.width * 0.1,
                 right: MediaQuery.of(context).size.width * 0.1,
-                top: MediaQuery.of(context).size.width * 0.1),
+                top: MediaQuery.of(context).size.width * 0.03),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -167,7 +221,7 @@ class _ProfileImageBarState extends State<ProfileImageBar> {
                   children: <Widget>[
                     Text(
                       name,
-                      style: textStyle1(15, Colors.black, FontWeight.bold),
+                      style: textStyle1(15, Colors.black, FontWeight.normal),
                     ),
                   ],
                 ),
@@ -202,17 +256,17 @@ class _ProfileDetailContainerState extends State<ProfileDetailContainer> {
           animationDuration: Duration(milliseconds: 500),
           children: [
             ExpansionPanel(
-              backgroundColor: Colors.grey[200],
+              backgroundColor: Color(0xfff6f6f6),
               headerBuilder: (BuildContext context, bool isExpanded) {
                 return ListTile(
                   title: Row(
                     children: <Widget>[
-                      Icon(Icons.person, size: 20, color: Colors.black54),
+                      SizedBox(width: 5),
+                      Icon(Icons.person, size: 20, color: Colors.black),
                       SizedBox(width: 10),
                       Text(
                         "Profile Details",
-                        style:
-                            textStyle1(15, Colors.grey[700], FontWeight.bold),
+                        style: textStyle1(15, Colors.black, FontWeight.normal),
                       ),
                     ],
                   ),
@@ -509,7 +563,7 @@ class _OptionsListState extends State<OptionsList> {
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(20)),
-              color: Colors.grey[200],
+              color: Color(0xfff6f6f6),
             ),
             child: Column(
               children: <Widget>[
@@ -530,16 +584,39 @@ class _OptionsListState extends State<OptionsList> {
                     await Helpers().showGstinDialog(context, user["gst"]);
                   },
                 ),
-                OptionRow(
-                  prefixIcon: Icons.card_giftcard,
-                  title: "Pickup Address",
-                  suffixIcon: Icons.edit,
-                  function: () async {
-                    await Helpers().showPickupAddressDialog(context);
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Image.asset(
+                      'assets/images/crateicon.png',
+                      width: 20,
+                      height: 20,
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Pickup Address",
+                          style:
+                              textStyle1(15, Colors.black54, FontWeight.normal),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        size: 18,
+                        color: Color(0xFF811111),
+                      ),
+                      onPressed: () async {
+                        await Helpers().showPickupAddressDialog(context);
+                      },
+                    ),
+                  ],
                 ),
                 OptionRow(
-                  prefixIcon: Icons.account_box,
+                  prefixIcon: FontAwesomeIcons.rupeeSign,
                   title: "Bank Account",
                   suffixIcon: Icons.edit,
                   function: () async {
@@ -568,7 +645,7 @@ class _OptionRowState extends State<OptionRow> {
       textStyle: TextStyle(
         color: color,
         fontSize: size.toDouble(),
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.normal,
       ),
     );
   }
@@ -585,7 +662,7 @@ class _OptionRowState extends State<OptionRow> {
             alignment: Alignment.centerLeft,
             child: Text(
               widget.title,
-              style: textStyle(15, Colors.black54),
+              style: textStyle1(15, Colors.black54, FontWeight.normal),
             ),
           ),
         ),

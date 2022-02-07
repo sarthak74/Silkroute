@@ -51,14 +51,14 @@ class CustomTextFieldState extends State<CustomTextField> {
             color: Colors.black,
           ),
           hintText: widget.hintText,
-          hintStyle: textStyle1(13, Colors.black45, FontWeight.w500),
+          hintStyle: textStyle1(13, Colors.black45, FontWeight.normal),
         ),
         style: textStyle1(
             13,
             (widget.enabled == null || widget.enabled == true)
                 ? Colors.black
                 : Colors.grey,
-            FontWeight.w500),
+            FontWeight.normal),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/checkAccountDetails.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/notification_service.dart';
@@ -29,10 +30,11 @@ import 'package:silkroute/view/widget/top_picks.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 
 class MerchantHome extends StatefulWidget {
-  static dynamic categoriess;
+  static dynamic categoriess, tags;
 
   void initState() async {
     categoriess = await ResellerHomeApi().getCategories();
+    tags = await ResellerHomeApi().getAllTags();
   }
 
   @override
@@ -182,6 +184,12 @@ class _MerchantHomeState extends State<MerchantHome> {
                               ),
                             )
                           : HorizontalListView("CATEGORIES", categories),
+
+                      SizedBox(height: 10),
+                      // ElevatedButton(
+                      //     onPressed: () =>
+                      //         Navigator.of(context).pushNamed('/temp'),
+                      //     child: Text("Temp")),
 
                       SizedBox(height: 20),
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/model/core/ProductList.dart';
 import 'package:silkroute/model/services/MerchantHomeAPI.dart';
 import 'package:silkroute/provider/ProductListProvider.dart';
 import 'package:silkroute/view/pages/reseller/order_page.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/product_tile.dart';
 import 'package:silkroute/view/widget2/merchantProductTile.dart';
 
@@ -42,26 +44,36 @@ class _AllProductsState extends State<AllProducts> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                "YOUR PRODUCTS",
-                style: textStyle(
-                  18,
-                  Colors.black54,
+          Container(
+            padding: EdgeInsets.only(left: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "YOUR PRODUCTS",
+                  style: textStyle1(
+                    14,
+                    Colors.black54,
+                    FontWeight.w500,
+                  ),
                 ),
-              ),
-              SizedBox(width: 10),
-              GestureDetector(
-                onTap: null,
-                child: Icon(
-                  Icons.arrow_downward,
-                  size: 20,
-                  color: Colors.black54,
+                SizedBox(width: 10),
+                GestureDetector(
+                  onTap: null,
+                  child: Icon(
+                    Icons.arrow_downward,
+                    size: 20,
+                    color: Colors.black54,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+          SizedBox(
+            height: ((_products == null || _products.length == 0) &&
+                    (loading == false))
+                ? 30
+                : 0,
           ),
           loading
               ? Container(
@@ -74,26 +86,39 @@ class _AllProductsState extends State<AllProducts> {
                         height: 30,
                         width: 30,
                         child: CircularProgressIndicator(
-                          color: Color(0xFF5B0D1B),
+                          color: Color(0xFF811111),
                         ),
                       ),
                     ],
                   ),
                 )
-              : GridView.count(
-                  childAspectRatio: Math().aspectRatio(context),
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  crossAxisCount: 2,
-                  children: List.generate(
-                    _products == [] ? 0 : _products.length,
-                    (index) {
-                      return MerchantProductTile(
-                        product: _products[index],
-                      );
-                    },
-                  ),
-                )
+              : (_products == null || _products.length == 0)
+                  ? Center(
+                      child: Text(
+                        "No products to show",
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    )
+                  : GridView.count(
+                      childAspectRatio: Math().aspectRatio(context),
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      crossAxisCount: 2,
+                      children: List.generate(
+                        _products == null ? 0 : _products.length,
+                        (index) {
+                          return MerchantProductTile(
+                            product: _products[index],
+                          );
+                        },
+                      ),
+                    )
         ],
       ),
     );

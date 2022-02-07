@@ -32,9 +32,10 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
       this.setState(() {});
     });
     controller.repeat();
-    Future.delayed(const Duration(seconds: 2), () async {
+    Future.delayed(const Duration(seconds: 12), () async {
       LocalStorage storage = await LocalStorage('silkroute');
       // await storage.clear();
+      String token = await FirebaseService().getToken();
       var usr = await storage.getItem('user');
       var auth = usr == null ? false : true;
       var reg = (usr != null) ? usr["registered"] : null;
@@ -44,6 +45,7 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
       if (auth && (usr != null) && (reg != null) && (reg == true)) {
         if (usr['fcmtoken'] == null) {
           usr['fcmtoken'] = await FirebaseService().getToken();
+          await storage.setItem('user', usr);
         }
         if (ut == "Manufacturer") {
           if (usr["verified"] == true) {
@@ -113,12 +115,15 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.5,
-                height: MediaQuery.of(context).size.height * 0.5,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/logo_front.png'),
+              Transform.scale(
+                scale: 1.15,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.55,
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/logo_front.png'),
+                    ),
                   ),
                 ),
               ),

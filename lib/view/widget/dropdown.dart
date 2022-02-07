@@ -19,13 +19,13 @@ class _DropdownState extends State<Dropdown> {
       style: const TextStyle(color: Colors.teal),
       underline: Container(
         height: 2,
-        color: Color(0xFF530000),
+        color: Color(0xFF811111),
       ),
       onChanged: widget.onpress,
       items: widget.list.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
-          child: Text(value, style: TextStyle(color: Color(0xFF530000))),
+          child: Text(value, style: TextStyle(color: Color(0xFF811111))),
         );
       }).toList(),
     );

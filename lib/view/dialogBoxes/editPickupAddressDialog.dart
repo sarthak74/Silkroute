@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/model/services/authservice.dart';
-import 'package:silkroute/view/pages/reseller/order_page.dart';
+// import 'package:silkroute/view/pages/reseller/order_page.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 
 class EditPickupAddressDialog extends StatefulWidget {
   const EditPickupAddressDialog({Key key, this.info}) : super(key: key);
@@ -34,11 +35,13 @@ class _EditPickupAddressDialogState extends State<EditPickupAddressDialog> {
       ),
       child: new TextField(
         controller: controller,
-        style: textStyle(13, Colors.black87),
+        style: textStyle1(13, Colors.black87, FontWeight.normal),
+        maxLines: 4,
+        minLines: 1,
         decoration: new InputDecoration(
           filled: true,
           fillColor: Colors.white,
-          hintStyle: textStyle(13, Colors.black54),
+          hintStyle: textStyle1(13, Colors.black54, FontWeight.normal),
           disabledBorder: outlineInputBorder(Colors.black54),
           focusedBorder: outlineInputBorder(Colors.black87),
           enabledBorder: outlineInputBorder(Colors.black54),
@@ -81,7 +84,7 @@ class _EditPickupAddressDialogState extends State<EditPickupAddressDialog> {
           ? editingInfo
           : Text(
               currentInfo.toString(),
-              style: textStyle(15, Colors.black),
+              style: textStyle1(13, Colors.black, FontWeight.normal),
             ),
       actionsPadding: EdgeInsets.all(10),
       actions: <Widget>[

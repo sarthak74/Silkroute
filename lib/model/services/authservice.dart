@@ -180,7 +180,7 @@ class AuthService {
           "data": userData,
         },
       );
-      var data = jsonDecode(res.toString());
+      var data = await jsonDecode(res.toString());
 
       LocalStorage storage = await LocalStorage('silkroute');
       print("register resp $data");
@@ -199,9 +199,10 @@ class AuthService {
           fontSize: 10,
         );
         await storage.clear();
-        data = data["user"];
+
         print("bef user --  $data");
-        await storage.setItem('token', data['token']);
+        await storage.setItem('token', data['token'].toString());
+        data = data["user"];
         await storage.setItem('contact', data['contact']);
         await storage.setItem('userType', data['userType']);
         await storage.setItem('name', data['name']);

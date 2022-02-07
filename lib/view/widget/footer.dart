@@ -37,7 +37,7 @@ class _FooterState extends State<Footer> {
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             child: (ut == "Manufacturer")
                 ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       GestureDetector(
                         onTap: () {
@@ -59,7 +59,7 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.widgets),
+                            Icon(Icons.add_box_outlined),
                             Text("Add New"),
                           ],
                         ),
@@ -71,21 +71,24 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.search),
+                            Icon(Icons.receipt_long_rounded),
                             Text("Orders"),
                           ],
                         ),
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context)
-                              .pushNamed("/merchant_dashboard");
+                          Navigator.of(context).pushNamed("/merchant_packages");
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(Icons.widgets),
-                            Text("dashboard"),
+                            Image.asset(
+                              'assets/images/crateicon.png',
+                              width: 25,
+                              height: 25,
+                            ),
+                            Text("Shipping"),
                           ],
                         ),
                       ),
@@ -100,12 +103,8 @@ class _FooterState extends State<Footer> {
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Icon(
-                              FontAwesomeIcons.store,
-                              size: 22,
-                            ),
+                            Icon(FontAwesomeIcons.shopify),
                             Text("Market"),
                           ],
                         ),
@@ -148,11 +147,7 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Icon(
-                              FontAwesomeIcons.solidBookmark,
-                              size: 20,
-                            ),
-                            SizedBox(height: 5),
+                            Icon(CupertinoIcons.heart_fill),
                             Text("Wishlist"),
                           ],
                         ),
@@ -164,11 +159,7 @@ class _FooterState extends State<Footer> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            Image.asset(
-                              'assets/images/crateicon.png',
-                              width: 25,
-                              height: 25,
-                            ),
+                            Icon(Icons.shopping_cart),
                             Text("Crate"),
                           ],
                         ),

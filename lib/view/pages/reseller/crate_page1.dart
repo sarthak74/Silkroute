@@ -300,111 +300,162 @@ class _CratePage1State extends State<CratePage1> {
 
                 /// Price DETAILS
 
-                loading
-                    ? Container(
-                        margin: EdgeInsets.only(
-                            top: MediaQuery.of(context).size.height * 0.3),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF5B0D1B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : (products == null || products.length == 0)
-                        ? Container()
-                        : Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              child: CustomTextField(
-                                "Pincode*",
-                                "Pincode",
-                                false,
-                                (val) async {
-                                  setState(() {
-                                    if (val.length == 6) {
-                                      pincode = val;
-                                      widget.setPincode(pincode);
-                                    } else {
-                                      canBeDelivered = false;
-                                      _deliveryServiceabilityStatus = {
-                                        "title":
-                                            "Enter a valid pincode to check status",
-                                        "etd": "",
-                                        "rate": ""
-                                      };
-                                    }
-                                  });
-                                  await checkDeliveryServiceabilityStatus();
-                                },
-                                initialValue: pincode,
-                              ),
-                            ),
-                          ),
-                SizedBox(height: 10),
-                loading
-                    ? Container(
-                        margin: EdgeInsets.only(
-                            top: MediaQuery.of(context).size.height * 0.3),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF5B0D1B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : (products == null || products.length == 0)
-                        ? Container()
-                        : (pincode != null && pincode.length == 6)
-                            ? (_loadingDeliveryServiceabilityStatus
-                                ? SizedBox(
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 1,
+                      child: loading
+                          ? Container(
+                              margin: EdgeInsets.only(
+                                  top:
+                                      MediaQuery.of(context).size.height * 0.3),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox(
                                     height: 30,
                                     width: 30,
                                     child: CircularProgressIndicator(
                                       color: Color(0xFF5B0D1B),
                                     ),
-                                  )
-                                : Column(
-                                    children: <Widget>[
-                                      SizedBox(height: 2),
-                                      Text(
-                                        _deliveryServiceabilityStatus["title"],
-                                        style: textStyle1(
-                                          13,
-                                          Colors.black54,
-                                          FontWeight.normal,
+                                  ),
+                                ],
+                              ),
+                            )
+                          : (products == null || products.length == 0)
+                              ? Container()
+                              : Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Container(
+                                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.4,
+                                    child: new TextFormField(
+                                      initialValue: pincode,
+                                      onChanged: (val) async {
+                                        setState(() {
+                                          if (val.length == 6) {
+                                            pincode = val;
+                                            widget.setPincode(pincode);
+                                          } else {
+                                            canBeDelivered = false;
+                                            _deliveryServiceabilityStatus = {
+                                              "title":
+                                                  "Enter a valid pincode to check status",
+                                              "etd": "",
+                                              "rate": ""
+                                            };
+                                          }
+                                        });
+                                        await checkDeliveryServiceabilityStatus();
+                                      },
+                                      decoration: new InputDecoration(
+                                        isDense: true,
+                                        border: OutlineInputBorder(
+                                          borderSide: new BorderSide(
+                                            color: Colors.black,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10)),
                                         ),
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        "Estimated Time: " +
-                                            _deliveryServiceabilityStatus[
-                                                "etd"],
-                                        style: textStyle1(
-                                          13,
-                                          Colors.black54,
-                                          FontWeight.normal,
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: new BorderSide(
+                                            color: Colors.black,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10)),
                                         ),
+                                        contentPadding:
+                                            new EdgeInsets.symmetric(
+                                          horizontal: 20.0,
+                                          vertical: 10,
+                                        ),
+                                        labelText: "Pincode*",
+                                        labelStyle: new TextStyle(
+                                          color: Colors.black54,
+                                        ),
+                                        prefixStyle: new TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                        hintText: "Pincode",
+                                        hintStyle: textStyle1(13,
+                                            Colors.black45, FontWeight.w500),
                                       ),
-                                    ],
-                                  ))
-                            : SizedBox(height: 20),
+                                      style: textStyle1(
+                                          13, Colors.black, FontWeight.w500),
+                                    ),
+                                  ),
+                                ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: loading
+                          ? Container(
+                              margin: EdgeInsets.only(
+                                  top:
+                                      MediaQuery.of(context).size.height * 0.3),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xFF5B0D1B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : (products == null || products.length == 0)
+                              ? Container()
+                              : (pincode != null && pincode.length == 6)
+                                  ? (_loadingDeliveryServiceabilityStatus
+                                      ? SizedBox(
+                                          height: 30,
+                                          width: 30,
+                                          child: CircularProgressIndicator(
+                                            color: Color(0xFF5B0D1B),
+                                          ),
+                                        )
+                                      : Column(
+                                          children: <Widget>[
+                                            (_deliveryServiceabilityStatus[
+                                                            "etd"]
+                                                        .length ==
+                                                    0)
+                                                ? Text(
+                                                    _deliveryServiceabilityStatus[
+                                                        "title"],
+                                                    style: textStyle1(
+                                                      13,
+                                                      Colors.black54,
+                                                      FontWeight.normal,
+                                                    ),
+                                                  )
+                                                : SizedBox(height: 0),
+                                            Text(
+                                              "Estimated Time: " +
+                                                  _deliveryServiceabilityStatus[
+                                                      "etd"],
+                                              style: textStyle1(
+                                                12,
+                                                Colors.black54,
+                                                FontWeight.normal,
+                                              ),
+                                              maxLines: 3,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ))
+                                  : SizedBox(height: 5),
+                    ),
+                  ],
+                ),
+
                 SizedBox(height: 20),
 
                 Container(
@@ -442,7 +493,7 @@ class _CratePage1State extends State<CratePage1> {
                     ],
                   ),
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 2),
 
                 ////  ApplyCoupon
 
@@ -450,34 +501,34 @@ class _CratePage1State extends State<CratePage1> {
                   onPressed: applyCoupons,
                   style: ElevatedButton.styleFrom(
                     primary: Colors.grey[200],
-                    elevation: 5,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        width: 2,
-                        color: Color(0xFF811111),
-                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    padding: EdgeInsets.fromLTRB(20, 10, 15, 7),
+                    padding: EdgeInsets.symmetric(vertical: 10),
                   ),
-                  child: Wrap(
-                    children: <Widget>[
-                      Text(
-                        "Apply Coupons",
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width - 20,
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          "Apply Coupons",
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 10),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: Colors.black,
-                      )
-                    ],
+                        Icon(
+                          Icons.arrow_forward,
+                          color: Colors.black,
+                        )
+                      ],
+                    ),
                   ),
                 ),
 
@@ -514,12 +565,20 @@ class _CratePage1State extends State<CratePage1> {
                         padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                         decoration: BoxDecoration(
                           color: (products.length > 0)
-                              ? Color(0xFF5B0D1B)
+                              ? Color(0xFF811111)
                               : Colors.grey[200],
                           borderRadius: BorderRadius.all(Radius.circular(20)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey[400],
+                              offset: Offset(3, 4),
+                              // spreadRadius: 5,
+                              blurRadius: 5,
+                            )
+                          ],
                         ),
                         child: Text(
-                          "Proceed",
+                          "Next",
                           style: GoogleFonts.poppins(
                             textStyle: TextStyle(
                               color: (products.length > 0)

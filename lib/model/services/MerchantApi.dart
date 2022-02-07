@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/core/MerchantOrderItem.dart';
 import 'package:silkroute/model/core/OrderListItem.dart';
 import 'package:silkroute/model/core/ProductList.dart';
@@ -21,7 +22,7 @@ class MerchantApi {
       };
       var url = Uri.parse(uri + '/manufacturerApi/addProduct');
       final res =
-          await http.post(url, headers: headers, body: json.encode(data));
+          await http.post(url, headers: headers, body: await json.encode(data));
       // var id = res.body.toString();
       print("resp: ${res.body}");
       // print("resp: ${decodedRes2[0].id}");
@@ -32,8 +33,7 @@ class MerchantApi {
     }
   }
 
-  Future<List<MerchantOrderItem>> getMerchantOrders(
-      sortBy, filter, orderType) async {
+  Future<dynamic> getMerchantOrders(sortBy, filter, orderType) async {
     try {
       var data = {
         "contact": await storage.getItem("contact"),
@@ -49,20 +49,54 @@ class MerchantApi {
         "Authorization": token
       };
       final res =
+          await http.post(url, headers: headers, body: await json.encode(data));
+      var decodedRes2 = jsonDecode(res.body);
+      // print("mer orders: $decodedRes2");
+      dynamic resp = decodedRes2;
+      // for (var i in decodedRes2) {
+      //   var order = i;
+      //   order["items"] =
+      //       i["items"].map((item) => MerchantOrderItem.fromMap(item)).toList();
+      //   resp.add(order);
+      // }
+      print("mer orders: $resp");
+      return resp;
+    } catch (e) {
+      print("error - $e");
+      return null;
+    }
+  }
+
+  Future<dynamic> getMerchantReturnOrders() async {
+    try {
+      var data = {
+        "contact": await storage.getItem("contact"),
+        "sortBy": {"createdDate": 1},
+        "orderType": true
+      };
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/manufacturerApi/getMerchantOrders');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res =
           await http.post(url, headers: headers, body: json.encode(data));
       var decodedRes2 = jsonDecode(res.body);
       // print("mer orders: $decodedRes2");
-      List<MerchantOrderItem> resp = [];
+      List<dynamic> resp = [];
       for (var i in decodedRes2) {
-        // print("mer order: $i");
-        MerchantOrderItem r = MerchantOrderItem.fromMap(i);
-        resp.add(r);
+        var order = i;
+        // order["items"] =
+        //     i["items"].map((item) => MerchantOrderItem.fromMap(item)).toList();
+        resp.add(order);
       }
       print("mer orders: $resp");
       return resp;
     } catch (e) {
       print("error - $e");
-      return e;
+      return null;
     }
   }
 
@@ -127,8 +161,8 @@ class MerchantApi {
 
   Future<dynamic> deleteProduct(Map<String, dynamic> body) async {
     try {
-      print("delete product");
-      var data = body;
+      print("delete product $body");
+      var data = body; // qry
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/deleteProduct');
       String token = await storage.getItem('token');
@@ -139,15 +173,37 @@ class MerchantApi {
       final res = await http.post(
         url,
         headers: headers,
-        body: json.encode(data),
+        body: await json.encode(data),
       );
-      var decodedRes2 = jsonDecode(res.body);
-
+      var decodedRes2 = await jsonDecode(res.body);
+      Toast().notifyInfo(decodedRes2['msg']);
       print("update product result: $decodedRes2");
       return decodedRes2;
-    } catch (e) {
-      print("update product err: $e");
-      return e;
+    } catch (err) {
+      print("update product err: $err");
+      return err;
+    }
+  }
+
+  Future<dynamic> getAllPickups() async {
+    try {
+      print("get all pickups");
+      String token = await storage.getItem('token');
+      var contact = await storage.getItem('contact');
+      var headers = {"Authorization": token};
+      var url =
+          Uri.parse(Math().ip() + '/manufacturerApi/getAllPickups/${contact}');
+      final res = await http.get(
+        url,
+        headers: headers,
+      );
+      var decodedRes2 = jsonDecode(res.body);
+      print("update product result: $decodedRes2");
+      Toast().notifyInfo(decodedRes2['msg']);
+      return decodedRes2['data'];
+    } catch (err) {
+      print("get all pickups error: $err");
+      return err;
     }
   }
 }

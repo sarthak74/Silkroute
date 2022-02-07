@@ -8,6 +8,7 @@ import 'package:silkroute/model/core/CrateListItem.dart';
 
 class MerchantOrderItem {
   final String productId;
+  final String razorpayItemId;
   final String orderId;
   final String contact;
   final dynamic createdDate;
@@ -21,6 +22,7 @@ class MerchantOrderItem {
   final dynamic shiprocket;
   MerchantOrderItem({
     this.productId,
+    this.razorpayItemId,
     this.orderId,
     this.contact,
     this.createdDate,
@@ -37,6 +39,7 @@ class MerchantOrderItem {
   Map<String, dynamic> toMap() {
     return {
       'productId': productId,
+      'razorpayItemId': razorpayItemId,
       'orderId': orderId,
       'contact': contact,
       'createdDate': createdDate,
@@ -54,6 +57,7 @@ class MerchantOrderItem {
   factory MerchantOrderItem.fromMap(Map<String, dynamic> map) {
     return MerchantOrderItem(
       productId: map['productId'] ?? '',
+      razorpayItemId: map['razorpayItemId'] ?? '',
       orderId: map['orderId'] ?? '',
       contact: map['contact'] ?? '',
       createdDate: map['createdDate'] ?? null,
@@ -62,7 +66,7 @@ class MerchantOrderItem {
       mrp: map['mrp'] ?? 0,
       merchantPaymentStatus: map['merchantPaymentStatus'] ?? '',
       quantity: map['quantity'] ?? 0,
-      refund: map['return'] ?? null,
+      refund: map['refund'] ?? null,
       colors: List<dynamic>.from(map['colors']),
       shiprocket: map['shiprocket'] ?? null,
     );
@@ -75,7 +79,7 @@ class MerchantOrderItem {
 
   @override
   String toString() {
-    return 'MerchantOrderItem(productId: $productId, orderId: $orderId, contact: $contact, createdDate: $createdDate, title: $title, merchantStatus: $merchantStatus, mrp: $mrp, merchantPaymentStatus: $merchantPaymentStatus, quantity: $quantity, refund: $refund, colors: $colors, shiprocket: $shiprocket)';
+    return 'MerchantOrderItem(productId: $productId, razorpayItemId: $razorpayItemId, orderId: $orderId, contact: $contact, createdDate: $createdDate, title: $title, merchantStatus: $merchantStatus, mrp: $mrp, merchantPaymentStatus: $merchantPaymentStatus, quantity: $quantity, refund: $refund, colors: $colors, shiprocket: $shiprocket)';
   }
 
   @override
@@ -85,6 +89,7 @@ class MerchantOrderItem {
 
     return other is MerchantOrderItem &&
         other.productId == productId &&
+        other.razorpayItemId == razorpayItemId &&
         other.orderId == orderId &&
         other.contact == contact &&
         other.createdDate == createdDate &&
@@ -101,6 +106,7 @@ class MerchantOrderItem {
   @override
   int get hashCode {
     return productId.hashCode ^
+        razorpayItemId.hashCode ^
         orderId.hashCode ^
         contact.hashCode ^
         createdDate.hashCode ^

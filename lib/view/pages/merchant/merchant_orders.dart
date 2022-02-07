@@ -9,6 +9,7 @@ import 'package:silkroute/view/pages/merchant/comingOrders.dart';
 import 'package:silkroute/view/pages/merchant/returnOrders.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/merchantOrderTile.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:silkroute/view/widget/topbar.dart';
@@ -78,14 +79,10 @@ class _MerchantOrdersState extends State<MerchantOrders> {
 
               Expanded(
                 child: loading
-                    ? Text("Loading")
+                    ? MyCircularProgress()
                     : CustomScrollView(slivers: [
                         SliverList(
                           delegate: SliverChildListDelegate([
-                            Icon(
-                              Icons.receipt_long,
-                              size: MediaQuery.of(context).size.height * 0.1,
-                            ),
                             Container(
                               width: MediaQuery.of(context).size.width * 0.5,
                               height: 70,
@@ -104,17 +101,23 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                                           curve: Curves.easeOut);
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      primary: Color(0xFFF0E7DA),
+                                      primary: (page == 0)
+                                          ? Color(0xFFF0E7DA)
+                                          : Colors.white,
                                       side: BorderSide(
                                         width: 2,
                                         color: Color(0xFF811111),
                                       ),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 8,
+                                      ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(13),
                                       ),
                                     ),
                                     child: Text(
-                                      "Incoming Orders",
+                                      "Your Orders",
                                       style: (page == 0)
                                           ? activePageTextStyle
                                           : inActivePageTextStyle,
@@ -127,13 +130,19 @@ class _MerchantOrdersState extends State<MerchantOrders> {
                                           curve: Curves.easeOut);
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      primary: Color(0xFFF0E7DA),
+                                      primary: (page == 1)
+                                          ? Color(0xFFF0E7DA)
+                                          : Colors.white,
                                       side: BorderSide(
                                         width: 2,
                                         color: Color(0xFF811111),
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(13),
+                                      ),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 8,
                                       ),
                                     ),
                                     child: Text(

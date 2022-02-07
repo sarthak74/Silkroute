@@ -175,7 +175,7 @@ class BankAccountDialogState extends State<BankAccountDialog> {
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.75,
         ),
-        padding: EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
         child: SingleChildScrollView(
           child: loading
               ? Text("Loading...")
@@ -234,30 +234,18 @@ class BankAccountDialogState extends State<BankAccountDialog> {
 
                     Align(
                       alignment: Alignment.topRight,
-                      child: Container(
-                        width: 70,
-                        height: 70,
-                        margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(70)),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFF530000),
-                              Color.fromRGBO(129, 20, 20, 1),
-                            ],
+                      child: GestureDetector(
+                        onTap: () async {
+                          if (await validForm()) await navigatorFuntion();
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          margin: EdgeInsets.only(right: 20),
+                          child: Text(
+                            "Save",
+                            style: textStyle1(
+                                12, Color(0xFF5B0D1B), FontWeight.bold),
                           ),
-                        ),
-                        child: new IconButton(
-                          icon: Icon(
-                            Icons.keyboard_arrow_right,
-                            color: Colors.white,
-                          ),
-                          iconSize: 40.0,
-                          onPressed: () async {
-                            if (await validForm()) await navigatorFuntion();
-                          },
                         ),
                       ),
                     ),
@@ -268,3 +256,8 @@ class BankAccountDialogState extends State<BankAccountDialog> {
     );
   }
 }
+/*
+onPressed: () async {
+                            if (await validForm()) await navigatorFuntion();
+                          },
+*/

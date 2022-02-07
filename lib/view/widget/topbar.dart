@@ -48,7 +48,7 @@ class _TopBarState extends State<TopBar> {
             builder: (context) => TopIcon(
               icon: Icon(
                 Icons.menu,
-                size: 35,
+                size: 25,
                 color: Colors.black87,
               ),
               margin: EdgeInsets.all(0),
@@ -60,7 +60,7 @@ class _TopBarState extends State<TopBar> {
           TopIcon(
             icon: Icon(
               Icons.notifications,
-              size: 35,
+              size: 25,
               color: Colors.black87,
             ),
             margin: EdgeInsets.all(0),

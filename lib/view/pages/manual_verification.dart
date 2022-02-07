@@ -22,18 +22,19 @@ class _ManualVerificationState extends State<ManualVerification> {
 
     bool flag = await AuthService().checkVerificationStatus();
 
+    verified = flag;
+
+    // if (verified == true) {
+    String ut = await storage.getItem('userType');
+    String nextpage =
+        (ut == "Reseller") ? "/reseller_home" : "/merchant_acc_details";
+
+    // Navigator.of(context).pop();
+    Navigator.of(context).popAndPushNamed(nextpage);
+    // }
     setState(() {
-      verified = flag;
       loading = false;
     });
-
-    if (verified == true) {
-      String ut = await storage.getItem('userType');
-      String nextpage =
-          (ut == "Reseller") ? "/reseller_home" : "/merchant_acc_details";
-      // Navigator.of(context).pop();
-      Navigator.of(context).popAndPushNamed(nextpage);
-    }
     return;
   }
 

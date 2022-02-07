@@ -4,8 +4,11 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 class NewProductProvider {
+  // setSize = num of colors
+  // min = num of set they sell
+  static String reference = "";
   static String title = "";
-  static String subCat = "";
+  static dynamic subCat = [];
   static String description = "";
   static int setSize = 0;
   static String category = "";
@@ -15,10 +18,10 @@ class NewProductProvider {
   static int min = 0;
   static double halfSetPrice = 0.0;
   static double fullSetPrice = 0.0;
-  static dynamic specifications = [];
+  static Map<String, dynamic> specifications = {};
   static List<dynamic> editColors = [];
   static List<dynamic> editImages = [];
-
+  static bool designPrivate = false;
   static dynamic fullSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
 }
 

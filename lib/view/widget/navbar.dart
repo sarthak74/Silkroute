@@ -82,6 +82,16 @@ class _NavbarState extends State<Navbar> {
         {"name": "Contact Us", "url": openwhatsapp}
       ];
 
+      // if (userType == "Manufacturer") {
+      //   navBarList.add({
+      //     "name": "Packages",
+      //     "url": () {
+      //       Navigator.pop(context);
+      //       Navigator.of(context).pushNamed("/merchant_packages");
+      //     }
+      //   });
+      // }
+
       loading = false;
     });
   }

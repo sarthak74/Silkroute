@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:localstorage/localstorage.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/math.dart';
+import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/core/OrderListItem.dart';
 
 class OrderApi {
@@ -137,7 +138,6 @@ class OrderApi {
         headers: headers,
         body: json.encode(data),
       );
-      print("Update order res -  ${res.body}");
       var decodedRes2 = jsonDecode(res.body);
       print("Update order res -  $decodedRes2");
 
@@ -145,6 +145,74 @@ class OrderApi {
     } catch (e) {
       print("Update Order error - $e");
       return e;
+    }
+  }
+
+  Future<dynamic> resellerRequestReturn(data) async {
+    try {
+      print("request return $data");
+      var uri = Math().ip();
+      LocalStorage storage = LocalStorage('silkroute');
+      var url = Uri.parse(uri + '/' + 'resellerApi' + '/requestReturn');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(data),
+      );
+      var decodedRes2 = jsonDecode(res.body);
+      print("request return res-  $decodedRes2");
+      if (decodedRes2["success"] == true) {
+        Toast().notifyErr(decodedRes2["msg"]);
+      } else {
+        Toast().notifySuccess(decodedRes2["msg"]);
+      }
+
+      return decodedRes2;
+    } catch (err) {
+      print("request return err: $err");
+      return {"success": false, "err": err, "msg": "Unknown error occurred"};
+    }
+  }
+
+  Future<dynamic> getResellerReturnOrders() async {
+    try {
+      print("get filt orders:");
+      // return [
+      //   {
+      //     "id": "prod_JBSD89S65H",
+      //     "return": {"requestedDate": "12-12-12", "refundAmount": "897"},
+      //   }
+      // ];
+      var data = {"contact": await storage.getItem('contact')};
+      print("$data");
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/resellerApi/getResellerReturnOrders');
+      String token = await storage.getItem('token');
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+      final res =
+          await http.post(url, headers: headers, body: json.encode(data));
+      var decodedRes2 = jsonDecode(res.body);
+      print("ret orders: $decodedRes2");
+      // List<dynamic> resp = [];
+      // for (var i in decodedRes2) {
+      //   var order = i;
+      //   order["items"] =
+      //       i["items"].map((item) => OrderListItem.fromMap(item)).toList();
+      //   resp.add(order);
+      // }
+      // print("res getResellerReturnOrders: $resp");
+      return decodedRes2;
+    } catch (err) {
+      print("get getResellerReturnOrders err: $err");
+      return err;
     }
   }
 }

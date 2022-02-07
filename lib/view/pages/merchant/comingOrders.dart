@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:silkroute/model/core/MerchantOrderItem.dart';
 import 'package:silkroute/provider/Merchantorderprovider.dart';
 import 'package:silkroute/view/dialogBoxes/merchantOrderSortDialogBox.dart';
+import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/pages/reseller/product.dart';
 import 'package:silkroute/view/widget/merchantOrderTile.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
@@ -122,7 +123,7 @@ class _ComingOrdersState extends State<ComingOrders> {
             ),
             height: MediaQuery.of(context).size.height * 0.58,
             child: SingleChildScrollView(
-              child: StreamBuilder<List<MerchantOrderItem>>(
+              child: StreamBuilder<List<dynamic>>(
                 stream: _merchantOrderProvider.productListStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -147,7 +148,19 @@ class _ComingOrdersState extends State<ComingOrders> {
                     if (snapshot.data != null) {
                       _orders.addAll(snapshot.data);
                       print("_orders ${_orders.length} $_orders");
-                      return MerchantOrderTile(orders: _orders);
+                      return _orders.length == 0
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.3),
+                                Text("No Items",
+                                    style: textStyle1(
+                                        13, Colors.black54, FontWeight.w500)),
+                              ],
+                            )
+                          : MerchantOrderTile(orders: _orders);
                     } else {
                       return Text("No more data to show");
                     }

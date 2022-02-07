@@ -23,6 +23,24 @@ class ResellerHomeApi {
     }
   }
 
+  Future<List<dynamic>> getAllTags() async {
+    try {
+      print("gettags:");
+      var reqBody = {};
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/resellerApi/getAllTags');
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
+      final res = await http.post(url, body: reqBody, headers: headers);
+      List<dynamic> tags = jsonDecode(res.body);
+      print(tags);
+      return tags;
+    } catch (err) {
+      print("errorC - $err");
+      return err;
+    }
+  }
+
   Future<List<dynamic>> getOffers() async {
     // Schema: List<Map<String, String>>
     // [

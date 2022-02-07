@@ -2,6 +2,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/registerredirect.dart';
 import 'package:silkroute/model/services/ExtraApi.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
@@ -21,9 +22,9 @@ class RegisterDetailPage extends StatefulWidget {
 
 class RegisterDetailPageState extends State<RegisterDetailPage> {
   bool agreementCheck = false;
-
+  bool whatsapp = false;
   LocalStorage storage = LocalStorage('silkroute');
-  String contact, userType = "Reseller";
+  String contact, userType = "Wholesale Buyer";
 
   Widget nullContact;
 
@@ -36,7 +37,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     "gst": "",
     "adhaar": "",
     "pan": "",
-    "userType": ""
+    "userType": "Wholesale Buyer"
   };
 
   String street = "", city = "", pincode = "", state = "";
@@ -83,29 +84,11 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     for (String x in reqFields) {
       print("$x - ${data[x].toString()}");
       if ((data[x].toString()).length == 0) {
-        Fluttertoast.showToast(
-          msg: "Invalid Form",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.grey[100],
-          textColor: Colors.red[800],
-          fontSize: 10,
-        );
         return false;
       }
     }
 
-    if (agreementCheck == false) {
-      Fluttertoast.showToast(
-        msg: "Invalid Form",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.grey[100],
-        textColor: Colors.red[800],
-        fontSize: 10,
-      );
-    }
-    return (agreementCheck == true);
+    return (agreementCheck == true) && (whatsapp);
   }
 
   void check() {
@@ -125,7 +108,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     setState(() {
       contact = contact1;
       data["contact"] = contact;
-      data["userType"] = "Reseller";
+      data["userType"] = "Wholesale Buyer";
       if (businessName != null) data["businessName"] = businessName;
       if (currAdd != null) data["currAdd"] = currAdd;
       if (gst != null) data["gst"] = gst;
@@ -183,7 +166,23 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
     });
   }
 
+  void whatsappFunction(bool agreementCheckCurrent) {
+    setState(() {
+      whatsapp = !whatsapp;
+    });
+  }
+
   void navigatorFuntion() async {
+    if (!validForm()) {
+      Fluttertoast.showToast(
+        msg: "Invalid Form",
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 13,
+      );
+      return;
+    }
     print("\nRD--\n$data\n");
     var nextpage = "/enter_contact";
     var res;
@@ -197,6 +196,8 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
         fontSize: 10,
       );
     } else {
+      if (data["userType"] == "Wholesale Buyer") data["userType"] = "Reseller";
+      data["whatsappNotifications"] = whatsapp;
       nextpage = "/register_detail";
       res = await AuthService().register(data);
       if (await storage.getItem('contact') != null) {
@@ -261,7 +262,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
       if (states.any(interactiveStates.contains)) {
         return Colors.black;
       }
-      return Color(0xFF530000);
+      return Color(0xFF811111);
     }
 
     return loading
@@ -277,7 +278,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                   height: 30,
                   width: 30,
                   child: CircularProgressIndicator(
-                    color: Color(0xFF5B0D1B),
+                    color: Color(0xff811111),
                   ),
                 ),
               ],
@@ -316,38 +317,38 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         },
                       ),
 
+                      // new SizedBox(
+                      //   height: 20.0,
+                      // ),
+
+                      // CustomTextField(
+                      //   ("Adhaar*").toString(), // labeltext
+                      //   "", // hinttext
+                      //   false, // isPassword
+                      //   (val) {
+                      //     check();
+                      //     // onChnaged
+                      //     data["adhaar"] = val;
+                      //   },
+                      // ),
+
+                      // new SizedBox(
+                      //   height: 20.0,
+                      // ),
+
+                      // CustomTextField(
+                      //   ("PAN*").toString(), // labeltext
+                      //   "", // hinttext
+                      //   false, // isPassword
+                      //   (val) {
+                      //     check();
+                      //     // onChnaged
+                      //     data["pan"] = val;
+                      //   },
+                      // ),
+
                       new SizedBox(
-                        height: 20.0,
-                      ),
-
-                      CustomTextField(
-                        ("Adhaar*").toString(), // labeltext
-                        "", // hinttext
-                        false, // isPassword
-                        (val) {
-                          check();
-                          // onChnaged
-                          data["adhaar"] = val;
-                        },
-                      ),
-
-                      new SizedBox(
-                        height: 20.0,
-                      ),
-
-                      CustomTextField(
-                        ("PAN*").toString(), // labeltext
-                        "", // hinttext
-                        false, // isPassword
-                        (val) {
-                          check();
-                          // onChnaged
-                          data["pan"] = val;
-                        },
-                      ),
-
-                      new SizedBox(
-                        height: 20.0,
+                        height: 10.0,
                       ),
 
                       CustomTextField(
@@ -364,6 +365,24 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       ),
 
                       new SizedBox(
+                        height: 10.0,
+                      ),
+
+                      ///// GST ////////
+
+                      CustomTextField(
+                        "GSTIN/Aadhaar*", "",
+                        false, // isPassword
+                        (val) {
+                          setState(() {
+                            data["gst"] = val;
+                            data["adhaar"] = val;
+                            data["pan"] = val;
+                          });
+                        },
+                      ),
+
+                      new SizedBox(
                         height: 20.0,
                       ),
 
@@ -375,6 +394,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
 
                       Container(
                         alignment: Alignment.topLeft,
+                        padding: EdgeInsets.only(left: 10),
                         child: Text(
                           "Business Address",
                           style: textStyle1(15, Colors.black, FontWeight.w500),
@@ -431,7 +451,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Container(
-                            width: MediaQuery.of(context).size.width * 0.42,
+                            width: MediaQuery.of(context).size.width * 0.55,
                             child: DropdownSearch<String>(
                               mode: Mode.BOTTOM_SHEET,
                               showSelectedItems: true,
@@ -472,7 +492,7 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                             ),
                           ),
                           Container(
-                            width: MediaQuery.of(context).size.width * 0.42,
+                            width: MediaQuery.of(context).size.width * 0.3,
                             child: CustomTextField(
                               "Pincode*", "",
                               false, // isPassword
@@ -499,62 +519,70 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
                       ),
 
                       new SizedBox(
-                        height: 30.0,
-                      ),
-
-                      ///// GST ////////
-
-                      CustomTextField(
-                        "GSTIN*", "",
-                        false, // isPassword
-                        (val) {
-                          setState(() {
-                            data["gst"] = val;
-                          });
-                        },
-                      ),
-
-                      new SizedBox(
                         height: 20.0,
                       ),
 
-                      CustomTextField(
-                        "Another Number", "",
-                        false, // isPassword
-                        (val) {
-                          setState(() {
-                            data["anotherNumber"] = val;
-                          });
-                        },
-                      ),
+                      // CustomTextField(
+                      //   "Another Number", "",
+                      //   false, // isPassword
+                      //   (val) {
+                      //     setState(() {
+                      //       data["anotherNumber"] = val;
+                      //     });
+                      //   },
+                      // ),
 
-                      new SizedBox(
-                        height: 20.0,
-                      ),
+                      // new SizedBox(
+                      //   height: 20.0,
+                      // ),
 
-                      Row(
-                        children: <Widget>[
-                          Text("You are "),
-                          SizedBox(width: 10),
-                          Dropdown(
-                            ["Reseller", "Manufacturer"],
-                            (val) async {
-                              setState(() {
-                                data["userType"] = val;
-                              });
-                            },
-                            data["userType"],
-                          ),
-                          new SizedBox(
-                            height: 30.0,
-                          ),
-                        ],
+                      Container(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Row(
+                          children: <Widget>[
+                            Text("You are "),
+                            SizedBox(width: 7),
+                            Dropdown(
+                              ["Wholesale Buyer", "Manufacturer"],
+                              (val) async {
+                                setState(() {
+                                  data["userType"] = val;
+                                });
+                              },
+                              data["userType"],
+                            ),
+                          ],
+                        ),
                       ),
 
                       // Terms and Conditions
 
-                      Agreements(agreementCheck, agreementCheckFunction,
-                          checkboxColor),
+                      Container(
+                        height: 100,
+                        child: Column(
+                          children: <Widget>[
+                            Agreements(
+                              agreementCheck,
+                              agreementCheckFunction,
+                              checkboxColor,
+                              dialogFn: true,
+                              userType: data['userType'],
+                            ),
+                            Transform.translate(
+                              offset: Offset(0, -15),
+                              child: Agreements(
+                                whatsapp,
+                                whatsappFunction,
+                                checkboxColor,
+                                title: "Get updates on Whatsapp",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Agreements(agreementCheck,
+                      //         agreementCheckFunction, checkboxColor),
 
                       // navigator
 
@@ -591,27 +619,30 @@ class RegisterDetailPageState extends State<RegisterDetailPage> {
               ),
             ),
             floatingActionButton: Container(
-              width: 70,
-              height: 70,
-              margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(70)),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF530000),
-                    Color.fromRGBO(129, 20, 20, 1),
-                  ],
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                width: 70,
+                height: 70,
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(70)),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF530000),
+                      Color.fromRGBO(129, 20, 20, 1),
+                    ],
+                  ),
                 ),
-              ),
-              child: new IconButton(
-                icon: Icon(
-                  Icons.keyboard_arrow_right,
-                  color: Colors.white,
+                child: new IconButton(
+                  icon: Icon(
+                    Icons.keyboard_arrow_right,
+                    color: Colors.white,
+                  ),
+                  iconSize: 40.0,
+                  onPressed: navigatorFuntion,
                 ),
-                iconSize: 40.0,
-                onPressed: (validForm()) ? navigatorFuntion : null,
               ),
             ),
           );

@@ -9,26 +9,26 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:silkroute/l10n/l10n.dart';
-import 'package:silkroute/model/services/NotificationApi.dart';
 import 'package:silkroute/model/services/firebase.dart';
+import 'package:silkroute/provider/PackageProvider.dart';
 import 'package:silkroute/view/pages/coming_soon.dart';
 import 'package:silkroute/view/pages/loader.dart';
 import 'package:silkroute/view/pages/manual_verification.dart';
-import 'package:silkroute/view/pages/merchant/add_new.dart';
 import 'package:silkroute/view/pages/merchant/add_new_product_page.dart';
 import 'package:silkroute/view/pages/merchant/dashboard.dart';
 import 'package:silkroute/view/pages/merchant/merchant_acc_details.dart';
 import 'package:silkroute/view/pages/merchant/merchant_orders.dart';
 import 'package:silkroute/view/pages/merchant/merchant_profile.dart';
+import 'package:silkroute/view/pages/merchant/packages.dart';
+import 'package:silkroute/view/pages/merchant/packages_and_pickups.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/pages/enter_contact.dart';
-import 'package:silkroute/view/pages/localization_app_page.dart';
 import 'package:silkroute/view/pages/merchant/merchant_home.dart';
 import 'package:silkroute/view/pages/otp-verification.dart';
 import 'package:silkroute/view/pages/register_detail_page.dart';
 import 'package:silkroute/view/pages/reseller/faqs.dart';
-import 'package:silkroute/view/pages/reseller/orders.dart';
+import 'package:silkroute/view/pages/reseller/main_order.page.dart';
 import 'package:silkroute/view/pages/reseller/reseller_home.dart';
 import 'package:silkroute/view/pages/reseller/reseller_profile.dart';
 import 'package:silkroute/view/pages/reseller/search.dart';
@@ -127,11 +127,16 @@ class MyApp extends StatelessWidget {
               "/search": (BuildContext context) => SearchPage(),
               "/wishlist": (BuildContext context) => WishlistPage(),
               "/crate": (BuildContext context) => CratePage(),
-              "/orders": (BuildContext context) => Orders(),
+              "/orders": (BuildContext context) => MainOrders(),
               "/faqs": (BuildContext context) => Faqs(),
               "/merchant_dashboard": (BuildContext context) =>
                   MerchantDashboard(),
               "/merchant_profile": (BuildContext context) => MerchantProfile(),
+              "/merchant_packages": (BuildContext context) =>
+                  ChangeNotifierProvider(
+                    create: (context) => PackageProvider(),
+                    child: PackagesAndPickups(),
+                  ),
               "/add_new_product_page": (BuildContext context) =>
                   AddNewProductPage(),
               "/merchant_orders": (BuildContext context) => MerchantOrders(),
@@ -140,6 +145,7 @@ class MyApp extends StatelessWidget {
               "/merchant_acc_details": (BuildContext context) =>
                   MechantAccountDetails(),
               "/coming_soon": (BuildContext context) => ComingSoon(),
+
               // "/reseller_home": (BuildContext context) => ComingSoon(),
               // "/reseller_profile": (BuildContext context) => ComingSoon(),
               // "/merchant_home": (BuildContext context) => ComingSoon(),
