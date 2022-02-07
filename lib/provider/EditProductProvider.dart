@@ -4,19 +4,21 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 class EditProductProvider {
+  static String id = "";
   static String reference = "";
   static String title = "";
-  static String subCat = "";
+  static dynamic subCat = [];
   static String description = "";
   static int setSize = 0;
   static String category = "";
+  static bool designPrivate = false;
   static int stockAvailability = 0;
   static List<dynamic> colors = [];
   static List<dynamic> images = [];
   static int min = 0;
   static double halfSetPrice = 0.0;
   static double fullSetPrice = 0.0;
-  static dynamic specifications = [];
+  static Map<String, dynamic> specifications = {};
   static List<dynamic> editColors = [];
   static List<dynamic> editImages = [];
 

@@ -22,7 +22,7 @@ class MerchantApi {
       };
       var url = Uri.parse(uri + '/manufacturerApi/addProduct');
       final res =
-          await http.post(url, headers: headers, body: json.encode(data));
+          await http.post(url, headers: headers, body: await json.encode(data));
       // var id = res.body.toString();
       print("resp: ${res.body}");
       // print("resp: ${decodedRes2[0].id}");
@@ -49,7 +49,7 @@ class MerchantApi {
         "Authorization": token
       };
       final res =
-          await http.post(url, headers: headers, body: json.encode(data));
+          await http.post(url, headers: headers, body: await json.encode(data));
       var decodedRes2 = jsonDecode(res.body);
       // print("mer orders: $decodedRes2");
       dynamic resp = decodedRes2;
@@ -161,8 +161,8 @@ class MerchantApi {
 
   Future<dynamic> deleteProduct(Map<String, dynamic> body) async {
     try {
-      print("delete product");
-      var data = body;
+      print("delete product $body");
+      var data = body; // qry
       var uri = Math().ip();
       var url = Uri.parse(uri + '/manufacturerApi/deleteProduct');
       String token = await storage.getItem('token');
@@ -173,10 +173,10 @@ class MerchantApi {
       final res = await http.post(
         url,
         headers: headers,
-        body: json.encode(data),
+        body: await json.encode(data),
       );
-      var decodedRes2 = jsonDecode(res.body);
-
+      var decodedRes2 = await jsonDecode(res.body);
+      Toast().notifyInfo(decodedRes2['msg']);
       print("update product result: $decodedRes2");
       return decodedRes2;
     } catch (err) {

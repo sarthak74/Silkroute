@@ -10,6 +10,7 @@ class OrderListItem {
   final String id;
   final String contact;
   final Bill bill;
+  final String image;
   final String status;
   final dynamic address;
   final String uniqueId;
@@ -23,6 +24,7 @@ class OrderListItem {
     this.id,
     this.contact,
     this.bill,
+    this.image,
     this.status,
     this.address,
     this.uniqueId,
@@ -39,6 +41,7 @@ class OrderListItem {
       'id': id,
       'contact': contact,
       'bill': bill.toMap(),
+      'image': image,
       'status': status,
       'address': address,
       'uniqueId': uniqueId,
@@ -56,6 +59,7 @@ class OrderListItem {
       id: map['id'] ?? '',
       contact: map['contact'] ?? '',
       bill: Bill.fromMap(map['bill']),
+      image: map['image'] ?? '',
       status: map['status'] ?? '',
       address: map['address'] ?? null,
       uniqueId: map['uniqueId'] ?? '',
@@ -75,7 +79,7 @@ class OrderListItem {
 
   @override
   String toString() {
-    return 'OrderListItem(id: $id, contact: $contact, bill: $bill, status: $status, address: $address, uniqueId: $uniqueId, invoiceNumber: $invoiceNumber, customerPaymentStatus: $customerPaymentStatus, createdDate: $createdDate, razorpay: $razorpay, items: $items, title: $title)';
+    return 'OrderListItem(id: $id, contact: $contact, bill: $bill, image: $image, status: $status, address: $address, uniqueId: $uniqueId, invoiceNumber: $invoiceNumber, customerPaymentStatus: $customerPaymentStatus, createdDate: $createdDate, razorpay: $razorpay, items: $items, title: $title)';
   }
 
   @override
@@ -87,6 +91,7 @@ class OrderListItem {
         other.id == id &&
         other.contact == contact &&
         other.bill == bill &&
+        other.image == image &&
         other.status == status &&
         other.address == address &&
         other.uniqueId == uniqueId &&
@@ -103,6 +108,7 @@ class OrderListItem {
     return id.hashCode ^
         contact.hashCode ^
         bill.hashCode ^
+        image.hashCode ^
         status.hashCode ^
         address.hashCode ^
         uniqueId.hashCode ^

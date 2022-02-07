@@ -26,7 +26,7 @@ class PackagesApi {
         packs.add(Package.fromMap(x));
       }
       // print("decodedRes $decoded");
-      Toast().notifyInfo(decoded['msg']);
+      // Toast().notifyInfo(decoded['msg']);
       return packs;
     } catch (err) {
       print("getallpacks err $err");

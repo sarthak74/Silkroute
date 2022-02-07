@@ -17,6 +17,7 @@ import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
+import 'package:silkroute/model/services/ResellerHomeApi.dart';
 import 'package:silkroute/model/services/aws.dart';
 import 'package:silkroute/model/services/uploadImageApi.dart';
 import 'package:silkroute/provider/NewProductProvider.dart';
@@ -256,7 +257,8 @@ class _UploadButtonState extends State<UploadButton> {
             s[key] = {
               "title": param["title"],
               "value": NewProductProvider
-                  .specifications[NewProductProvider.category][key]["value"]
+                  .specifications[NewProductProvider.category][key]["value"],
+              "key": param["key"]
             };
         }
         break;
@@ -457,6 +459,26 @@ class _UploadButtonState extends State<UploadButton> {
     return ok;
   }
 
+  void clearNewProductData() async {
+    NewProductProvider.category = "";
+    NewProductProvider.reference = "";
+    NewProductProvider.title = "";
+    NewProductProvider.subCat = [];
+    NewProductProvider.description = "";
+    NewProductProvider.setSize = 0;
+    NewProductProvider.stockAvailability = 0;
+    NewProductProvider.colors = [];
+    NewProductProvider.images = [];
+    NewProductProvider.min = 0;
+    NewProductProvider.halfSetPrice = 0;
+    NewProductProvider.fullSetPrice = 0;
+    NewProductProvider.specifications = {};
+    NewProductProvider.editColors = [];
+    NewProductProvider.editImages = [];
+    NewProductProvider.designPrivate = false;
+    NewProductProvider.fullSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
+  }
+
   void uploadHandler() async {
     var accountCheck = await AccountDetails().check(context);
     if (accountCheck == false) {
@@ -465,6 +487,7 @@ class _UploadButtonState extends State<UploadButton> {
       Navigator.of(context).pushNamed("/merchant_acc_details");
       return;
     }
+
     var isValid = await validateForm();
     if (isValid) {
       if (_agree1 && _agree2) {
@@ -475,16 +498,18 @@ class _UploadButtonState extends State<UploadButton> {
           var cat = NewProductProvider.category;
           print("specs: ${NewProductProvider.specifications[cat]}");
 
-          List<String> keys =
-              Helpers().getKeys(NewProductProvider.specifications[cat]);
+          List<String> keys = Helpers()
+              .getKeys(s); // s contains filtered specs after validation
           for (var x in keys) {
             specs.add({
-              "title": NewProductProvider.specifications[cat][x]["title"],
-              "value": NewProductProvider.specifications[cat][x]["value"]
+              "title": s[x]["title"],
+              "value": s[x]["value"],
+              "key": s[x]["key"]
             });
           }
 
           Map<String, dynamic> data = {
+            'designPrivate': NewProductProvider.designPrivate,
             'reference': NewProductProvider.reference,
             "title": NewProductProvider.title,
             "category": NewProductProvider.category,
@@ -577,6 +602,7 @@ class _UploadButtonState extends State<UploadButton> {
           };
           var res = await MerchantApi().updateProduct(body);
           if (res["success"] == true) {
+            await clearNewProductData();
             Toast().notifySuccess("Product Uploaded Successfully");
             Navigator.of(context).popAndPushNamed('/merchant_home');
             print("\nupdated\n");
@@ -813,11 +839,14 @@ class _SpecificationsState extends State<Specifications>
       hasSpecs = false;
       return;
     }
+    var tags = await ResellerHomeApi().getAllTags();
+    print("tage: $tags");
+    for (var y in tags) {
+      _data.add(y);
+    }
     for (var x in mechantHomeCategories) {
       _categories.add(x["title"]);
-      for (var y in x["subCat"]) {
-        _data.add(y["title"]);
-      }
+
       if (x["title"] == _category) {
         _parameters = x["parameters"];
       }
@@ -857,9 +886,9 @@ class _SpecificationsState extends State<Specifications>
     if ((Helpers().getKeys(_specs) ?? []).length == 0) {
       for (String x in Helpers().getKeys(_parameters)) {
         if (_specs[x] == null) _specs[x] = {};
-        _specs[x] = {"title": _parameters[x]["title"], "value": ""};
+        _specs[x] = {"title": _parameters[x]["title"], "value": "", "key": x};
         NewProductProvider.specifications[_category]
-            [x] = {"title": _parameters[x]["title"], "value": ""};
+            [x] = {"title": _parameters[x]["title"], "value": "", "key": x};
       }
 
       // NewProductProvider.specifications.add({"title": "Type", "value": []});
@@ -917,11 +946,6 @@ class _SpecificationsState extends State<Specifications>
     setState(() {
       loadingSpecs = false;
     });
-  }
-
-  void addFieldHandler() {
-    var data = {"title": "Title", "value": "Text"};
-    _specs.add(data);
   }
 
   @override
@@ -1134,7 +1158,7 @@ class _SpecificationsState extends State<Specifications>
                                 ),
                               ),
                               title: Text(
-                                "Styles",
+                                "Tags",
                                 style: textStyle1(
                                   15,
                                   Colors.black,
@@ -1154,7 +1178,7 @@ class _SpecificationsState extends State<Specifications>
                                   FontWeight.w500,
                                 ),
                               ),
-                              searchHint: "Style",
+                              searchHint: "Tag",
                               searchHintStyle: textStyle1(
                                   13, Colors.black54, FontWeight.w500),
                               onConfirm: (values) {
@@ -1163,7 +1187,7 @@ class _SpecificationsState extends State<Specifications>
                                   NewProductProvider.subCat = values;
                                 });
                               },
-                              initialValue: (NewProductProvider.subCat ?? []),
+                              // initialValue: (NewProductProvider.subCat ?? []),
                             ),
                             SizedBox(height: 10),
                             if (loadingSpecs)
@@ -1467,56 +1491,97 @@ class _ProductInfoState extends State<ProductInfo> {
         : Column(
             children: <Widget>[
               // PRODUCT REFERENCE
-              Theme(
-                data: new ThemeData(
-                  primaryColor: Colors.black87,
-                ),
-                child: new TextFormField(
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.normal,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Expanded(
+                    flex: 4,
+                    child: Theme(
+                      data: new ThemeData(
+                        primaryColor: Colors.black87,
+                      ),
+                      child: new TextFormField(
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        onChanged: (val) {
+                          setState(() {
+                            NewProductProvider.reference =
+                                _referenceController.text;
+                          });
+                        },
+                        controller: _referenceController,
+                        decoration: new InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(
+                            borderSide: new BorderSide(
+                              color: Colors.black,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                          ),
+                          contentPadding: new EdgeInsets.symmetric(
+                            horizontal: 20.0,
+                            vertical: 8,
+                          ),
+                          labelText: "Reference ID",
+                          hintText: "Enter Reference ID",
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: new BorderSide(
+                              color: Colors.black54,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                          ),
+                          labelStyle:
+                              textStyle1(13, Colors.black54, FontWeight.normal),
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: textStyle1(
+                              13,
+                              Colors.black54,
+                              FontWeight.w300,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  onChanged: (val) {
-                    setState(() {
-                      NewProductProvider.reference = _referenceController.text;
-                    });
-                  },
-                  controller: _referenceController,
-                  decoration: new InputDecoration(
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderSide: new BorderSide(
-                        color: Colors.black,
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                    ),
-                    contentPadding: new EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 8,
-                    ),
-                    labelText: "Reference ID",
-                    hintText: "Enter Reference ID",
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(
-                        color: Colors.black54,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                    ),
-                    labelStyle:
-                        textStyle1(13, Colors.black54, FontWeight.normal),
-                    hintStyle: GoogleFonts.poppins(
-                      textStyle: textStyle1(
-                        13,
-                        Colors.black54,
-                        FontWeight.w300,
-                      ),
+                  Expanded(
+                    flex: 3,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              NewProductProvider.designPrivate =
+                                  !NewProductProvider.designPrivate;
+                            });
+                          },
+                          child: Icon(
+                            NewProductProvider.designPrivate
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
+                            color: Colors.black54,
+                            size: 25,
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          "Private Design",
+                          style: textStyle1(
+                            13,
+                            Colors.black54,
+                            FontWeight.normal,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                ],
               ),
 
               SizedBox(height: 15),

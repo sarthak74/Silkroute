@@ -22,7 +22,7 @@ class Math {
     var ip_local = "http://localhost:4000";
     var ip_usb = "http://192.168.1.8:4000";
     var ip_emulator = "http://10.0.2.2:4000";
-    return ip_usb;
+    return ip_universal;
   }
 
   double aspectRatio(context) {

@@ -116,13 +116,20 @@ class _PackagesState extends State<Packages> {
                 ),
                 SizedBox(height: 10),
                 (packages == null || packages.length == 0)
-                    ? Text(
-                        "No packages, Create one now!",
-                        style: textStyle1(
-                          12,
-                          Colors.black54,
-                          FontWeight.w500,
-                        ),
+                    ? Column(
+                        children: <Widget>[
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.25),
+                          Text(
+                            "No packages, Create one now!",
+                            style: textStyle1(
+                              12,
+                              Colors.black54,
+                              FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       )
                     : PackageList(packages: packages),
               ],

@@ -21,7 +21,7 @@ class NewProductProvider {
   static Map<String, dynamic> specifications = {};
   static List<dynamic> editColors = [];
   static List<dynamic> editImages = [];
-
+  static bool designPrivate = false;
   static dynamic fullSetSize = {"L": 0.0, "B": 0.0, "H": 0.0};
 }
 

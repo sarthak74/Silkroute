@@ -36,21 +36,44 @@ class Helpers {
   }
 
   List<List<String>> getAgreements(userType) {
-    return [
+    List<List<String>> reseller = [
       [
-        "Mentioned stock must be available",
-        "If stock decreases due to any external reason, immideately update it on app",
-        "Do not enter false/ambiguous information of products",
-        "85% Payment within 24 hrs, 15% Payment after 15 days (at the end of return policy)",
-        "You have to keep your package ready within 2 hrs of getting order confirmation.",
-        "There must not be anything else inside package, strict actions will be taken."
+        "Read product details and offer details carefully before placing the order.",
+        "All products are available only in wholesale sets.",
+        "Choose colors if multiple colors are available, enter the quantity and add to crate.",
+        "Enter your pin code, apply coupons and recheck bill before proceeding.",
+        "Enter address & complete payment as per your preference.",
+        "After placing order you can download the gst invoice from orders pages.",
+        "In case we fail to deliver the order after 15 days of estimated delivery date, you will get 100% refund."
       ],
       [
-        "If return request is made, we will notify you immideately & you can track the  package.",
-        "You have to return the money within 7 days of return request.",
-        "due to false information, you will pay logistic charges."
+        "We have 7 day no question return policy.",
+        "If you want to return few/all products, go to orders details and then select product, enter quantity & create request return.",
+        "There are no charges for return only if value of purchase order was more than 8000.",
+        "Pack the return products in same package in which it came, keep label intact and hand over to pickup guy.",
+        "For one order you cannot create multiple return requests, whatever you want to return, return in one time.",
+        "You will get refund money after 7-15 days.",
+        "Lesser the returns more exclusive offers you will get in next orders.",
+        "You are responsible for any frauds/misdeed in return order."
       ]
     ];
+
+    List<List<String>> merchant = [
+      [
+        "Mentioned product details must be correct.",
+        "Mentioned stock must be available and keep it updated if it is reduced due to any reason.",
+        "Keep the package/s ready along with invoice and it handover to pickup guy.",
+        "If shipping is done through transport (non-courier service), you are responsible till product reaches us.",
+        "We have 7 day no question return policy. 7 days count starts from the date we deliver product to our customer.",
+        "Within return period we can return few/all the products.",
+        "You will get 40% payment within 2 working days or order dispatch date whichever is later.",
+        "You will get remaining payment (amount after adjusting return order) at the end of return period.",
+        "If in any case value of return order exceeds the amount we have already paid to you for a order, you have to refund the required amount before the end of return period.",
+        "You are responsible for delivering wrong/defective products or any other fraud/misdeed."
+      ],
+      []
+    ];
+    return userType == "Manufacturer" ? merchant : reseller;
   }
 
   Future<ImageSource> getImageSource(context) async {
@@ -125,7 +148,7 @@ class Helpers {
   }
 
   Future showPickupAddressDialog(context) async {
-    LocalStorage storage = LocalStorage('silkroute');
+    LocalStorage storage = await LocalStorage('silkroute');
     var user = await storage.getItem('user');
     await showDialog(
       context: context,
@@ -152,13 +175,17 @@ class Helpers {
       builder: (_) => AlertDialog(
         title: Text(
           user["currAdd"]["address"].toString(),
-          style: textStyle(15, Colors.black),
+          style: textStyle1(13, Colors.black, FontWeight.normal),
         ),
         actions: <Widget>[
           GestureDetector(
-            child: Text(
-              "Close",
-              style: textStyle(12, Color(0xFF5B0D1B)),
+            child: Container(
+              padding: EdgeInsets.all(8),
+              margin: EdgeInsets.only(right: 20),
+              child: Text(
+                "Close",
+                style: textStyle1(12, Color(0xFF5B0D1B), FontWeight.bold),
+              ),
             ),
             onTap: () {
               Navigator.pop(context);
@@ -178,13 +205,17 @@ class Helpers {
       builder: (_) => AlertDialog(
         title: Text(
           (gst == null) ? "No gst added" : gst.toString(),
-          style: textStyle(15, Colors.black),
+          style: textStyle1(13, Colors.black, FontWeight.normal),
         ),
         actions: <Widget>[
           GestureDetector(
-            child: Text(
-              "Close",
-              style: textStyle(12, Color(0xFF5B0D1B)),
+            child: Container(
+              padding: EdgeInsets.all(8),
+              margin: EdgeInsets.only(right: 20),
+              child: Text(
+                "Close",
+                style: textStyle1(12, Color(0xFF5B0D1B), FontWeight.bold),
+              ),
             ),
             onTap: () {
               Navigator.pop(context);
@@ -461,7 +492,11 @@ class Helpers {
               onChanged: (val) async {
                 // print("object $val");
                 if (data[param["key"]] == null)
-                  data[param["key"]] = {"title": param["title"], "value": ""};
+                  data[param["key"]] = {
+                    "title": param["title"],
+                    "value": "",
+                    "key": param["key"]
+                  };
                 data[param["key"]]["value"] = val.toString();
                 data[param["key"]]["title"] = param["title"];
 
@@ -519,7 +554,11 @@ class Helpers {
                 print("val $val");
                 if (!ok) {
                   if (data[param['key']] == null) {
-                    data[param['key']] = {"title": param["title"], "value": ""};
+                    data[param['key']] = {
+                      "title": param["title"],
+                      "value": "",
+                      "key": param['key']
+                    };
                   } else {
                     data[param['key']]["value"] = "";
                   }
@@ -577,7 +616,11 @@ class Helpers {
     }
     _textControllers[param['key']] = new TextEditingController();
     if (data[param['key']] == null)
-      data[param['key']] = {"title": param["title"], "value": ""};
+      data[param['key']] = {
+        "title": param["title"],
+        "value": "",
+        "key": param['key']
+      };
     _textControllers[param['key']].text = data[param['key']]["value"] ?? "";
     if (_focusNodes[param['key']] == null) {
       _focusNodes[param['key']] = new FocusNode();
@@ -626,7 +669,8 @@ class Helpers {
                     if (data[param['key']] == null)
                       data[param['key']] = {
                         "title": param["title"],
-                        "value": ""
+                        "value": "",
+                        "key": param['key']
                       };
                     data[param['key']]["value"] =
                         _textControllers[param['key']].text;

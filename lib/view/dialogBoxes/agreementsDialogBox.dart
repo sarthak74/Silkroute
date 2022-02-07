@@ -60,16 +60,17 @@ class _AgreementsDialogBoxState extends State<AgreementsDialogBox> {
                   children: <Widget>[
                     Text(
                       "Terms and Conditions",
-                      style: textStyle(20, Colors.black),
+                      style: textStyle(17, Colors.black),
                     ),
                     SizedBox(height: 25),
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      child: Text(
-                        "General",
-                        style: textStyle(15, Colors.black87),
+                    if (widget.userType != "Manufacturer")
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        child: Text(
+                          "General",
+                          style: textStyle(13, Colors.black87),
+                        ),
                       ),
-                    ),
                     SizedBox(height: 10),
                     ListView.builder(
                       physics: NeverScrollableScrollPhysics(),
@@ -84,7 +85,7 @@ class _AgreementsDialogBoxState extends State<AgreementsDialogBox> {
                               child: Text(
                                 _agreements[0][index],
                                 style: textStyle1(
-                                  13,
+                                  11,
                                   Colors.black87,
                                   FontWeight.w500,
                                 ),
@@ -97,39 +98,41 @@ class _AgreementsDialogBoxState extends State<AgreementsDialogBox> {
                       },
                     ),
                     SizedBox(height: 18),
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      child: Text(
-                        "Return Policy",
-                        style: textStyle(15, Colors.black87),
+                    if ((_agreements[1] ?? []).length > 0)
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        child: Text(
+                          "Return Policy",
+                          style: textStyle(15, Colors.black87),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: _agreements[1].length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Icon(Icons.arrow_right, size: 15),
-                            Expanded(
-                              child: Text(
-                                _agreements[0][index],
-                                style: textStyle1(
-                                  13,
-                                  Colors.black87,
-                                  FontWeight.w500,
+                    if ((_agreements[1] ?? []).length > 0) SizedBox(height: 10),
+                    if ((_agreements[1] ?? []).length > 0)
+                      ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: _agreements[1].length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Icon(Icons.arrow_right, size: 15),
+                              Expanded(
+                                child: Text(
+                                  _agreements[1][index],
+                                  style: textStyle1(
+                                    11,
+                                    Colors.black87,
+                                    FontWeight.w500,
+                                  ),
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 5,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            )
-                          ],
-                        );
-                      },
-                    ),
+                              )
+                            ],
+                          );
+                        },
+                      ),
                     SizedBox(height: 18),
                   ],
                 ),

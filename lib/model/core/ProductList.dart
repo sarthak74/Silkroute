@@ -29,6 +29,7 @@ class ProductList {
   final num discountValue;
   final String category;
   final dynamic subCat;
+  final bool designPrivate;
   final String userContact;
   final String dateAdded;
   final String description;
@@ -51,6 +52,7 @@ class ProductList {
     this.discountValue,
     this.category,
     this.subCat,
+    this.designPrivate,
     this.userContact,
     this.dateAdded,
     this.description,
@@ -76,6 +78,7 @@ class ProductList {
       'discountValue': discountValue,
       'category': category,
       'subCat': subCat,
+      'designPrivate': designPrivate,
       'userContact': userContact,
       'dateAdded': dateAdded,
       'description': description,
@@ -102,6 +105,7 @@ class ProductList {
       discountValue: map['discountValue'] ?? 0,
       category: map['category'] ?? '',
       subCat: map['subCat'] ?? null,
+      designPrivate: map['designPrivate'] ?? false,
       userContact: map['userContact'] ?? '',
       dateAdded: map['dateAdded'] ?? '',
       description: map['description'] ?? '',
@@ -124,7 +128,7 @@ class ProductList {
 
   @override
   String toString() {
-    return 'ProductList(id: $id, reference: $reference, title: $title, discount: $discount, mrp: $mrp, sp: $sp, discountValue: $discountValue, category: $category, subCat: $subCat, userContact: $userContact, dateAdded: $dateAdded, description: $description, setSize: $setSize, min: $min, stockAvailability: $stockAvailability, resellerCrateAvailability: $resellerCrateAvailability, images: $images, fullSetSize: $fullSetSize, fullSetPrice: $fullSetPrice, colors: $colors, specifications: $specifications)';
+    return 'ProductList(id: $id, reference: $reference, title: $title, discount: $discount, mrp: $mrp, sp: $sp, discountValue: $discountValue, category: $category, subCat: $subCat, designPrivate: $designPrivate, userContact: $userContact, dateAdded: $dateAdded, description: $description, setSize: $setSize, min: $min, stockAvailability: $stockAvailability, resellerCrateAvailability: $resellerCrateAvailability, images: $images, fullSetSize: $fullSetSize, fullSetPrice: $fullSetPrice, colors: $colors, specifications: $specifications)';
   }
 
   @override
@@ -141,6 +145,7 @@ class ProductList {
         other.discountValue == discountValue &&
         other.category == category &&
         other.subCat == subCat &&
+        other.designPrivate == designPrivate &&
         other.userContact == userContact &&
         other.dateAdded == dateAdded &&
         other.description == description &&
@@ -166,6 +171,7 @@ class ProductList {
         discountValue.hashCode ^
         category.hashCode ^
         subCat.hashCode ^
+        designPrivate.hashCode ^
         userContact.hashCode ^
         dateAdded.hashCode ^
         description.hashCode ^

@@ -21,7 +21,6 @@ import 'package:silkroute/view/pages/merchant/merchant_orders.dart';
 import 'package:silkroute/view/pages/merchant/merchant_profile.dart';
 import 'package:silkroute/view/pages/merchant/packages.dart';
 import 'package:silkroute/view/pages/merchant/packages_and_pickups.dart';
-import 'package:silkroute/view/pages/merchant/temp.dart';
 import 'package:silkroute/view/pages/reseller/category.dart';
 import 'package:silkroute/view/pages/reseller/crate.dart';
 import 'package:silkroute/view/pages/enter_contact.dart';
@@ -146,7 +145,7 @@ class MyApp extends StatelessWidget {
               "/merchant_acc_details": (BuildContext context) =>
                   MechantAccountDetails(),
               "/coming_soon": (BuildContext context) => ComingSoon(),
-              "/temp": (BuildContext context) => Temp(),
+
               // "/reseller_home": (BuildContext context) => ComingSoon(),
               // "/reseller_profile": (BuildContext context) => ComingSoon(),
               // "/merchant_home": (BuildContext context) => ComingSoon(),

@@ -30,10 +30,11 @@ import 'package:silkroute/view/widget/top_picks.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 
 class MerchantHome extends StatefulWidget {
-  static dynamic categoriess;
+  static dynamic categoriess, tags;
 
   void initState() async {
     categoriess = await ResellerHomeApi().getCategories();
+    tags = await ResellerHomeApi().getAllTags();
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/model/services/authservice.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/next_page_button.dart';
 import 'package:silkroute/view/widget/text_field.dart';
 import 'package:localstorage/localstorage.dart';
@@ -16,7 +17,7 @@ class OtpVerificationPage extends StatefulWidget {
 
 class OtpVerificationPageState extends State<OtpVerificationPage> {
   LocalStorage storage = new LocalStorage('silkroute');
-  bool loading = true;
+  bool loading = true, verifying = false;
   String token;
 
   void loadVars() async {
@@ -105,73 +106,95 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
 
               // Next page and verification button
 
-              new ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF811111),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                  child: Text(
-                    "Verify",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-                onPressed: () async {
-                  String contact, name, userType;
-                  List<String> list;
-                  dynamic user;
-                  print("In Otp -- Token is $token");
-
-                  AuthService().verifyotp(userOtp, token).then(
-                    (res) async {
-                      user = await Methods().getUser();
-
-                      print("User --  $user");
-                      print("\nOtp result --- $res\n");
-                      if (user == null) {
-                        return;
-                      }
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  new ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFF811111),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                      child: Text(
+                        "Verify",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    onPressed: () async {
                       setState(() {
-                        if (user["success"] == true) {
-                          if (user["registered"] == true) {
-                            String ut = user["userType"];
-                            if (ut == "Manufacturer") {
-                              if (user["verified"] == true) {
-                                if (user["bankAccountNo"] != null &&
-                                    user["bankAccountNo"].length > 0) {
-                                  nextpage =
-                                      "/merchant_home"; // todo: merchant home
-                                } else {
-                                  nextpage = "/merchant_acc_details";
-                                }
-                              } else {
-                                nextpage = "/manual_verification";
-                              }
-                            } else {
-                              if (user["verified"] == true) {
-                                nextpage =
-                                    "/reseller_home"; // todo: reseller home
-                              } else {
-                                nextpage = "/manual_verification";
-                              }
-                            }
-                            // Navigator.of(context).pop();
-                            Navigator.of(context).popAndPushNamed(nextpage);
-                            return;
-                          } else {
-                            nextpage = "/register_detail";
-                            // Navigator.of(context).pop();
-                            Navigator.of(context).popAndPushNamed(nextpage);
+                        verifying = true;
+                      });
+                      String contact, name, userType;
+                      List<String> list;
+                      dynamic user;
+                      print("In Otp -- Token is $token");
+
+                      AuthService().verifyotp(userOtp, token).then(
+                        (res) async {
+                          user = await Methods().getUser();
+
+                          print("User --  $user");
+                          print("\nOtp result --- $res\n");
+                          if (user == null) {
+                            setState(() {
+                              verifying = false;
+                            });
                             return;
                           }
-                        }
+                          setState(() {
+                            if (user["success"] == true) {
+                              if (user["registered"] == true) {
+                                String ut = user["userType"];
+                                if (ut == "Manufacturer") {
+                                  if (user["verified"] == true) {
+                                    if (user["bankAccountNo"] != null &&
+                                        user["bankAccountNo"].length > 0) {
+                                      nextpage =
+                                          "/merchant_home"; // todo: merchant home
+                                    } else {
+                                      nextpage = "/merchant_acc_details";
+                                    }
+                                  } else {
+                                    nextpage = "/manual_verification";
+                                  }
+                                } else {
+                                  if (user["verified"] == true) {
+                                    nextpage =
+                                        "/reseller_home"; // todo: reseller home
+                                  } else {
+                                    nextpage = "/manual_verification";
+                                  }
+                                }
+                                // Navigator.of(context).pop();
+                                Navigator.of(context).popAndPushNamed(nextpage);
+                                setState(() {
+                                  verifying = false;
+                                });
+                                return;
+                              } else {
+                                nextpage = "/register_detail";
+                                // Navigator.of(context).pop();
+                                Navigator.of(context).popAndPushNamed(nextpage);
+                                setState(() {
+                                  verifying = false;
+                                });
+                                return;
+                              }
+                            }
+                          });
+                        },
+                      );
+                      setState(() {
+                        verifying = false;
                       });
                     },
-                  );
-                },
+                  ),
+                  if (verifying) SizedBox(width: 10),
+                  if (verifying) MyCircularProgress(),
+                ],
               ),
             ],
           ),

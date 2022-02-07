@@ -62,7 +62,7 @@ class _CategoryPageState extends State<CategoryPage> {
               //////////////////////////////
 
               TopBar(),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
               Expanded(
                 child: loading
@@ -114,6 +114,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                           )
                                         : GridView.count(
                                             crossAxisCount: 2,
+                                            childAspectRatio: 175 / 114,
                                             children: List.generate(
                                               (category['subCat'].length == 0 ||
                                                       (category['subCat'] ??

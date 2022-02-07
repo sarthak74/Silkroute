@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:im_stepper/stepper.dart';
@@ -581,10 +582,19 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                         children: <Widget>[
                           Expanded(
                             flex: 1,
-                            child: Image.asset(
-                              "assets/images/unnamed.png",
-                              fit: BoxFit.contain,
+                            child: Container(
                               width: MediaQuery.of(context).size.width * 0.2,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  fit: BoxFit.contain,
+                                  // image: FileImage(File(
+                                  //     EditProductProvider.editColors[index].path)),
+                                  image: CachedNetworkImageProvider(
+                                    orderDetails['items'][item_i]['image']
+                                        .toString(),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           Expanded(
@@ -625,10 +635,21 @@ class _OrderPageTitleState extends State<OrderPageTitle> {
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(10),
-                                              child: Image.asset(
-                                                "assets/images/unnamed.png",
-                                                fit: BoxFit.contain,
+                                              child: Container(
                                                 width: 20,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    fit: BoxFit.contain,
+                                                    // image: FileImage(File(
+                                                    //     EditProductProvider.editColors[index].path)),
+                                                    image:
+                                                        CachedNetworkImageProvider(
+                                                      orderDetails['items']
+                                                              [item_i]['image']
+                                                          .toString(),
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                           );

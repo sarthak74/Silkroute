@@ -13,14 +13,17 @@ import 'package:localstorage/localstorage.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:silkroute/methods/helpers.dart';
 import 'package:silkroute/methods/math.dart';
 import 'package:silkroute/methods/toast.dart';
 import 'package:silkroute/model/services/MerchantApi.dart';
+import 'package:silkroute/model/services/ResellerHomeApi.dart';
 import 'package:silkroute/model/services/aws.dart';
 import 'package:silkroute/model/services/uploadImageApi.dart';
 import 'package:silkroute/provider/EditProductProvider.dart';
 import 'package:silkroute/view/pages/merchant/merchant_home.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/show_dialog.dart';
 import 'package:silkroute/view/widget/text_field.dart';
@@ -72,9 +75,11 @@ class _EditProductState extends State<EditProduct> {
 
   void loadVars() {
     setState(() {
+      EditProductProvider.id = widget.product.id;
+      EditProductProvider.designPrivate = widget.product.designPrivate;
       EditProductProvider.reference = widget.product.reference;
       EditProductProvider.title = widget.product.title;
-
+      EditProductProvider.subCat = widget.product.subCat;
       EditProductProvider.category = widget.product.category;
       // EditProductProvider.specifications[0]["value"] = widget.product.subCat;
       EditProductProvider.fullSetPrice =
@@ -89,10 +94,14 @@ class _EditProductState extends State<EditProduct> {
       EditProductProvider.fullSetSize = widget.product.fullSetSize;
       EditProductProvider.editColors = widget.product.colors;
       EditProductProvider.editImages = widget.product.images;
-      EditProductProvider.specifications = widget.product.specifications;
+
+      EditProductProvider.specifications = {};
+      var specs = widget.product.specifications;
+      for (var x in specs) {
+        EditProductProvider.specifications[x['key']] = x;
+      }
+
       print("ppp: ${widget.product}");
-      EditProductProvider.specifications
-          .insert(0, {"title": "Type", "value": widget.product.subCat});
       // for (var x in widget.product.specifications) {
       //   EditProductProvider.specifications.add(x);
       // }
@@ -185,7 +194,7 @@ class _EditProductState extends State<EditProduct> {
                                     //// MIN ORDER AMOUNT and PRICE
 
                                     if ((EditProductProvider.setSize != null) &&
-                                        (EditProductProvider.setSize >= 4) &&
+                                        (EditProductProvider.setSize >= 1) &&
                                         (EditProductProvider.setSize <= 24))
                                       MinOrderAmountAndPrice(),
 
@@ -244,31 +253,67 @@ class UploadButton extends StatefulWidget {
 
 class _UploadButtonState extends State<UploadButton> {
   LocalStorage storage = LocalStorage('silkroute');
-  List s = [];
+  Map<String, dynamic> s = {};
   bool _agree1 = true, _agree2 = false;
   int _imageCounter = 0;
   bool _uploadingImage = false;
 
-  loadparameters() async {
+  loadparameters(cspecs) async {
     for (dynamic x in MerchantHome.categoriess) {
-      if (x == EditProductProvider.category) {
-        s = x["parameters"];
+      print("title:: ${x['title']} ${EditProductProvider.category} \n $cspecs");
+      if (x["title"] == EditProductProvider.category) {
+        List<String> keys = Helpers().getKeys(x['parameters']);
+        print("pre keys: ${keys}");
+        for (String key in keys) {
+          var param = x['parameters'][key];
+          var parent = param["parent"];
+          var parentVals = param["parentVals"];
+          if (parentVals == null) {
+            parentVals = [];
+          }
+
+          print("paren: $param\n$parent\n$parentVals");
+          bool ok = true;
+          for (int i = 0; i < parent.length; i++) {
+            if (((cspecs[parent[i]] ?? {})["value"] ?? "").toString() !=
+                parentVals[i].toString()) {
+              ok = false;
+              break;
+            }
+          }
+          if (ok)
+            s[key] = {
+              "title": param["title"],
+              "value": EditProductProvider
+                  .specifications[EditProductProvider.category][key]["value"],
+              "key": param["key"]
+            };
+        }
         break;
       }
     }
   }
 
   Future<bool> validateSpecs() async {
-    await loadparameters();
+    print("validate specs\n${EditProductProvider.specifications}");
+    var cspecs =
+        EditProductProvider.specifications[EditProductProvider.category];
+    await loadparameters(cspecs);
+    var keys = Helpers().getKeys(s);
+    print("valid keys $keys");
     for (int i = 0; i < s.length; i++) {
-      if (EditProductProvider.specifications[i]["value"].length == 0) {
-        Toast().notifyErr("Invalid ${s[i]} in Specifications");
+      print(
+          "${keys[i]} ${cspecs[keys[i]]["title"]} ${cspecs[keys[i]]["value"]}");
+      if (s[keys[i]]["value"].length == 0) {
+        Toast()
+            .notifyErr("Invalid ${cspecs[keys[i]]["title"]} in Specifications");
         return false;
       }
     }
-    if (EditProductProvider.specifications[0]["value"] == null ||
-        EditProductProvider.specifications[0]["value"].length == 0) {
-      Toast().notifyErr("Select at least one Type in");
+    if (EditProductProvider.subCat == null ||
+        EditProductProvider.subCat.length == 0) {
+      Toast().notifyErr("Select at least one Tag");
+      return false;
     }
     print("Specs validated");
     return true;
@@ -397,7 +442,7 @@ class _UploadButtonState extends State<UploadButton> {
       Toast().notifyErr("Invalid Category");
       return false;
     }
-    if (EditProductProvider.setSize < 4 || EditProductProvider.setSize > 24) {
+    if (EditProductProvider.setSize < 1 || EditProductProvider.setSize > 24) {
       Toast().notifyErr("Invalid Number of Colors");
       return false;
     }
@@ -425,16 +470,14 @@ class _UploadButtonState extends State<UploadButton> {
       return false;
     }
 
-    for (var d in ['L', 'B', 'H']) {
-      if (EditProductProvider.fullSetSize[d] < 1) {
-        Toast().notifyErr("Invalid Set $d");
-        return false;
-      }
-    }
-
     print("texts and images validated");
 
-    return await validateSpecs();
+    bool ok = await validateSpecs();
+    if (!ok) {
+      Toast().notifyErr("Something wrong in specifications");
+    }
+
+    return ok;
   }
 
   bool updating = false;
@@ -451,22 +494,31 @@ class _UploadButtonState extends State<UploadButton> {
           List<String> imageUrls = [], colorUrls = [];
 
           var specs = [];
-          print("specs: ${EditProductProvider.specifications}");
-          for (var x in EditProductProvider.specifications) {
-            if (x["title"] == "Type") continue;
-            specs.add(x);
+          var cat = EditProductProvider.category;
+          print("specs: ${EditProductProvider.specifications[cat]}");
+
+          List<String> keys = Helpers()
+              .getKeys(s); // s contains filtered specs after validation
+          for (var x in keys) {
+            specs.add({
+              "title": s[x]["title"],
+              "value": s[x]["value"],
+              "key": s[x]["key"]
+            });
           }
 
           Map<String, dynamic> data = {
+            "designPrivate": EditProductProvider.designPrivate,
             "title": EditProductProvider.title,
             "category": EditProductProvider.category,
             // "subCat": EditProductProvider.specifications[0]["value"],
+            "subCat": EditProductProvider.subCat,
             "mrp": EditProductProvider.fullSetPrice,
             'discount': false,
             'discountValue': 0,
             'userContact': contact,
             'description': EditProductProvider.description,
-            // 'totalSet': EditProductProvider.setSize,
+            'totalSet': EditProductProvider.setSize,
             'min': EditProductProvider.min,
             'stockAvailability': EditProductProvider.stockAvailability,
             'resellerCrateAvailability': 0,
@@ -590,6 +642,8 @@ class _UploadButtonState extends State<UploadButton> {
     super.initState();
   }
 
+  bool deleting = false;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -611,27 +665,82 @@ class _UploadButtonState extends State<UploadButton> {
                   )
                 : Container(),
             SizedBox(height: 10),
-            FittedBox(
-              child: Container(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                  color: Color(0xFF811111),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                child: Text(
-                  // !_uploadingImage ? "Upload to Shop" : "Uploading...",
-                  "Save Changes",
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                InkWell(
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 20),
+                    padding: EdgeInsets.fromLTRB(20, 6, 20, 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
                       color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.normal,
+                      border: Border.all(
+                        width: 2,
+                        color: Color(0xff811111),
+                      ),
+                    ),
+                    child: deleting
+                        ? MyCircularProgress()
+                        : Text(
+                            "Delete",
+                            style: textStyle1(
+                              13,
+                              Color(0xff811111),
+                              FontWeight.w500,
+                            ),
+                          ),
+                  ),
+                  onTap: () async {
+                    if (deleting) return;
+                    setState(() {
+                      deleting = true;
+                    });
+                    var want = await Helpers().getConfirmationDialog(
+                        context,
+                        "Delete",
+                        "Are you sure you want to delete this product?");
+                    if (want != true) {
+                      setState(() {
+                        deleting = false;
+                      });
+                      return;
+                    }
+                    var res = await MerchantApi().deleteProduct({
+                      "reference": EditProductProvider.reference,
+                      "_id": EditProductProvider.id
+                    });
+                    if (res['success'] == true) {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/merchant_home',
+                          ModalRoute.withName('/merchant_home'));
+                    }
+                    setState(() {
+                      deleting = false;
+                    });
+                  },
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color: Color(0xFF811111),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+                  child: Text(
+                    // !_uploadingImage ? "Upload to Shop" : "Uploading...",
+                    "Save Changes",
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -843,123 +952,105 @@ class Specifications extends StatefulWidget {
 class _SpecificationsState extends State<Specifications>
     with SingleTickerProviderStateMixin {
   bool loading = true;
-  List _specs = [];
-  List _parameters = [];
+  dynamic _specs;
+  dynamic _parameters;
   List<String> _typeData = [], _categories = [];
   String _category;
-  List<TextEditingController> _textControllers = [];
   AnimationController _controller;
   Animation _animation;
 
-  List<FocusNode> _focusNodes = new List();
-  List<dynamic> subcats = [];
+  Map<String, dynamic> finalData = {};
+  Map<String, TextEditingController> _textControllers;
+  List<Widget> specsWidget = [Text("")];
+
+  Map<String, FocusNode> _focusNodes;
+
   bool hasSpecs = true;
+  List<dynamic> subcats = [];
 
-  void loadVars() {
+  void loadVars() async {
     setState(() {
-      subcats = EditProductProvider.specifications[0]["value"];
-      print("subcats: $subcats");
-      _category = EditProductProvider.category;
-      Set<String> _data = {};
-      List mechantHomeCategories =
-          (MerchantHome.categoriess != null) ? MerchantHome.categoriess : [];
-      if (MerchantHome.categoriess.length == null) {
-        hasSpecs = false;
-        return;
+      loading = true;
+    });
+    subcats = EditProductProvider.subCat;
+    print("subcats: $subcats");
+    _category = EditProductProvider.category;
+    Set<String> _data = {};
+    List mechantHomeCategories =
+        (MerchantHome.categoriess != null) ? MerchantHome.categoriess : [];
+    if (MerchantHome.categoriess.length == null) {
+      hasSpecs = false;
+      return;
+    }
+    if (MerchantHome.categoriess.length == 0) {
+      hasSpecs = false;
+      return;
+    }
+    var tags = await ResellerHomeApi().getAllTags();
+    print("tage: $tags");
+    for (var y in tags) {
+      _data.add(y);
+    }
+    for (var x in mechantHomeCategories) {
+      _categories.add(x["title"]);
+
+      if (x["title"] == _category) {
+        _parameters = x["parameters"];
       }
-      if (MerchantHome.categoriess.length == 0) {
-        hasSpecs = false;
-        return;
-      }
-      for (var x in mechantHomeCategories) {
-        _categories.add(x["title"]);
-        for (var y in x["subCat"]) {
-          _data.add(y["title"]);
-        }
-        if (x["title"] == _category) {
-          _parameters = x["parameters"];
-        }
-      }
-      if (_category.length == 0) {
-        _category = _categories[0];
-        EditProductProvider.category = _category;
-        _parameters = mechantHomeCategories[0]["parameters"];
-      }
+    }
+    if (_category.length == 0) {
+      _category = _categories[0];
+      EditProductProvider.category = _category;
+      _parameters = mechantHomeCategories[0]["parameters"];
+    }
 
-      // print("cat $_category");
-      // print("param $_parameters");
+    // print("cat $_category");
+    // print("param $_parameters");
 
-      for (var x in _data) {
-        _typeData.add(x);
-      }
+    for (var x in _data) {
+      _typeData.add(x);
+    }
 
-      // print("type $_typeData");
+    // print("type $_typeData");
+    EditProductProvider.specifications = {
+      _category: EditProductProvider.specifications
+    };
 
-      _specs = EditProductProvider.specifications;
+    _specs = EditProductProvider.specifications[_category];
 
-      // print("specs $_specs");
+    // print("specs $_specs");
 
-      dynamic tempSpecs = {};
-      for (dynamic x in EditProductProvider.specifications) {
-        tempSpecs[x["title"]] = x["value"];
-      }
+    dynamic tempSpecs = {};
+    List<String> keys =
+        Helpers().getKeys(EditProductProvider.specifications[_category]) ?? [];
+    for (dynamic x in keys) {
+      tempSpecs[x] = EditProductProvider.specifications[_category][x];
+    }
 
-      if (_specs.length == 0) {
-        _specs = _parameters.map(
-          (parameter) {
-            return {"title": parameter, "value": (tempSpecs[parameter] ?? "")};
-          },
-        ).toList();
+    // print("specs $_specs");
 
-        EditProductProvider.specifications.add({"title": "Type", "value": []});
-        for (var x in _specs) {
-          EditProductProvider.specifications.add(x);
-        }
+    // print("specs ${EditProductProvider.specifications}");
 
-        // print("specs2: $_specs ${EditProductProvider.specifications}");
-      } else {
-        _specs.removeAt(0);
-        // print("specs3: $_specs");
-      }
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _animation = Tween(begin: 20.0, end: 0.0).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      });
 
-      for (var x in _specs) {
-        TextEditingController temp = new TextEditingController();
-        temp.text = x["value"].toString();
-        _textControllers.add(temp);
-      }
-
-      // print("specs $_specs");
-
-      // print("specs ${EditProductProvider.specifications}");
-
-      _controller = AnimationController(
-          vsync: this, duration: Duration(milliseconds: 300));
-      _animation = Tween(begin: 20.0, end: 0.0).animate(_controller)
-        ..addListener(() {
-          setState(() {});
-        });
-
-      for (int i = 0; i < _specs.length; i++) {
-        _focusNodes.add(FocusNode());
-        _focusNodes[i].addListener(() {
-          if (_focusNodes[i].hasFocus) {
-            _controller.forward();
-          } else {
-            _controller.reverse();
-          }
-        });
-      }
-
+    await buildSpecs();
+    setState(() {
       loading = false;
     });
   }
 
-  var loadingSpecs = false;
+  var loadingSpecs = true;
 
   void buildSpecs() async {
     setState(() {
       loadingSpecs = true;
     });
+    print("Merchant home cats: ${MerchantHome.categoriess}");
     for (var x in MerchantHome.categoriess) {
       if (x["title"] == _category) {
         setState(() {
@@ -970,27 +1061,32 @@ class _SpecificationsState extends State<Specifications>
       }
     }
 
+    if (EditProductProvider.specifications == null)
+      EditProductProvider.specifications = {};
+    if (EditProductProvider.specifications[_category] == null)
+      EditProductProvider.specifications[_category] =
+          new Map<String, dynamic>();
+    print(
+        "Newprod- $_category\n${EditProductProvider.specifications[_category]}");
+    specsWidget = Helpers().buildparams(
+        context,
+        _parameters,
+        _textControllers,
+        EditProductProvider.specifications[_category],
+        _focusNodes,
+        buildSpecs,
+        _controller);
+
     setState(() {
-      _specs = _parameters
-          .map(
-            (parameter) => {"title": parameter, "value": ""},
-          )
-          .toList();
-      EditProductProvider.specifications = [];
-      EditProductProvider.specifications.add({"title": "Type", "value": []});
-      for (var x in _specs) {
-        EditProductProvider.specifications.add(x);
-      }
+      // EditProductProvider.specifications.add({"title": "Type", "value": []});
+      // for (var x in _specs) {
+      //   EditProductProvider.specifications.add(x);
+      // }
     });
 
     setState(() {
       loadingSpecs = false;
     });
-  }
-
-  void addFieldHandler() {
-    var data = {"title": "Title", "value": "Text"};
-    _specs.add(data);
   }
 
   @override
@@ -999,15 +1095,19 @@ class _SpecificationsState extends State<Specifications>
     loadVars();
   }
 
-  @override
   void dispose() {
-    _controller.dispose();
-    for (int i = 0; i < _textControllers.length; i++) {
-      _textControllers[i].dispose();
+    if (_controller != null) {
+      _controller.dispose();
     }
-
-    for (int i = 0; i < _focusNodes.length; i++) {
-      _focusNodes[i].dispose();
+    var keys = Helpers().getKeys(_textControllers);
+    for (int i = 0; i < keys.length; i++) {
+      if (_textControllers[keys[i]] == null) continue;
+      _textControllers[keys[i]].dispose();
+    }
+    keys = Helpers().getKeys(_focusNodes);
+    for (int i = 0; i < keys.length; i++) {
+      if (_focusNodes[keys[i]] == null) continue;
+      _focusNodes[keys[i]].dispose();
     }
 
     super.dispose();
@@ -1221,78 +1321,15 @@ class _SpecificationsState extends State<Specifications>
                               onConfirm: (values) {
                                 setState(() {
                                   print("values $values");
-                                  EditProductProvider.specifications[0]
-                                      ["value"] = values;
+                                  EditProductProvider.subCat = values;
                                 });
                               },
                             ),
                             SizedBox(height: 10),
-                            loadingSpecs
-                                ? Text("Loading")
-                                : ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemCount: _specs.length,
-                                    itemBuilder: (BuildContext context, int i) {
-                                      return Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Text(
-                                            _specs[i]["title"],
-                                            style: textStyle1(13, Colors.black,
-                                                FontWeight.normal),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(bottom: 10),
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.4,
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              onTap: () {
-                                                FocusScope.of(context)
-                                                    .requestFocus(FocusNode());
-                                              },
-                                              child: Theme(
-                                                data: new ThemeData(
-                                                  primaryColor: Colors.black54,
-                                                ),
-                                                child: new TextFormField(
-                                                  controller:
-                                                      _textControllers[i],
-                                                  focusNode: _focusNodes[i],
-                                                  style: textStyle1(
-                                                      13,
-                                                      Colors.black,
-                                                      FontWeight.normal),
-                                                  onChanged: (val) {
-                                                    setState(() {
-                                                      _specs[i]["value"] =
-                                                          _textControllers[i]
-                                                              .text;
-                                                      EditProductProvider
-                                                                  .specifications[
-                                                              i + 1]["value"] =
-                                                          _textControllers[i]
-                                                              .text;
-                                                      print(
-                                                          "nrep: ${EditProductProvider.specifications}");
-                                                    });
-                                                  },
-                                                  decoration:
-                                                      textFormFieldInputDecorator(
-                                                          "Text Here",
-                                                          "Enter Text Here"),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
+                            if (loadingSpecs)
+                              Text("Loading")
+                            else
+                              Column(children: specsWidget),
                             SizedBox(height: 10),
                           ],
                         ),
@@ -1500,7 +1537,8 @@ class _DifferentColorImageState extends State<DifferentColorImage> {
                                     // image: FileImage(File(
                                     //     EditProductProvider.editColors[index].path)),
                                     image: CachedNetworkImageProvider(
-                                        "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
+                                        EditProductProvider.editColors[index]
+                                            .toString()),
                                   ),
                                 ),
                               ),
@@ -1556,52 +1594,95 @@ class _ProductInfoState extends State<ProductInfo> {
         : Column(
             children: <Widget>[
               // PRODUCT REFERENCE
-              Theme(
-                data: new ThemeData(
-                  primaryColor: Colors.black54,
-                ),
-                child: new TextFormField(
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 13,
-                      fontWeight: FontWeight.normal,
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 4,
+                    child: Theme(
+                      data: new ThemeData(
+                        primaryColor: Colors.black54,
+                      ),
+                      child: new TextFormField(
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            color: Colors.black,
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        initialValue: EditProductProvider.reference,
+                        enabled: false,
+                        decoration: new InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(
+                            borderSide: new BorderSide(
+                              color: Colors.black,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                          ),
+                          contentPadding: new EdgeInsets.symmetric(
+                            horizontal: 20.0,
+                            vertical: 8,
+                          ),
+                          labelText: "Reference ID",
+                          hintText: "Enter Reference ID",
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: new BorderSide(
+                              color: Colors.black54,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                          ),
+                          labelStyle:
+                              textStyle1(13, Colors.black54, FontWeight.normal),
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  initialValue: EditProductProvider.reference,
-                  enabled: false,
-                  decoration: new InputDecoration(
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderSide: new BorderSide(
-                        color: Colors.black,
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                    ),
-                    contentPadding: new EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 8,
-                    ),
-                    labelText: "Reference ID",
-                    hintText: "Enter Reference ID",
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(
-                        color: Colors.black54,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                    ),
-                    labelStyle:
-                        textStyle1(13, Colors.black54, FontWeight.normal),
-                    hintStyle: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w300,
-                      ),
+                  Expanded(
+                    flex: 3,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              EditProductProvider.designPrivate =
+                                  !EditProductProvider.designPrivate;
+                            });
+                          },
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                EditProductProvider.designPrivate
+                                    ? Icons.check_box
+                                    : Icons.check_box_outline_blank,
+                                color: Colors.black54,
+                                size: 25,
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                "Private Design",
+                                style: textStyle1(
+                                  13,
+                                  Colors.black54,
+                                  FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                ],
               ),
               SizedBox(height: 15),
               Theme(
@@ -1951,7 +2032,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
                                       // image:
                                       //     FileImage(File(_image[index].path)),
                                       image: CachedNetworkImageProvider(
-                                          "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
+                                          _image[index].toString()),
                                     ),
                                   ),
                                 ),
@@ -1999,8 +2080,7 @@ class _UploadProductImagesState extends State<UploadProductImages> {
                                   ? AssetImage("assets/images/noimage.jpg")
                                   :
                                   // FileImage(File(_image[index].path)),
-                                  CachedNetworkImageProvider(
-                                      "https://raw.githubusercontent.com/sarthak74/Yibrance-imgaes/master/category-Suit.png"),
+                                  CachedNetworkImageProvider(_image[index]),
                               initialScale: PhotoViewComputedScale.contained,
                               // heroAttributes: PhotoViewHeroAttributes(tag: galleryItems[index].id),
                             );

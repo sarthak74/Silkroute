@@ -47,11 +47,11 @@ class AWS {
     try {
       var params = {"filename": name, "path": image.path};
       print(params);
-      var res = {"success": true, "uploadUrl": "test", "downloadUrl": "test"};
-      // var res = await getUrl(params);
+      // var res = {"success": true, "uploadUrl": "test", "downloadUrl": "test"};
+      var res = await getUrl(params);
       if (res['success'] == true) {
-        var uploadRes = {"success": true};
-        // var uploadRes = await uploadToS3(res['uploadUrl'], image);
+        // var uploadRes = {"success": true};
+        var uploadRes = await uploadToS3(res['uploadUrl'], image);
         if (uploadRes['success'] == true) {
           return {
             "success": true,

@@ -89,13 +89,18 @@ class _MerchantOrderTileState extends State<MerchantReturnOrderTile> {
                   return ReturnOrderItem(orders[i]);
                 },
               )
-            : Text(
-                "No return items",
-                style: textStyle1(
-                  12,
-                  Colors.black54,
-                  FontWeight.w500,
-                ),
+            : Column(
+                children: <Widget>[
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                  Text(
+                    "No return items",
+                    style: textStyle1(
+                      13,
+                      Colors.black54,
+                      FontWeight.w500,
+                    ),
+                  ),
+                ],
               );
   }
 }

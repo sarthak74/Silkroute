@@ -53,7 +53,7 @@ class _MerchantProductTileState extends State<MerchantProductTile> {
               color: Color.fromRGBO(0, 0, 0, 0.3),
               image: DecorationImage(
                 image: CachedNetworkImageProvider(
-                  "https://images.pexels.com/photos/2246476/pexels-photo-2246476.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+                  widget.product.images[0].toString(),
                 ),
                 fit: BoxFit.fill,
               ),

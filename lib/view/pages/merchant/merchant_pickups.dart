@@ -62,13 +62,19 @@ class _MerchantPickupsState extends State<MerchantPickups> {
               ),
               SizedBox(height: 10),
               (pickups == null || pickups.length == 0)
-                  ? Text(
-                      "No packages, Create one now!",
-                      style: textStyle1(
-                        12,
-                        Colors.black54,
-                        FontWeight.w500,
-                      ),
+                  ? Column(
+                      children: <Widget>[
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.25),
+                        Text(
+                          "No packages, Create one now!",
+                          style: textStyle1(
+                            12,
+                            Colors.black54,
+                            FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     )
                   : PickupList(pickups: pickups),
             ],
