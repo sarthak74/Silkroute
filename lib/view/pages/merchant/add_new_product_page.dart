@@ -481,10 +481,17 @@ class _UploadButtonState extends State<UploadButton> {
 
   void uploadHandler() async {
     var accountCheck = await AccountDetails().check(context);
+
     if (accountCheck == false) {
       Toast().notifyErr("Account details are not added!");
       Navigator.pop(context);
       Navigator.of(context).pushNamed("/merchant_acc_details");
+      return;
+    }
+
+    var user = await storage.getItem('user');
+    if (user['verified'] != true) {
+      Toast().notifyErr("Please wait till verification");
       return;
     }
 
@@ -858,7 +865,7 @@ class _SpecificationsState extends State<Specifications>
       _parameters = mechantHomeCategories[0]["parameters"];
     }
 
-    print("params--- $_parameters");
+    // print("params--- $_parameters");
 
     // print("cat $_category");
     // print("param $_parameters");

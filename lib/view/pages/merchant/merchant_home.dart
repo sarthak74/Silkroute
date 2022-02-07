@@ -31,12 +31,6 @@ import 'package:silkroute/view/widget/topbar.dart';
 
 class MerchantHome extends StatefulWidget {
   static dynamic categoriess, tags;
-
-  void initState() async {
-    categoriess = await ResellerHomeApi().getCategories();
-    tags = await ResellerHomeApi().getAllTags();
-  }
-
   @override
   _MerchantHomeState createState() => _MerchantHomeState();
 }
@@ -120,12 +114,9 @@ class _MerchantHomeState extends State<MerchantHome> {
   @override
   void initState() {
     super.initState();
+    loadVars();
     awesomeNotifications();
     init();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadVars();
-    });
   }
 
   @override

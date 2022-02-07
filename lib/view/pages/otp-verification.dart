@@ -187,9 +187,6 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
                           });
                         },
                       );
-                      setState(() {
-                        verifying = false;
-                      });
                     },
                   ),
                   if (verifying) SizedBox(width: 10),

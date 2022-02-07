@@ -32,9 +32,27 @@ class ResellerHomeApi {
       String token = await storage.getItem('token');
       var headers = {"Authorization": token};
       final res = await http.post(url, body: reqBody, headers: headers);
-      List<dynamic> tags = jsonDecode(res.body);
+      List<dynamic> tags = await jsonDecode(res.body);
       print(tags);
       return tags;
+    } catch (err) {
+      print("errorC - $err");
+      return err;
+    }
+  }
+
+  Future getSubcats(category) async {
+    try {
+      print("getsubcats:");
+      var reqBody = {};
+      var uri = Math().ip();
+      var url = Uri.parse(uri + '/resellerApi/getSubcategories/' + category);
+      String token = await storage.getItem('token');
+      var headers = {"Authorization": token};
+      final res = await http.post(url, headers: headers);
+      dynamic cats = await jsonDecode(res.body);
+      print("cats-- $cats");
+      return cats;
     } catch (err) {
       print("errorC - $err");
       return err;

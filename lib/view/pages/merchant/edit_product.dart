@@ -987,7 +987,7 @@ class _SpecificationsState extends State<Specifications>
       return;
     }
     var tags = await ResellerHomeApi().getAllTags();
-    print("tage: $tags");
+    // print("tage: $tags");
     for (var y in tags) {
       _data.add(y);
     }
