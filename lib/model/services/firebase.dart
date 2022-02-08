@@ -10,7 +10,7 @@ class FirebaseService {
 
   Future<String> generateToken() async {
     print("generate fcm token:");
-    FirebaseMessaging.instance.getToken().then((newtoken) async {
+    await FirebaseMessaging.instance.getToken().then((newtoken) async {
       print("$newtoken");
       await FirebaseService().saveToken(newtoken);
       await storage.setItem('fcmtoken', newtoken);
@@ -21,6 +21,7 @@ class FirebaseService {
   Future<dynamic> getToken() async {
     print("get fcmtoken");
     String fcmtoken = await storage.getItem('fcmtoken');
+    await FirebaseService().saveToken(fcmtoken);
     if (fcmtoken == null) {
       fcmtoken = await FirebaseService().generateToken();
     }
@@ -30,6 +31,9 @@ class FirebaseService {
   Future saveToken(fcmtoken) async {
     try {
       var contact = await storage.getItem('contact');
+      if (contact == null || contact.length == 0) {
+        return;
+      }
       dynamic data = {'token': fcmtoken};
       dynamic body = await json.encode(data);
       print("save fcm token: $contact\n$data");
@@ -40,6 +44,7 @@ class FirebaseService {
         "Content-Type": "application/json",
         "Authorization": token
       };
+      print("mathip: ${Math().ip()}");
       var url = Uri.parse(Math().ip() + '/fcm/token/$contact');
       final res = await http.put(url, body: body, headers: headers);
       var decodedRes2 = jsonDecode(res.body);

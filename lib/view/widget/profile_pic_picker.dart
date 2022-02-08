@@ -54,10 +54,14 @@ class ProfilePicState extends State<ProfilePic> {
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
+                  var userType = await storage.getItem('userType');
                   // pickImage();
                   // print("abcd");
-                  Navigator.of(context).pushNamed("/reseller_profile");
+                  var route = (userType == "Manufacturer")
+                      ? "/merchant_profile"
+                      : "/reseller_profile";
+                  Navigator.of(context).pushNamed(route);
                 },
                 child: Image.network(
                   'https://static.thenounproject.com/png/3237155-200.png',

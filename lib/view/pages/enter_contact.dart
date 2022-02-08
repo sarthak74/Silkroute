@@ -1,7 +1,11 @@
 import 'dart:ui';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:silkroute/methods/toast.dart';
+import 'package:silkroute/model/services/awesome_notifications.dart';
+import 'package:silkroute/model/services/firebase.dart';
 import 'package:silkroute/view/widget/my_circular_progress.dart';
 
 import 'package:silkroute/view/widget/top_banner.dart';
@@ -26,7 +30,11 @@ class EnterContactState extends State<EnterContactPage> {
     String token, to;
     var res;
     try {
+      await storage.setItem('contact', contact);
+
       res = await AuthService().auth(contact);
+
+      var fcmtoken = await FirebaseService().getToken();
       // token = (str.split('"')[11]).toString(),
       if (res == null) {
         setState(() {
@@ -39,8 +47,8 @@ class EnterContactState extends State<EnterContactPage> {
       if (res[0]) {
         token = res[1];
 
-        storage.setItem('token', token);
-        to = storage.getItem('token');
+        await storage.setItem('token', token);
+        to = await storage.getItem('token');
 
         Navigator.of(context).pushNamed("/otp_verification");
       }
@@ -57,16 +65,26 @@ class EnterContactState extends State<EnterContactPage> {
 
   String contact = "", indicatorText = "";
 
-  bool disabled = true;
+  bool disabled = true, loading = true;
 
   Color indicatorColor = Color(0xFF9E9E9E);
 
+  void loadVars() async {
+    setState(() {
+      loading = true;
+    });
+
+    // await storage.clear();
+    await AwesomeNotificationsService().awesomeNotifications(context);
+    setState(() {
+      loading = false;
+    });
+  }
+
   @override
   void initState() {
-    storage.clear();
     super.initState();
-
-    storage.clear();
+    loadVars();
   }
 
   @override

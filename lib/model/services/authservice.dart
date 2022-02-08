@@ -86,22 +86,20 @@ class AuthService {
         await storage.setItem('contact', data['contact']);
         await storage.setItem('userType', data['userType']);
         await storage.setItem('name', data['name']);
-        await storage.setItem('user', data);
 
-        var usr = await storage.getItem('user');
         if (data['registered']) {
           print("reg");
           send += "1";
 
-          if (usr['fcmtoken'] == null) {
-            usr['fcmtoken'] = await FirebaseService().getToken();
+          if (data['fcmtoken'] == null) {
+            data['fcmtoken'] = await FirebaseService().getToken();
           }
 
-          print("Storage User -- $usr");
+          print("Storage User -- $data");
         } else {
           send += "0";
         }
-
+        await storage.setItem('user', data);
         Fluttertoast.showToast(
           msg: dres['msg'],
           toastLength: Toast.LENGTH_SHORT,
@@ -206,12 +204,13 @@ class AuthService {
         await storage.setItem('contact', data['contact']);
         await storage.setItem('userType', data['userType']);
         await storage.setItem('name', data['name']);
-        await storage.setItem('user', data);
-        var usr = await storage.getItem('user');
-        if (usr['fcmtoken'] == null) {
-          usr['fcmtoken'] = await FirebaseService().getToken();
+
+        // var usr = await storage.getItem('user');
+        if (data['fcmtoken'] == null) {
+          data['fcmtoken'] = await FirebaseService().getToken();
         }
-        print("Storage User -- $usr");
+        // print("Storage User -- $usr");
+        await storage.setItem('user', data);
         return true;
       } else {
         Fluttertoast.showToast(
