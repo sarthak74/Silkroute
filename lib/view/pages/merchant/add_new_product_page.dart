@@ -73,7 +73,10 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
 
   void loadVars() async {
     var res = await AccountDetails().check(context);
-    if (res == false) {
+    if (res == 0) {
+      Toast().notifyErr("Unverified user!");
+      Navigator.pop(context);
+    } else if (res == 1) {
       setState(() {
         loading = false;
       });
@@ -499,7 +502,7 @@ class _UploadButtonState extends State<UploadButton> {
     if (isValid) {
       if (_agree1 && _agree2) {
         try {
-          var contact = await storage.getItem('contact');
+          var contact = user['contact'];
           List<String> imageUrls = [], colorUrls = [];
           var specs = [];
           var cat = NewProductProvider.category;

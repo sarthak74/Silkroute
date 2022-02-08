@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:silkroute/model/services/ResellerHomeApi.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
+import 'package:silkroute/view/widget/my_circular_progress.dart';
 import 'package:silkroute/view/widget/subcategory_head.dart';
 import 'package:silkroute/view/widget/category_tile.dart';
 import 'package:silkroute/view/widget/footer.dart';
@@ -36,9 +37,9 @@ class _CategoryPageState extends State<CategoryPage> {
 
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadSubcategories();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    loadSubcategories();
+    // });
   }
 
   @override
@@ -71,7 +72,11 @@ class _CategoryPageState extends State<CategoryPage> {
 
               Expanded(
                 child: loading
-                    ? Text("Loading")
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                            MyCircularProgress(),
+                          ])
                     : CustomScrollView(slivers: [
                         SliverList(
                           delegate: SliverChildListDelegate([
