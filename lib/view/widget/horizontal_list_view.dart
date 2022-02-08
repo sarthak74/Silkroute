@@ -66,7 +66,8 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.black54, width: 2),
-                          borderRadius: BorderRadius.all(Radius.circular(37.5)),
+                          // borderRadius: BorderRadius.all(Radius.circular(37.5)),
+                          shape: BoxShape.circle,
                         ),
                         child: ClipRRect(
                           child: GestureDetector(
@@ -99,7 +100,7 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                           child: Text(
                         product["title"],
                         style: textStyle1(
-                          12,
+                          11,
                           Colors.black54,
                           FontWeight.w500,
                         ),

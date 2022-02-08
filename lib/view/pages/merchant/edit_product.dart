@@ -81,6 +81,7 @@ class _EditProductState extends State<EditProduct> {
       EditProductProvider.title = widget.product.title;
       EditProductProvider.subCat = widget.product.subCat;
       EditProductProvider.category = widget.product.category;
+
       // EditProductProvider.specifications[0]["value"] = widget.product.subCat;
       EditProductProvider.fullSetPrice =
           double.parse(widget.product.mrp.toString());
@@ -100,8 +101,11 @@ class _EditProductState extends State<EditProduct> {
       for (var x in specs) {
         EditProductProvider.specifications[x['key']] = x;
       }
+      if (EditProductProvider.category == "") {
+        EditProductProvider.category = widget.product.category;
+      }
 
-      print("ppp: ${widget.product}");
+      print("ppp: ${EditProductProvider.category}");
       // for (var x in widget.product.specifications) {
       //   EditProductProvider.specifications.add(x);
       // }
@@ -165,7 +169,7 @@ class _EditProductState extends State<EditProduct> {
                     SliverList(
                       delegate: SliverChildListDelegate([
                         loading
-                            ? Text("Loading")
+                            ? MyCircularProgress()
                             : SingleChildScrollView(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -987,7 +991,7 @@ class _SpecificationsState extends State<Specifications>
       return;
     }
     var tags = await ResellerHomeApi().getAllTags();
-    print("tage: $tags");
+    // print("tage: $tags");
     for (var y in tags) {
       _data.add(y);
     }
@@ -1050,7 +1054,8 @@ class _SpecificationsState extends State<Specifications>
     setState(() {
       loadingSpecs = true;
     });
-    print("Merchant home cats: ${MerchantHome.categoriess}");
+    print("Merchant home cats: ${MerchantHome.categoriess}\n");
+    print("cat: $_category");
     for (var x in MerchantHome.categoriess) {
       if (x["title"] == _category) {
         setState(() {

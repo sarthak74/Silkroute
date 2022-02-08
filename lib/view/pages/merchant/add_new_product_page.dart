@@ -73,7 +73,10 @@ class _AddNewProductPageState extends State<AddNewProductPage> {
 
   void loadVars() async {
     var res = await AccountDetails().check(context);
-    if (res == false) {
+    if (res == 0) {
+      Toast().notifyErr("Unverified user!");
+      Navigator.pop(context);
+    } else if (res == 1) {
       setState(() {
         loading = false;
       });
@@ -481,6 +484,7 @@ class _UploadButtonState extends State<UploadButton> {
 
   void uploadHandler() async {
     var accountCheck = await AccountDetails().check(context);
+
     if (accountCheck == false) {
       Toast().notifyErr("Account details are not added!");
       Navigator.pop(context);
@@ -488,11 +492,17 @@ class _UploadButtonState extends State<UploadButton> {
       return;
     }
 
+    var user = await storage.getItem('user');
+    if (user['verified'] != true) {
+      Toast().notifyErr("Please wait till verification");
+      return;
+    }
+
     var isValid = await validateForm();
     if (isValid) {
       if (_agree1 && _agree2) {
         try {
-          var contact = await storage.getItem('contact');
+          var contact = user['contact'];
           List<String> imageUrls = [], colorUrls = [];
           var specs = [];
           var cat = NewProductProvider.category;
@@ -858,7 +868,7 @@ class _SpecificationsState extends State<Specifications>
       _parameters = mechantHomeCategories[0]["parameters"];
     }
 
-    print("params--- $_parameters");
+    // print("params--- $_parameters");
 
     // print("cat $_category");
     // print("param $_parameters");
