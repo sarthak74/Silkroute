@@ -32,10 +32,10 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
       this.setState(() {});
     });
     controller.repeat();
-    Future.delayed(const Duration(seconds: 3), () async {
+    Future.delayed(const Duration(seconds: 2), () async {
       LocalStorage storage = await LocalStorage('silkroute');
       // await storage.clear();
-      String token = await FirebaseService().getToken();
+      // String token = await FirebaseService().getToken();
       var usr = await storage.getItem('user');
       var auth = usr == null ? false : true;
       var reg = (usr != null) ? usr["registered"] : null;

@@ -43,15 +43,15 @@ class _MerchantHomeState extends State<MerchantHome> {
   List<dynamic> categories = [];
 
   void loadVars() async {
-    MerchantHome.categoriess = await ResellerHomeApi().getCategories();
-    List<dynamic> adLists = await ResellerHomeApi().getOffers();
-    String token = await FirebaseService().getToken();
-
-    print("token $token");
+    if (MerchantHome.categoriess == null || MerchantHome.categoriess == []) {
+      MerchantHome.categoriess = await ResellerHomeApi().getCategories();
+    }
+    categories = MerchantHome.categoriess;
+    if (adList == null || adList == []) {
+      adList = await ResellerHomeApi().getOffers();
+    }
 
     setState(() {
-      categories = MerchantHome.categoriess;
-      adList = adLists;
       loading = false;
     });
   }
@@ -66,9 +66,9 @@ class _MerchantHomeState extends State<MerchantHome> {
   }
 
   void awesomeNotifications() {
-    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) async {
       if (!isAllowed) {
-        showDialog(
+        await showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: Text('Allow Notifications'),
@@ -100,15 +100,15 @@ class _MerchantHomeState extends State<MerchantHome> {
       }
     });
 
-    AwesomeNotifications().createdStream.listen((event) {
-      print("awsm notif create event $event");
-    });
+    // AwesomeNotifications().createdStream.listen((event) {
+    //   print("awsm notif create event $event");
+    // });
 
-    AwesomeNotifications().actionStream.listen((event) {
-      print('awsm notif action event $event');
-      print(event.toMap().toString());
-      Navigator.pushNamed(context, '/merchant_orders');
-    });
+    // AwesomeNotifications().actionStream.listen((event) {
+    //   print('awsm notif action event $event');
+    //   print(event.toMap().toString());
+    //   Navigator.pushNamed(context, '/merchant_orders');
+    // });
   }
 
   @override
