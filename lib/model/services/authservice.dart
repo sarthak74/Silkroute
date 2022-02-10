@@ -70,13 +70,14 @@ class AuthService {
       print("Otp response - \ndata -- $dres\nUser--${dres['user']}");
 
       LocalStorage storage = await LocalStorage('silkroute');
-      dynamic data = dres['user'];
-      data["success"] = dres["success"];
-      data["msg"] = dres["msg"];
+
       String send = "";
 
       print("print ${dres['success']}");
       if (dres["success"]) {
+        dynamic data = dres['user'];
+        data["success"] = dres["success"];
+        data["msg"] = dres["msg"];
         print("success");
         send += "1";
         await storage.clear();

@@ -6,9 +6,9 @@ import 'package:silkroute/view/pages/reseller/category.dart';
 import 'package:silkroute/view/pages/reseller/orders.dart';
 
 class HorizontalListView extends StatefulWidget {
-  HorizontalListView(this.title, this.productList);
+  HorizontalListView(this.title, this.productList, {this.category});
   final List<dynamic> productList;
-  final String title;
+  final String title, category;
 
   _HorizontalListViewState createState() => _HorizontalListViewState();
 }
@@ -65,7 +65,16 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                         width: 75,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black54, width: 2),
+                          border: Border.all(
+                            color:
+                                ((widget.category ?? "x") == product['title'])
+                                    ? Color(0xff811111)
+                                    : Colors.black54,
+                            width: 2,
+                          ),
+                          color: ((widget.category ?? "x") == product['title'])
+                              ? Color(0xFFF0E7DA)
+                              : Colors.transparent,
                           // borderRadius: BorderRadius.all(Radius.circular(37.5)),
                           shape: BoxShape.circle,
                         ),
@@ -101,7 +110,9 @@ class _HorizontalListViewState extends State<HorizontalListView> {
                         product["title"],
                         style: textStyle1(
                           11,
-                          Colors.black54,
+                          ((widget.category ?? "x") == product['title'])
+                              ? Color(0xff811111)
+                              : Colors.black54,
                           FontWeight.w500,
                         ),
                       )),

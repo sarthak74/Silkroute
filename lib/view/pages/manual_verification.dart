@@ -30,7 +30,11 @@ class _ManualVerificationState extends State<ManualVerification> {
         (ut == "Reseller") ? "/reseller_home" : "/merchant_acc_details";
 
     // Navigator.of(context).pop();
-    Navigator.of(context).popAndPushNamed(nextpage);
+    if (ut == "Manufacturer") {
+      Navigator.of(context).popAndPushNamed(nextpage);
+    } else if (verified == true) {
+      Navigator.of(context).popAndPushNamed(nextpage);
+    }
     // }
     setState(() {
       loading = false;

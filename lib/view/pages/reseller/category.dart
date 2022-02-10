@@ -85,7 +85,11 @@ class _CategoryPageState extends State<CategoryPage> {
                             ///     Category Head      ///
                             ///                        ///
                             //////////////////////////////
-                            HorizontalListView("CATEGORIES", widget.categories),
+                            HorizontalListView(
+                              "CATEGORIES",
+                              widget.categories,
+                              category: title.toString(),
+                            ),
                             //CategoryHead(title: widget.category),
 
                             //////////////////////////////

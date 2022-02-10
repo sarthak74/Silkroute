@@ -59,8 +59,11 @@ class _CategoryTileState extends State<CategoryTile> {
             // ),
 
             ),
-        child: CustomNetworkImage(
-            url: widget.subCat['url'] + "?raw=true".toString()),
+        child: Transform.scale(
+          scale: 1.15,
+          child: CustomNetworkImage(
+              url: widget.subCat['url'] + "?raw=true".toString()),
+        ),
       ),
     );
   }
