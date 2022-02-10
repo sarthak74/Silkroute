@@ -1,21 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:im_stepper/stepper.dart';
-import 'package:intl/intl.dart';
+
 import 'package:silkroute/constants/values.dart';
 import 'package:silkroute/methods/helpers.dart';
-import 'package:silkroute/methods/toast.dart';
+
 import 'package:silkroute/model/core/package.dart';
-import 'package:silkroute/model/services/OrderApi.dart';
+
 import 'package:silkroute/model/services/packagesApi.dart';
-import 'package:silkroute/provider/PackageProvider.dart';
+
 import 'package:silkroute/view/pages/reseller/orders.dart';
 import 'package:silkroute/view/widget/flutter_dash.dart';
 import 'package:silkroute/view/widget/navbar.dart';
 import 'package:silkroute/view/widget/topbar.dart';
 import 'package:silkroute/view/widget2/footer.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class MerchantOrderDetail extends StatefulWidget {
   const MerchantOrderDetail({Key key, this.order}) : super(key: key);

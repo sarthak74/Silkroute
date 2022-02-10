@@ -1,10 +1,10 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
-import 'package:silkroute/methods/isauthenticated.dart';
 import 'package:silkroute/model/services/firebase.dart';
-import 'package:silkroute/view/pages/reseller/orders.dart';
+import 'package:new_version/new_version.dart';
 
 class MainLoader extends StatefulWidget {
   @override
@@ -16,22 +16,33 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
   Animation<double> animation;
   bool loading = true;
 
-  @override
-  void initState() {
-    super.initState();
+  basicStatusCheck(NewVersion newVersion) {
+    newVersion.showAlertIfNecessary(context: context);
+  }
 
-    controller = new AnimationController(
-      duration: new Duration(seconds: 10),
-      vsync: this,
-    );
-    animation = new CurvedAnimation(
-      parent: controller,
-      curve: Curves.linear,
-    );
-    animation.addListener(() {
-      this.setState(() {});
-    });
-    controller.repeat();
+  advancedStatusCheck(NewVersion newVersion) async {
+    final status = await newVersion.getVersionStatus();
+    if (status != null) {
+      if (status.storeVersion.toString() != status.localVersion.toString()) {
+        await newVersion.showUpdateDialog(
+          context: context,
+          versionStatus: status,
+          dialogTitle: 'Update',
+          dialogText: 'New update available. Update Now!',
+          updateButtonText: 'Update',
+          allowDismissal: false,
+        );
+      } else {
+        init();
+      }
+    } else {
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      }
+    }
+  }
+
+  void init() async {
     Future.delayed(const Duration(seconds: 2), () async {
       LocalStorage storage = await LocalStorage('silkroute');
       // await storage.clear();
@@ -72,6 +83,39 @@ class _MainLoaderState extends State<MainLoader> with TickerProviderStateMixin {
       // Navigator.of(context).pop();
       Navigator.of(context).popAndPushNamed(nextpage);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final newVersion = NewVersion(
+      // iOSId: 'com.google.Vespa',
+      androidId: 'com.yibrance.app',
+    );
+
+    // You can let the plugin handle fetching the status and showing a dialog,
+    // or you can fetch the status and display your own dialog, or no dialog.
+    const simpleBehavior = false;
+
+    if (simpleBehavior) {
+      basicStatusCheck(newVersion);
+    } else {
+      advancedStatusCheck(newVersion);
+    }
+
+    controller = new AnimationController(
+      duration: new Duration(seconds: 10),
+      vsync: this,
+    );
+    animation = new CurvedAnimation(
+      parent: controller,
+      curve: Curves.linear,
+    );
+    animation.addListener(() {
+      this.setState(() {});
+    });
+    controller.repeat();
   }
 
   @override

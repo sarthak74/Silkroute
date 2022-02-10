@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:getwidget/components/loader/gf_loader.dart';
 import 'package:localstorage/localstorage.dart';
 
 class Methods {
@@ -31,6 +33,9 @@ class Methods {
     await storage.clear();
     print(
         "Logout \n Contact - ${storage.getItem('contact') == null ? "null" : "In"}");
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => Loader()),
+        (Route<dynamic> route) => false);
     Navigator.of(context).pushNamed('/enter_contact');
   }
 }
